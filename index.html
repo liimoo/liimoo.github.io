@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>日本都市パズル｜市区町村まで遊んで覚える、日本まるごと地理パズル</title>
-<meta name="description" content="日本全国の市区町村まで収録した地理パズルアプリ。パズル・クイズ・スタディの3つの遊び方と、都道府県・山・川の3カテゴリ。全62マップ、1,700以上の市区町村。親子で・受験対策にも。">
+<meta name="description" content="日本全国の市区町村まで収録した地理パズルアプリ。全62マップ・1,746市区町村。パズル・クイズ・スタディの3つの遊び方 × 都道府県・山・川の3カテゴリ。親子で・受験対策にも。">
 
 <!-- OGP / Twitter Card -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="日本都市パズル">
-<meta property="og:description" content="市区町村まで遊んで覚える、日本まるごと地理パズル。パズル・クイズ・スタディ × 都道府県・山・川。">
+<meta property="og:description" content="全62マップ・1,746市区町村。市区町村まで遊んで覚える、日本まるごと地理パズル。">
 <meta property="og:image" content="https://liimoo.github.io/assets/japanmap/ogp.png">
 <meta property="og:url" content="https://liimoo.github.io/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="日本都市パズル">
-<meta name="twitter:description" content="市区町村まで遊んで覚える、日本まるごと地理パズル。">
+<meta name="twitter:description" content="全62マップ・1,746市区町村。遊んで覚える、日本まるごと地理パズル。">
 <meta name="twitter:image" content="https://liimoo.github.io/assets/japanmap/ogp.png">
 
 <style>
@@ -22,6 +22,8 @@
     color-scheme: light dark;
     --blue:#2a64c0;
     --blue-deep:#0a3478;
+    --accent:#ff8a3d;
+    --gold:#e0a400;
     --ink:#1a1a1a;
     --muted:#666;
     --bg:#ffffff;
@@ -29,7 +31,7 @@
     --line:#e2e8f4;
   }
   @media (prefers-color-scheme: dark){
-    :root{ --ink:#e8e8e8; --muted:#9aa4b2; --bg:#141414; --card:#1e2229; --line:#2c323c; }
+    :root{ --ink:#e8e8e8; --muted:#9aa4b2; --bg:#141414; --card:#1e2229; --line:#2c323c; --gold:#f1c44a; }
   }
   *{ box-sizing:border-box; }
   body{
@@ -37,21 +39,22 @@
     margin:0; color:var(--ink); background:var(--bg); line-height:1.8;
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{ max-width:920px; margin:0 auto; padding:0 20px; }
+  .wrap{ max-width:960px; margin:0 auto; padding:0 20px; }
   a{ color:var(--blue); }
 
   /* ---- hero ---- */
   .hero{
+    position:relative; overflow:hidden;
     background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%);
-    color:#fff; text-align:center; padding:56px 20px 64px;
+    color:#fff; text-align:center; padding:58px 20px 60px;
   }
   .hero img.icon{
-    width:104px; height:104px; border-radius:23%;
-    box-shadow:0 10px 30px rgba(0,0,0,.35); vertical-align:middle;
+    width:108px; height:108px; border-radius:23%;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
   }
-  .hero h1{ font-size:2.0em; margin:18px 0 6px; letter-spacing:.02em; }
-  .hero .tag{ font-size:1.08em; opacity:.95; margin:0 auto 8px; max-width:30em; }
-  .hero .sub{ font-size:.92em; opacity:.8; margin:0 0 26px; }
+  .hero h1{ font-size:2.05em; margin:18px 0 6px; letter-spacing:.02em; }
+  .hero .tag{ font-size:1.1em; opacity:.96; margin:0 auto 8px; max-width:30em; }
+  .hero .sub{ font-size:.92em; opacity:.82; margin:0 0 24px; }
   .badges{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
   .badge{
     display:inline-flex; align-items:center; gap:8px;
@@ -64,27 +67,57 @@
   .badge small{ display:block; font-size:.72em; font-weight:500; opacity:.7; line-height:1.2; }
   .badge .big{ font-size:1.05em; line-height:1.2; }
 
+  /* ---- stat band ---- */
+  .stats{
+    background:linear-gradient(120deg,var(--accent) 0%, var(--gold) 100%);
+    color:#fff;
+  }
+  .stats .wrap{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding-top:30px; padding-bottom:30px; text-align:center; }
+  .stat .num{ font-size:2.5em; font-weight:800; line-height:1.1; letter-spacing:-.01em; }
+  .stat .num small{ font-size:.42em; font-weight:700; margin-left:2px; }
+  .stat .lbl{ font-size:.85em; opacity:.95; }
+
   /* ---- sections ---- */
-  section{ padding:48px 0; }
-  h2{ font-size:1.5em; text-align:center; color:var(--blue); margin:0 0 6px; }
+  section{ padding:50px 0; }
+  h2{ font-size:1.55em; text-align:center; color:var(--blue); margin:0 0 6px; }
   .lead{ text-align:center; color:var(--muted); margin:0 0 30px; }
 
   .modes{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
   .mode{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 16px; text-align:center; }
-  .mode .emoji{ font-size:1.8em; }
+  .mode .emoji{ font-size:1.9em; }
   .mode h3{ margin:8px 0 4px; font-size:1.15em; }
   .mode p{ margin:0; font-size:.9em; color:var(--muted); }
+
+  .cats{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
+  .cat{ background:var(--card); border:1px solid var(--line); border-radius:999px; padding:10px 22px; font-weight:700; }
+  .cat .e{ margin-right:6px; }
 
   .feat{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:18px; padding:0; }
   .feat li{ list-style:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
   .feat b{ color:var(--blue); }
+
+  /* ---- map wall (volume!) ---- */
+  .wall-sec{ background:var(--card); }
+  .wall{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(108px,1fr));
+    gap:8px; margin-top:8px;
+  }
+  .wall img{
+    width:100%; aspect-ratio:260/280; object-fit:cover; object-position:top center;
+    border-radius:10px; background:#dfe7f2;
+    box-shadow:0 2px 8px rgba(0,0,0,.12);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .wall img:hover{ transform:translateY(-3px) scale(1.03); box-shadow:0 8px 18px rgba(0,0,0,.22); }
+  .wall-note{ text-align:center; color:var(--muted); font-size:.85em; margin-top:16px; }
 
   /* ---- screenshots ---- */
   .shots{ display:flex; gap:16px; overflow-x:auto; padding:6px 4px 18px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
   .shots img{ height:520px; border-radius:18px; scroll-snap-align:center; flex:0 0 auto; box-shadow:0 8px 24px rgba(0,0,0,.18); }
 
   /* ---- audience ---- */
-  .aud{ background:var(--card); border-radius:18px; padding:28px 22px; text-align:center; border:1px solid var(--line); }
+  .aud{ background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%); color:#fff; border-radius:18px; padding:30px 22px; text-align:center; }
+  .aud h2{ color:#fff; }
   .aud p{ margin:.3em 0; }
 
   /* ---- footer ---- */
@@ -92,10 +125,13 @@
   footer a{ margin:0 10px; }
 
   @media (max-width:640px){
-    .hero h1{ font-size:1.7em; }
+    .hero h1{ font-size:1.75em; }
+    .stats .wrap{ grid-template-columns:repeat(2,1fr); gap:18px 8px; }
+    .stat .num{ font-size:2.1em; }
     .modes{ grid-template-columns:1fr; }
     .feat{ grid-template-columns:1fr; }
     .shots img{ height:440px; }
+    .wall{ grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:6px; }
   }
 </style>
 </head>
@@ -116,6 +152,16 @@
   </div>
 </header>
 
+<!-- 数字で見るボリューム -->
+<div class="stats">
+  <div class="wrap">
+    <div class="stat"><div class="num">62</div><div class="lbl">マップ</div></div>
+    <div class="stat"><div class="num">1,746</div><div class="lbl">市区町村</div></div>
+    <div class="stat"><div class="num">184<small>ピース</small></div><div class="lbl">最大(北海道)</div></div>
+    <div class="stat"><div class="num">9</div><div class="lbl">通りの遊び方</div></div>
+  </div>
+</div>
+
 <main>
 
 <section class="wrap">
@@ -126,18 +172,97 @@
     <div class="mode"><div class="emoji">❓</div><h3>クイズ</h3><p>「ここはどこ？」全10問。名前と場所が自然に身につく。</p></div>
     <div class="mode"><div class="emoji">📖</div><h3>スタディ</h3><p>自分のペースで。タップで読み上げ＆豆知識も。</p></div>
   </div>
+  <p class="lead" style="margin-top:28px">さらに3つのカテゴリで、遊びは9通りに広がる。</p>
+  <div class="cats">
+    <span class="cat"><span class="e">🗾</span>都道府県</span>
+    <span class="cat"><span class="e">⛰️</span>山</span>
+    <span class="cat"><span class="e">🌊</span>川</span>
+  </div>
+</section>
+
+<!-- ボリュームの主役: 全62マップの壁 -->
+<section class="wall-sec">
+  <div class="wrap">
+    <h2>全62マップ、ぜんぶ遊べる。</h2>
+    <p class="lead">日本全国＋47都道府県＋政令指定都市の区。<br>市区町村まで、これだけのボリューム。</p>
+    <div class="wall">
+    <img src="assets/japanmap/wall/zenkoku.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_01.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_02.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_03.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_04.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_05.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_06.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_07.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_08.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_09.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_10.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_11.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_12.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_13.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_14.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_15.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_16.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_17.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_18.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_19.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_20.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_21.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_22.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_23.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_24.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_25.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_26.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_27.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_28.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_29.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_30.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_31.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_32.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_33.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_34.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_35.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_36.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_37.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_38.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_39.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_40.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_41.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_42.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_43.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_44.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_45.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_46.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/pref_47.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S01100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S11100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S13100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S14100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S14130.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S15100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S23100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S26100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S27100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S27140.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S28100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S34100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S40100.jpg" alt="" loading="lazy" decoding="async">
+    <img src="assets/japanmap/wall/sp_S40130.jpg" alt="" loading="lazy" decoding="async">
+    </div>
+    <p class="wall-note">↑ 全62マップを並べたもの。山・川モードのマップはさらに別途収録。</p>
+  </div>
 </section>
 
 <section class="wrap">
-  <h2>収録ボリューム</h2>
-  <p class="lead">都道府県から、山・川まで。日本まるごと。</p>
+  <h2>充実の機能</h2>
+  <p class="lead">遊びごたえも、学びやすさも。</p>
   <ul class="feat">
-    <li><b>全62マップ</b><br>日本全国＋47都道府県＋政令指定都市の区。</li>
-    <li><b>1,700以上の市区町村</b><br>あなたの住む街もきっとある。</li>
     <li><b>政令指定都市の区まで</b><br>大都市は区の単位でこまかく遊べる。</li>
     <li><b>山・川モード</b><br>日本の名峰・有名な河川もパズル/クイズ/スタディで。</li>
     <li><b>圧倒的な作り込み</b><br>北海道はなんと184ピース。</li>
     <li><b>記録とランキング</b><br>Game Centerで全国のプレイヤーとタイムを競える。</li>
+    <li><b>クラウドで記録復元</b><br>機種変・再インストールでも進捗そのまま。</li>
+    <li><b>スタディの豆知識</b><br>地名の読み・由来など、学びがふくらむ。</li>
   </ul>
 </section>
 
@@ -161,7 +286,7 @@
     <p>📚 小学生の地理学習に・中学受験対策に</p>
     <p>👨‍👩‍👧 親子でいっしょに、クイズで盛り上がる</p>
     <p>🗾 大人の学び直し・ご当地ファンにも</p>
-    <p style="margin-top:1.2em;color:var(--muted);font-size:.9em">基本プレイ無料（広告あり）／買い切りで広告削除</p>
+    <p style="margin-top:1.2em;opacity:.85;font-size:.9em">基本プレイ無料（広告あり）／買い切りで広告削除</p>
   </div>
 </section>
 
