@@ -1,10 +1,180 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>leoram apps</title>
-<style>body{font-family:-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;max-width:640px;margin:40px auto;padding:0 18px;line-height:1.8}</style>
-</head><body>
-<h1>アプリ情報</h1>
-<ul>
-<li><a href="japanmap-privacy.html">日本地図都市パズル — プライバシーポリシー</a></li>
-</ul>
-</body></html>
+<title>日本都市パズル｜市区町村まで遊んで覚える、日本まるごと地理パズル</title>
+<meta name="description" content="日本全国の市区町村まで収録した地理パズルアプリ。パズル・クイズ・スタディの3つの遊び方と、都道府県・山・川の3カテゴリ。全62マップ、1,700以上の市区町村。親子で・受験対策にも。">
+
+<!-- OGP / Twitter Card -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="日本都市パズル">
+<meta property="og:description" content="市区町村まで遊んで覚える、日本まるごと地理パズル。パズル・クイズ・スタディ × 都道府県・山・川。">
+<meta property="og:image" content="https://liimoo.github.io/assets/japanmap/ogp.png">
+<meta property="og:url" content="https://liimoo.github.io/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="日本都市パズル">
+<meta name="twitter:description" content="市区町村まで遊んで覚える、日本まるごと地理パズル。">
+<meta name="twitter:image" content="https://liimoo.github.io/assets/japanmap/ogp.png">
+
+<style>
+  :root{
+    color-scheme: light dark;
+    --blue:#2a64c0;
+    --blue-deep:#0a3478;
+    --ink:#1a1a1a;
+    --muted:#666;
+    --bg:#ffffff;
+    --card:#f4f7fc;
+    --line:#e2e8f4;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e8e8; --muted:#9aa4b2; --bg:#141414; --card:#1e2229; --line:#2c323c; }
+  }
+  *{ box-sizing:border-box; }
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+    margin:0; color:var(--ink); background:var(--bg); line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:920px; margin:0 auto; padding:0 20px; }
+  a{ color:var(--blue); }
+
+  /* ---- hero ---- */
+  .hero{
+    background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%);
+    color:#fff; text-align:center; padding:56px 20px 64px;
+  }
+  .hero img.icon{
+    width:104px; height:104px; border-radius:23%;
+    box-shadow:0 10px 30px rgba(0,0,0,.35); vertical-align:middle;
+  }
+  .hero h1{ font-size:2.0em; margin:18px 0 6px; letter-spacing:.02em; }
+  .hero .tag{ font-size:1.08em; opacity:.95; margin:0 auto 8px; max-width:30em; }
+  .hero .sub{ font-size:.92em; opacity:.8; margin:0 0 26px; }
+  .badges{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:13px 22px; border-radius:14px; font-weight:700; font-size:1.0em;
+    text-decoration:none; transition:transform .12s ease;
+  }
+  .badge:hover{ transform:translateY(-2px); }
+  .badge.ios{ background:#fff; color:#111; }
+  .badge.android{ background:rgba(255,255,255,.16); color:#fff; border:1px solid rgba(255,255,255,.4); cursor:default; }
+  .badge small{ display:block; font-size:.72em; font-weight:500; opacity:.7; line-height:1.2; }
+  .badge .big{ font-size:1.05em; line-height:1.2; }
+
+  /* ---- sections ---- */
+  section{ padding:48px 0; }
+  h2{ font-size:1.5em; text-align:center; color:var(--blue); margin:0 0 6px; }
+  .lead{ text-align:center; color:var(--muted); margin:0 0 30px; }
+
+  .modes{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .mode{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 16px; text-align:center; }
+  .mode .emoji{ font-size:1.8em; }
+  .mode h3{ margin:8px 0 4px; font-size:1.15em; }
+  .mode p{ margin:0; font-size:.9em; color:var(--muted); }
+
+  .feat{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:18px; padding:0; }
+  .feat li{ list-style:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .feat b{ color:var(--blue); }
+
+  /* ---- screenshots ---- */
+  .shots{ display:flex; gap:16px; overflow-x:auto; padding:6px 4px 18px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
+  .shots img{ height:520px; border-radius:18px; scroll-snap-align:center; flex:0 0 auto; box-shadow:0 8px 24px rgba(0,0,0,.18); }
+
+  /* ---- audience ---- */
+  .aud{ background:var(--card); border-radius:18px; padding:28px 22px; text-align:center; border:1px solid var(--line); }
+  .aud p{ margin:.3em 0; }
+
+  /* ---- footer ---- */
+  footer{ border-top:1px solid var(--line); padding:28px 20px 48px; text-align:center; font-size:.9em; color:var(--muted); }
+  footer a{ margin:0 10px; }
+
+  @media (max-width:640px){
+    .hero h1{ font-size:1.7em; }
+    .modes{ grid-template-columns:1fr; }
+    .feat{ grid-template-columns:1fr; }
+    .shots img{ height:440px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <img class="icon" src="assets/japanmap/icon.png" alt="日本都市パズル アイコン">
+  <h1>日本都市パズル</h1>
+  <p class="tag">市区町村まで遊んで覚える、<br>日本まるごと地理パズル。</p>
+  <p class="sub">パズル・クイズ・スタディ × 都道府県・山・川</p>
+  <div class="badges">
+    <a class="badge ios" href="https://apps.apple.com/jp/app/id6777826991">
+      <span><small>ダウンロード</small><span class="big">App Store</span></span>
+    </a>
+    <span class="badge android">
+      <span><small>Android</small><span class="big">近日公開</span></span>
+    </span>
+  </div>
+</header>
+
+<main>
+
+<section class="wrap">
+  <h2>3つの遊び方</h2>
+  <p class="lead">気分やレベルに合わせて、同じ地図を3通りに楽しめます。</p>
+  <div class="modes">
+    <div class="mode"><div class="emoji">🧩</div><h3>パズル</h3><p>ピースを正しい場所へ。完成めざしてタイムアタック。</p></div>
+    <div class="mode"><div class="emoji">❓</div><h3>クイズ</h3><p>「ここはどこ？」全10問。名前と場所が自然に身につく。</p></div>
+    <div class="mode"><div class="emoji">📖</div><h3>スタディ</h3><p>自分のペースで。タップで読み上げ＆豆知識も。</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>収録ボリューム</h2>
+  <p class="lead">都道府県から、山・川まで。日本まるごと。</p>
+  <ul class="feat">
+    <li><b>全62マップ</b><br>日本全国＋47都道府県＋政令指定都市の区。</li>
+    <li><b>1,700以上の市区町村</b><br>あなたの住む街もきっとある。</li>
+    <li><b>政令指定都市の区まで</b><br>大都市は区の単位でこまかく遊べる。</li>
+    <li><b>山・川モード</b><br>日本の名峰・有名な河川もパズル/クイズ/スタディで。</li>
+    <li><b>圧倒的な作り込み</b><br>北海道はなんと184ピース。</li>
+    <li><b>記録とランキング</b><br>Game Centerで全国のプレイヤーとタイムを競える。</li>
+  </ul>
+</section>
+
+<section class="wrap">
+  <h2>スクリーンショット</h2>
+  <p class="lead">→ 横にスクロールできます</p>
+  <div class="shots">
+    <img src="assets/japanmap/10_title.png" alt="タイトル画面" loading="lazy">
+    <img src="assets/japanmap/2_zenkoku.png" alt="日本全国パズル" loading="lazy">
+    <img src="assets/japanmap/1_maplist.png" alt="全62マップ" loading="lazy">
+    <img src="assets/japanmap/3_hokkaido.png" alt="北海道184ピース" loading="lazy">
+    <img src="assets/japanmap/4_tokyo.png" alt="あなたの街は何ピース？" loading="lazy">
+    <img src="assets/japanmap/geo_mountain.png" alt="山モード" loading="lazy">
+    <img src="assets/japanmap/geo_river.png" alt="川モード" loading="lazy">
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="aud">
+    <h2>こんな方に</h2>
+    <p>📚 小学生の地理学習に・中学受験対策に</p>
+    <p>👨‍👩‍👧 親子でいっしょに、クイズで盛り上がる</p>
+    <p>🗾 大人の学び直し・ご当地ファンにも</p>
+    <p style="margin-top:1.2em;color:var(--muted);font-size:.9em">基本プレイ無料（広告あり）／買い切りで広告削除</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>
+    <a href="japanmap-support.html">サポート</a>・
+    <a href="japanmap-privacy.html">プライバシーポリシー</a>・
+    <a href="mailto:le_oram@icloud.com">お問い合わせ</a>
+  </p>
+  <p>© 2026 LIMO</p>
+</footer>
+
+</body>
+</html>
