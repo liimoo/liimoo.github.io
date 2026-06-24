@@ -45,6 +45,30 @@
     margin:0; color:var(--ink); background:var(--page); line-height:1.8;
     -webkit-font-smoothing:antialiased;
   }
+  /* ページ全体に薄く散らした地図タイルの背景（ヒーロー以外の区間も地図で満たす） */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    opacity:.14; filter:saturate(1.05);
+    background-repeat:no-repeat;
+    background-size:
+      15vmin,17vmin,13vmin,19vmin,14vmin,16vmin,18vmin,13vmin,15vmin,
+      17vmin,14vmin,16vmin,19vmin,13vmin,15vmin,17vmin,14vmin,16vmin;
+    background-position:
+      5% 6%, 21% 22%, 38% 9%, 55% 19%, 72% 7%, 90% 24%,
+      9% 44%, 27% 56%, 45% 40%, 63% 52%, 81% 42%, 96% 58%,
+      7% 80%, 25% 92%, 43% 76%, 61% 88%, 79% 78%, 95% 94%;
+    background-image:
+      url(assets/japanmap/scatter/c01.jpg), url(assets/japanmap/scatter/p3.jpg),
+      url(assets/japanmap/scatter/c07.jpg), url(assets/japanmap/scatter/p9.jpg),
+      url(assets/japanmap/scatter/c12.jpg), url(assets/japanmap/scatter/p14.jpg),
+      url(assets/japanmap/scatter/c18.jpg), url(assets/japanmap/scatter/p1.jpg),
+      url(assets/japanmap/scatter/c22.jpg), url(assets/japanmap/scatter/p6.jpg),
+      url(assets/japanmap/scatter/c04.jpg), url(assets/japanmap/scatter/p11.jpg),
+      url(assets/japanmap/scatter/c15.jpg), url(assets/japanmap/scatter/p4.jpg),
+      url(assets/japanmap/scatter/c09.jpg), url(assets/japanmap/scatter/p12.jpg),
+      url(assets/japanmap/scatter/c20.jpg), url(assets/japanmap/scatter/p8.jpg);
+  }
+  @media (max-width:560px){ body::before{ opacity:.10; background-size:24vmin; } }
   .wrap{ max-width:960px; margin:0 auto; padding:0 20px; }
   a{ color:var(--blue); }
 
