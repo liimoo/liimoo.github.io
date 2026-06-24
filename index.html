@@ -45,41 +45,25 @@
     margin:0; color:var(--ink); background:var(--page); line-height:1.8;
     -webkit-font-smoothing:antialiased;
   }
-  /* ページ全体に薄く散らした地図タイルの背景（ヒーロー以外の区間も地図で満たす） */
+  /* ページ全体で共通の暗幕（地図コラージュ背景の上に1枚だけ。可読性確保＆上下で統一） */
   body::before{
     content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
-    opacity:.14; filter:saturate(1.05);
-    background-repeat:no-repeat;
-    background-size:
-      15vmin,17vmin,13vmin,19vmin,14vmin,16vmin,18vmin,13vmin,15vmin,
-      17vmin,14vmin,16vmin,19vmin,13vmin,15vmin,17vmin,14vmin,16vmin;
-    background-position:
-      5% 6%, 21% 22%, 38% 9%, 55% 19%, 72% 7%, 90% 24%,
-      9% 44%, 27% 56%, 45% 40%, 63% 52%, 81% 42%, 96% 58%,
-      7% 80%, 25% 92%, 43% 76%, 61% 88%, 79% 78%, 95% 94%;
-    background-image:
-      url(assets/japanmap/scatter/c01.jpg), url(assets/japanmap/scatter/p3.jpg),
-      url(assets/japanmap/scatter/c07.jpg), url(assets/japanmap/scatter/p9.jpg),
-      url(assets/japanmap/scatter/c12.jpg), url(assets/japanmap/scatter/p14.jpg),
-      url(assets/japanmap/scatter/c18.jpg), url(assets/japanmap/scatter/p1.jpg),
-      url(assets/japanmap/scatter/c22.jpg), url(assets/japanmap/scatter/p6.jpg),
-      url(assets/japanmap/scatter/c04.jpg), url(assets/japanmap/scatter/p11.jpg),
-      url(assets/japanmap/scatter/c15.jpg), url(assets/japanmap/scatter/p4.jpg),
-      url(assets/japanmap/scatter/c09.jpg), url(assets/japanmap/scatter/p12.jpg),
-      url(assets/japanmap/scatter/c20.jpg), url(assets/japanmap/scatter/p8.jpg);
+    background:rgba(8,22,55,.56);
   }
-  @media (max-width:560px){ body::before{ opacity:.10; background-size:24vmin; } }
+  @media (prefers-color-scheme: light){
+    body::before{ background:rgba(244,248,255,.74); }
+  }
   .wrap{ max-width:960px; margin:0 auto; padding:0 20px; }
   a{ color:var(--blue); }
 
   /* ---- hero ---- */
   .hero{
-    position:relative; overflow:hidden; isolation:isolate;
-    background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%);
-    color:#fff; text-align:center; padding:64px 20px 68px; min-height:600px;
+    position:relative; isolation:isolate;
+    background:transparent;
+    color:var(--ink); text-align:center; padding:64px 20px 68px; min-height:600px;
   }
-  /* 背景の散らばったスクショ（落ち葉演出） */
-  .leaves{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+  /* 背景の散らばったスクショ（落ち葉演出）。ページ全体の固定背景として表示する。 */
+  .leaves{ position:fixed; inset:0; z-index:-2; pointer-events:none; }
   .leaves .leaf{
     position:absolute; border-radius:11px;
     transform:translate(-50%,-50%) rotate(var(--r));
@@ -95,14 +79,10 @@
   @media (prefers-reduced-motion: reduce){
     .leaves .leaf{ animation:none; }
   }
-  /* タイトル/ボタンの可読性確保：中央を少し沈ませ、上下を締める覆い */
-  .hero::after{
-    content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-    background:
-      radial-gradient(62% 52% at 50% 40%, rgba(8,36,92,.70), rgba(8,36,92,.14) 66%, rgba(8,36,92,0) 82%),
-      linear-gradient(180deg, rgba(10,52,120,.32) 0%, rgba(10,52,120,0) 26%, rgba(10,52,120,0) 74%, rgba(10,52,120,.24) 100%);
+  .hero-inner{ position:relative; z-index:2; text-shadow:0 1px 12px rgba(255,255,255,.65); }
+  @media (prefers-color-scheme: dark){
+    .hero-inner{ text-shadow:0 2px 16px rgba(6,24,64,.6); }
   }
-  .hero-inner{ position:relative; z-index:2; text-shadow:0 2px 16px rgba(6,24,64,.55); }
   .hero img.icon{
     width:108px; height:108px; border-radius:23%;
     box-shadow:0 10px 30px rgba(0,0,0,.35);
@@ -119,7 +99,10 @@
   .badge-soon{
     display:inline-flex; flex-direction:column; justify-content:center;
     height:54px; padding:0 20px; border-radius:10px; text-align:left;
-    background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.4); cursor:default;
+    background:rgba(12,32,72,.08); border:1px solid rgba(12,32,72,.30); cursor:default;
+  }
+  @media (prefers-color-scheme: dark){
+    .badge-soon{ background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.4); }
   }
   .badge-soon small{ font-size:.7em; font-weight:500; opacity:.78; line-height:1.3; }
   .badge-soon .big{ font-size:1.05em; font-weight:700; line-height:1.2; }
@@ -212,8 +195,7 @@
 </head>
 <body>
 
-<header class="hero">
-  <div class="leaves" aria-hidden="true">
+<div class="leaves" aria-hidden="true">
     <img class="leaf" src="assets/japanmap/scatter/p14.jpg" alt="" loading="lazy" decoding="async" style="left:1.2%;top:11.0%;width:269px;opacity:0.63;--r:-14deg;--amp:8px;--rd:-2deg;--dur:9.6s;--delay:-1.3s">
     <img class="leaf" src="assets/japanmap/scatter/c04.jpg" alt="" loading="lazy" decoding="async" style="left:17.0%;top:4.1%;width:211px;opacity:0.48;--r:36deg;--amp:14px;--rd:-4deg;--dur:9.4s;--delay:-9.9s">
     <img class="leaf" src="assets/japanmap/scatter/c19.jpg" alt="" loading="lazy" decoding="async" style="left:30.8%;top:13.7%;width:175px;opacity:0.57;--r:32deg;--amp:15px;--rd:0deg;--dur:7.5s;--delay:-7.4s">
@@ -269,6 +251,8 @@
     <img class="leaf" src="assets/japanmap/scatter/p3.jpg" alt="" loading="lazy" decoding="async" style="left:79.8%;top:91.8%;width:248px;opacity:0.67;--r:-23deg;--amp:15px;--rd:3deg;--dur:7.7s;--delay:-4.2s">
     <img class="leaf" src="assets/japanmap/scatter/c08.jpg" alt="" loading="lazy" decoding="async" style="left:92.9%;top:90.4%;width:297px;opacity:0.61;--r:36deg;--amp:14px;--rd:-3deg;--dur:8.2s;--delay:-2.3s">
   </div>
+
+<header class="hero">
   <div class="hero-inner">
     <img class="icon" src="assets/japanmap/icon.png" alt="日本都市パズル アイコン">
     <h1>日本都市パズル</h1>
