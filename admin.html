@@ -67,6 +67,18 @@
 const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
 const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
 let token = sessionStorage.getItem("jm_admin_token") || "";
+let CITY = null;   // {prefs:{"01":"北海道"...}, codes:{code:"都道府県 市区町村"...}}
+
+async function fetchCities(){
+  if (CITY) return;
+  try { const r = await fetch("./admin-cities.json"); CITY = await r.json(); } catch(e){ CITY = null; }
+}
+function cityName(code){
+  if (!CITY || !code) return code;
+  if (CITY.codes[code]) return CITY.codes[code];
+  if (code.indexOf("|") >= 0){ const a = code.split("|"); return (CITY.prefs[a[0]]||"") + " " + a[1]; }
+  return code;
+}
 
 function esc(s){ return String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 function setMsg(t){ document.getElementById("msg").textContent = t||""; }
@@ -91,7 +103,7 @@ async function login(){
 
 function logout(){ token=""; sessionStorage.removeItem("jm_admin_token"); document.getElementById("app").classList.add("hidden"); document.getElementById("login").classList.remove("hidden"); }
 
-function showApp(){ document.getElementById("loginmsg").textContent=""; document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); load(); }
+async function showApp(){ document.getElementById("loginmsg").textContent=""; document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); await fetchCities(); load(); }
 
 async function api(action, params){
   const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
@@ -148,7 +160,7 @@ function render(rows){
     const rep = c.report_count>0 ? `<span class="pill p-rejected">通報 ${c.report_count}</span>` : "";
     const pin = c.pinned ? '<span class="pill" style="background:#7a2740">📌</span>' : "";
     return `<div class="card">
-      <div>${pill}${rep}${pin}<span class="meta">${esc(c.city_code)} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div>${pill}${rep}${pin}<span class="meta">${esc(cityName(c.city_code))} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
       <div class="body">${esc(c.body)}</div>
       <div class="row">
         <button class="b-green" onclick="act('set_status',{comment_id:${c.id},status:'approved'})">承認</button>
