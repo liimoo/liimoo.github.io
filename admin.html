@@ -55,6 +55,7 @@
       <option value="rejected">却下</option>
       <option value="all">すべて</option>
       <option value="banned">BAN済みユーザー</option>
+      <option value="reporters">通報者ランキング</option>
     </select>
     <button class="b-gray" onclick="load()">更新</button>
     <span id="msg"></span>
@@ -128,6 +129,12 @@ async function load(){
       setMsg(`${(d.banned||[]).length} 人`);
       return;
     }
+    if (status === "reporters") {
+      const d = await api("report_stats", {});
+      renderReporters(d.reporters||[]);
+      setMsg(`${(d.reporters||[]).length} 人`);
+      return;
+    }
     const d = await api("list", { status, limit: 200 });
     render(d.comments||[]);
     setMsg(`${(d.comments||[]).length} 件`);
@@ -151,6 +158,41 @@ function renderBanned(rows){
   }).join("");
 }
 
+function renderReporters(rows){
+  const list = document.getElementById("list");
+  if (!rows.length){ list.innerHTML = '<p class="muted">通報した人はまだいません。</p>'; return; }
+  list.innerHTML = rows.map(r => {
+    const ut = r.untrusted ? '<span class="pill p-rejected">通報無効</span>' : "";
+    const trustBtn = r.untrusted
+      ? `<button class="b-green" onclick="setTrust('${esc(r.user_id)}',false)">通報を有効に戻す</button>`
+      : `<button class="b-orange" onclick="setTrust('${esc(r.user_id)}',true)">この人の通報を無効化</button>`;
+    return `<div class="card">
+      <div>${ut}<span class="meta">通報 ${r.count} 件</span></div>
+      <div class="body"><a class="ulink" onclick="viewUser('${esc(r.user_id)}')">${esc(r.nickname)}</a></div>
+      <div class="row">
+        ${trustBtn}
+        <button class="b-blue" onclick="viewUser('${esc(r.user_id)}')">この人の投稿</button>
+        <button class="b-red" onclick="banUser('${esc(r.user_id)}')">このユーザーをBAN</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function setTrust(user_id, untrusted){
+  if (untrusted && !confirm("この人の通報を無効化します。\n以降この人の通報はカウントされず、既存の通報も除外されます。よろしいですか？")) return;
+  try { await api("set_trust", { user_id, untrusted }); await load(); } catch(e){}
+}
+
+async function showReporters(comment_id){
+  try {
+    const d = await api("comment_reporters", { comment_id });
+    const rs = d.reporters || [];
+    if (!rs.length){ alert("通報者はいません。"); return; }
+    const lines = rs.map(r => `・${r.nickname}${r.untrusted?"（無効）":""}  理由:${r.reason||"なし"}  ${(r.created_at||"").replace("T"," ").slice(0,16)}`).join("\n");
+    alert("通報者（" + rs.length + "人）\n\n" + lines + "\n\n※「通報者ランキング」から個別に無効化できます。");
+  } catch(e){}
+}
+
 function render(rows){
   const list = document.getElementById("list");
   if (!rows.length){ list.innerHTML = '<p class="muted">該当するコメントはありません。</p>'; return; }
@@ -169,6 +211,7 @@ function render(rows){
         <button class="b-green" onclick="act('set_status',{comment_id:${c.id},status:'approved'})">承認</button>
         <button class="b-orange" onclick="act('set_status',{comment_id:${c.id},status:'rejected'})">却下</button>
         <button class="b-gray" onclick="act('delete',{comment_id:${c.id}})">削除</button>
+        ${c.report_count>0 ? `<button class="b-gray" onclick="showReporters(${c.id})">通報者</button>` : ""}
         <button class="b-blue" onclick="viewUser('${esc(c.user_id)}')">この人の投稿</button>
         <button class="b-red" onclick="banUser('${esc(c.user_id)}')">このユーザーをBAN</button>
       </div>
