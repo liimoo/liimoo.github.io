@@ -51,6 +51,7 @@
       <option value="approved">公開中</option>
       <option value="rejected">却下/通報</option>
       <option value="all">すべて</option>
+      <option value="banned">BAN済みユーザー</option>
     </select>
     <button class="b-gray" onclick="load()">更新</button>
     <span id="msg"></span>
@@ -106,10 +107,30 @@ async function load(){
   setMsg("読み込み中…");
   try {
     const status = document.getElementById("filter").value;
+    if (status === "banned") {
+      const d = await api("list_banned", {});
+      renderBanned(d.banned||[]);
+      setMsg(`${(d.banned||[]).length} 人`);
+      return;
+    }
     const d = await api("list", { status, limit: 200 });
     render(d.comments||[]);
     setMsg(`${(d.comments||[]).length} 件`);
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+
+function renderBanned(rows){
+  const list = document.getElementById("list");
+  if (!rows.length){ list.innerHTML = '<p class="muted">BAN中のユーザーはいません。</p>'; return; }
+  list.innerHTML = rows.map(b => {
+    const name = (b.profiles && b.profiles.display_name) ? b.profiles.display_name : "（名前なし）";
+    return `<div class="card">
+      <div><span class="pill p-rejected">BAN中</span><span class="meta">${esc(name)} ・ ${esc((b.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div class="body">理由: ${esc(b.reason||"（なし）")}</div>
+      <div class="meta" style="word-break:break-all">user_id: ${esc(b.user_id)}</div>
+      <div class="row"><button class="b-green" onclick="act('unban',{user_id:'${esc(b.user_id)}'})">BAN解除</button></div>
+    </div>`;
+  }).join("");
 }
 
 function render(rows){
