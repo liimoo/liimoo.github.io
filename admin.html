@@ -109,7 +109,7 @@ async function load(){
     const d = await api("list", { status, limit: 200 });
     render(d.comments||[]);
     setMsg(`${(d.comments||[]).length} 件`);
-  } catch(e){ /* setMsg in api */ }
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
 }
 
 function render(rows){
