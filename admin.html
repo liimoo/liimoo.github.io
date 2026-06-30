@@ -128,7 +128,10 @@ function renderBanned(rows){
       <div><span class="pill p-rejected">BAN中</span><span class="meta">${esc(name)} ・ ${esc((b.created_at||"").replace("T"," ").slice(0,16))}</span></div>
       <div class="body">理由: ${esc(b.reason||"（なし）")}</div>
       <div class="meta" style="word-break:break-all">user_id: ${esc(b.user_id)}</div>
-      <div class="row"><button class="b-green" onclick="act('unban',{user_id:'${esc(b.user_id)}'})">BAN解除</button></div>
+      <div class="row">
+        <button class="b-blue" onclick="viewUser('${esc(b.user_id)}')">この人の投稿</button>
+        <button class="b-green" onclick="act('unban',{user_id:'${esc(b.user_id)}'})">BAN解除</button>
+      </div>
     </div>`;
   }).join("");
 }
@@ -149,10 +152,20 @@ function render(rows){
         <button class="b-green" onclick="act('set_status',{comment_id:${c.id},status:'approved'})">承認</button>
         <button class="b-orange" onclick="act('set_status',{comment_id:${c.id},status:'rejected'})">却下</button>
         <button class="b-gray" onclick="act('delete',{comment_id:${c.id}})">削除</button>
+        <button class="b-blue" onclick="viewUser('${esc(c.user_id)}')">この人の投稿</button>
         <button class="b-red" onclick="banUser('${esc(c.user_id)}')">このユーザーをBAN</button>
       </div>
     </div>`;
   }).join("");
+}
+
+async function viewUser(uid){
+  setMsg("読み込み中…");
+  try {
+    const d = await api("list", { user_id: uid, limit: 200 });
+    render(d.comments||[]);
+    setMsg(`このユーザーの投稿 ${(d.comments||[]).length} 件（上のフィルタを選ぶと通常一覧に戻ります）`);
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
 }
 
 async function act(action, params){
