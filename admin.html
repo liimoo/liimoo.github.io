@@ -159,8 +159,10 @@ function render(rows){
                : '<span class="pill p-pending">承認待ち</span>';
     const rep = c.report_count>0 ? `<span class="pill p-rejected">通報 ${c.report_count}</span>` : "";
     const pin = c.pinned ? '<span class="pill" style="background:#7a2740">📌</span>' : "";
+    const reason = (c.report_count>0 && c.report_reason) ? `<div class="meta" style="color:#ffb0a0">通報理由: ${esc(c.report_reason)}</div>` : "";
     return `<div class="card">
       <div>${pill}${rep}${pin}<span class="meta">${esc(cityName(c.city_code))} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      ${reason}
       <div class="body">${esc(c.body)}</div>
       <div class="row">
         <button class="b-green" onclick="act('set_status',{comment_id:${c.id},status:'approved'})">承認</button>
