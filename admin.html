@@ -30,7 +30,7 @@
   .muted { color: #9fb0cc; }
   #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
   #msg { color: #ffd27a; min-height: 1.2em; font-size: 13px; }
-  .hidden { display: none; }
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
@@ -88,7 +88,7 @@ async function login(){
 
 function logout(){ token=""; sessionStorage.removeItem("jm_admin_token"); document.getElementById("app").classList.add("hidden"); document.getElementById("login").classList.remove("hidden"); }
 
-function showApp(){ document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); load(); }
+function showApp(){ document.getElementById("loginmsg").textContent=""; document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); load(); }
 
 async function api(action, params){
   const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
