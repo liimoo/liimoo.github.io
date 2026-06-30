@@ -51,7 +51,8 @@
     <select id="filter" onchange="load()">
       <option value="pending">承認待ち</option>
       <option value="approved">公開中</option>
-      <option value="rejected">却下/通報</option>
+      <option value="reported">通報あり</option>
+      <option value="rejected">却下</option>
       <option value="all">すべて</option>
       <option value="banned">BAN済みユーザー</option>
     </select>
@@ -155,7 +156,7 @@ function render(rows){
   if (!rows.length){ list.innerHTML = '<p class="muted">該当するコメントはありません。</p>'; return; }
   list.innerHTML = rows.map(c => {
     const pill = c.status==="approved"?'<span class="pill p-approved">公開中</span>'
-               : c.status==="rejected"?'<span class="pill p-rejected">却下/通報</span>'
+               : c.status==="rejected"?'<span class="pill p-rejected">却下</span>'
                : '<span class="pill p-pending">承認待ち</span>';
     const rep = c.report_count>0 ? `<span class="pill p-rejected">通報 ${c.report_count}</span>` : "";
     const pin = c.pinned ? '<span class="pill" style="background:#7a2740">📌</span>' : "";
