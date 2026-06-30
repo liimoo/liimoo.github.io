@@ -28,6 +28,8 @@
   .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
   .p-pending { background: #6b5a16; } .p-approved { background: #1c5e38; } .p-rejected { background: #6a2730; }
   .muted { color: #9fb0cc; }
+  .ulink { color: #7fb0ff; text-decoration: underline; cursor: pointer; }
+  .ulink:hover { color: #a9caff; }
   #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
   #msg { color: #ffd27a; min-height: 1.2em; font-size: 13px; }
   .hidden { display: none !important; }
@@ -125,7 +127,7 @@ function renderBanned(rows){
   list.innerHTML = rows.map(b => {
     const name = (b.profiles && b.profiles.display_name) ? b.profiles.display_name : "（名前なし）";
     return `<div class="card">
-      <div><span class="pill p-rejected">BAN中</span><span class="meta">${esc(name)} ・ ${esc((b.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div><span class="pill p-rejected">BAN中</span><span class="meta"><a class="ulink" onclick="viewUser('${esc(b.user_id)}')">${esc(name)}</a> ・ ${esc((b.created_at||"").replace("T"," ").slice(0,16))}</span></div>
       <div class="body">理由: ${esc(b.reason||"（なし）")}</div>
       <div class="meta" style="word-break:break-all">user_id: ${esc(b.user_id)}</div>
       <div class="row">
@@ -146,7 +148,7 @@ function render(rows){
     const rep = c.report_count>0 ? `<span class="pill p-rejected">通報 ${c.report_count}</span>` : "";
     const pin = c.pinned ? '<span class="pill" style="background:#7a2740">📌</span>' : "";
     return `<div class="card">
-      <div>${pill}${rep}${pin}<span class="meta">${esc(c.city_code)} ・ ${esc(c.nickname)} ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div>${pill}${rep}${pin}<span class="meta">${esc(c.city_code)} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
       <div class="body">${esc(c.body)}</div>
       <div class="row">
         <button class="b-green" onclick="act('set_status',{comment_id:${c.id},status:'approved'})">承認</button>
