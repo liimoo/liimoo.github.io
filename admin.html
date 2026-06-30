@@ -56,6 +56,8 @@
       <option value="all">すべて</option>
       <option value="banned">BAN済みユーザー</option>
       <option value="reporters">通報者ランキング</option>
+      <option value="profiles_pending">プロフィール承認待ち</option>
+      <option value="profiles_reported">プロフィール通報あり</option>
     </select>
     <button class="b-gray" onclick="load()">更新</button>
     <span id="msg"></span>
@@ -135,6 +137,13 @@ async function load(){
       setMsg(`${(d.reporters||[]).length} 人`);
       return;
     }
+    if (status === "profiles_pending" || status === "profiles_reported") {
+      const filter = status === "profiles_pending" ? "pending" : "reported";
+      const d = await api("list_profiles", { filter, limit: 200 });
+      renderProfiles(d.profiles||[]);
+      setMsg(`${(d.profiles||[]).length} 件`);
+      return;
+    }
     const d = await api("list", { status, limit: 200 });
     render(d.comments||[]);
     setMsg(`${(d.comments||[]).length} 件`);
@@ -176,6 +185,42 @@ function renderReporters(rows){
       </div>
     </div>`;
   }).join("");
+}
+
+const PROFILE_ICONS = ["🐱","🐶","🐰","🦊","🐻","🐼","🐨","🦁","🐯","🐸","🐵","🐔","🐧","🦉","🦄","🐴","🐮","🐷","🐹","🐢","🐙","🦀","🐠","🐳","🐝","🦋","🌸","🌻","🌈","🍀","🍎","🍓","🍰","🎈","🎁","⭐","🌟","⛰","🌊","🗾"];
+
+function renderProfiles(rows){
+  const list = document.getElementById("list");
+  if (!rows.length){ list.innerHTML = '<p class="muted">該当するプロフィールはありません。</p>'; return; }
+  list.innerHTML = rows.map(p => {
+    const pill = p.public_status==="approved"?'<span class="pill p-approved">公開</span>'
+               : p.public_status==="rejected"?'<span class="pill p-rejected">非公開</span>'
+               : '<span class="pill p-pending">承認待ち</span>';
+    const rep = p.report_count>0 ? `<span class="pill p-rejected">通報 ${p.report_count}</span>` : "";
+    const icon = PROFILE_ICONS[p.icon] || "🐱";
+    const sns = [];
+    if (p.x_handle) sns.push(`X: <a class="ulink" href="https://x.com/${esc(p.x_handle)}" target="_blank" rel="noopener">@${esc(p.x_handle)}</a>`);
+    if (p.ig_handle) sns.push(`IG: <a class="ulink" href="https://www.instagram.com/${esc(p.ig_handle)}" target="_blank" rel="noopener">@${esc(p.ig_handle)}</a>`);
+    return `<div class="card">
+      <div>${pill}${rep}<span class="meta">${icon} ${esc(p.display_name||"（名前なし）")} ・ ${esc((p.updated_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div class="body">${esc(p.bio||"（自己紹介なし）")}</div>
+      ${sns.length ? `<div class="meta">${sns.join(" 　 ")}</div>` : ""}
+      ${p.report_reason ? `<div class="meta">通報理由: ${esc(p.report_reason)}</div>` : ""}
+      <div class="meta" style="word-break:break-all">user_id: ${esc(p.user_id)}</div>
+      <div class="row">
+        <button class="b-green" onclick="actProfile('set_profile_status',{user_id:'${esc(p.user_id)}',status:'approved'})">公開を承認</button>
+        <button class="b-orange" onclick="actProfile('set_profile_status',{user_id:'${esc(p.user_id)}',status:'rejected'})">非公開にする</button>
+        <button class="b-gray" onclick="actProfile('clear_profile',{user_id:'${esc(p.user_id)}'},'自己紹介とSNSを消去して承認済みに戻します。よろしいですか？')">内容クリア</button>
+        <button class="b-blue" onclick="viewUser('${esc(p.user_id)}')">この人の投稿</button>
+        <button class="b-red" onclick="banUser('${esc(p.user_id)}')">このユーザーをBAN</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function actProfile(action, params, confirmMsg){
+  if (confirmMsg && !confirm(confirmMsg)) return;
+  try { await api(action, params); await load(); } catch(e){}
 }
 
 async function setTrust(user_id, untrusted){
