@@ -46,7 +46,7 @@
 <div id="app" class="hidden">
   <header>
     <h1>💬 みんなの声 管理</h1>
-    <select id="filter">
+    <select id="filter" onchange="load()">
       <option value="pending">承認待ち</option>
       <option value="approved">公開中</option>
       <option value="rejected">却下/通報</option>
