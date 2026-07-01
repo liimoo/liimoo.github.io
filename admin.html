@@ -294,8 +294,40 @@ async function viewUser(uid){
         <button class="b-red" onclick="banUser('${esc(uid)}')">このユーザーをBAN</button>
       </div>`;
     list.insertBefore(banner, list.firstChild);
-    setMsg(`このユーザーの投稿 ${rows.length} 件`);
+    // この人が「通報した」投稿の一覧を下に追加
+    let reports = [];
+    try { const rd = await api("reports_by_user", { user_id: uid }); reports = rd.reports || []; } catch(e){}
+    list.insertAdjacentHTML("beforeend", renderUserReports(reports));
+    setMsg(`このユーザーの投稿 ${rows.length} 件 ・ 通報 ${reports.length} 件`);
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+
+// 「この人が通報した投稿」セクションのHTML。
+function renderUserReports(reports){
+  let html = `<div class="card" style="border-left:5px solid #c0392b"><div><span class="pill p-rejected">この人が通報した投稿</span><span class="meta">${reports.length} 件</span></div></div>`;
+  if (!reports.length){ return html + '<p class="muted">通報はありません。</p>'; }
+  html += reports.map(r => {
+    const c = r.comments || null;
+    const when = (r.created_at||"").replace("T"," ").slice(0,16);
+    if (!c || !c.id){
+      return `<div class="card"><div><span class="pill" style="background:#8a5a16">通報: ${esc(r.reason||"なし")}</span><span class="meta">${esc(when)}</span></div><div class="body muted">（対象コメントは削除されています）</div></div>`;
+    }
+    const statusPill = c.status==="approved"?'<span class="pill p-approved">公開中</span>'
+                     : c.status==="rejected"?'<span class="pill p-rejected">却下</span>'
+                     : '<span class="pill p-pending">承認待ち</span>';
+    const kindLbl = c.kind==="cheer"?"📣応援":(c.kind==="praise"||c.kind==="celebration")?"🎉お祝い":"🗺️紹介";
+    return `<div class="card">
+      <div><span class="pill" style="background:#8a5a16">通報: ${esc(r.reason||"なし")}</span>${statusPill}<span class="meta">${esc(kindLbl)} ・ ${esc(cityName(c.city_code))} ・ ${esc(c.nickname||"")} ・ ${esc(when)}</span></div>
+      <div class="body">${esc(c.body||"")}</div>
+      <div class="meta" style="word-break:break-all">投稿者 user_id: ${esc(c.user_id||"")}</div>
+      <div class="row">
+        <button class="b-orange" onclick="act('set_status',{comment_id:${c.id},status:'rejected'})">この投稿を却下</button>
+        <button class="b-gray" onclick="act('delete',{comment_id:${c.id}})">この投稿を削除</button>
+        <button class="b-blue" onclick="viewUser('${esc(c.user_id)}')">投稿者を見る</button>
+      </div>
+    </div>`;
+  }).join("");
+  return html;
 }
 
 async function act(action, params){
