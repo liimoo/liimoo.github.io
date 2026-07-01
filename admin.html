@@ -59,6 +59,12 @@
       <option value="profiles_pending">プロフィール承認待ち</option>
       <option value="profiles_reported">プロフィール通報あり</option>
     </select>
+    <select id="kindfilter" onchange="load()">
+      <option value="">種類：すべて</option>
+      <option value="voice">地域紹介</option>
+      <option value="cheer">応援</option>
+      <option value="praise">お祝い</option>
+    </select>
     <button class="b-gray" onclick="load()">更新</button>
     <span id="msg"></span>
     <span style="margin-left:auto"></span>
@@ -144,7 +150,8 @@ async function load(){
       setMsg(`${(d.profiles||[]).length} 件`);
       return;
     }
-    const d = await api("list", { status, limit: 200 });
+    const kind = document.getElementById("kindfilter").value;
+    const d = await api("list", { status, limit: 200, kind });
     render(d.comments||[]);
     setMsg(`${(d.comments||[]).length} 件`);
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
@@ -247,9 +254,12 @@ function render(rows){
                : '<span class="pill p-pending">承認待ち</span>';
     const rep = c.report_count>0 ? `<span class="pill p-rejected">通報 ${c.report_count}</span>` : "";
     const pin = c.pinned ? '<span class="pill" style="background:#7a2740">📌</span>' : "";
+    const kindPill = c.kind==="cheer" ? '<span class="pill" style="background:#8a5a16">📣応援</span>'
+                   : (c.kind==="praise"||c.kind==="celebration") ? '<span class="pill" style="background:#7a3a55">🎉お祝い</span>'
+                   : '<span class="pill" style="background:#2a5a6a">🗺️紹介</span>';
     const reason = (c.report_count>0 && c.report_reason) ? `<div class="meta" style="color:#ffb0a0">通報理由: ${esc(c.report_reason)}</div>` : "";
     return `<div class="card">
-      <div>${pill}${rep}${pin}<span class="meta">${esc(cityName(c.city_code))} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div>${kindPill}${pill}${rep}${pin}<span class="meta">${esc(cityName(c.city_code))} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
       ${reason}
       <div class="body">${esc(c.body)}</div>
       <div class="row">
