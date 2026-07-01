@@ -262,6 +262,7 @@ function render(rows){
       <div>${kindPill}${pill}${rep}${pin}<span class="meta">${esc(cityName(c.city_code))} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
       ${reason}
       <div class="body">${esc(c.body)}</div>
+      <div class="meta" style="word-break:break-all">user_id: ${esc(c.user_id)}</div>
       <div class="row">
         <button class="b-green" onclick="act('set_status',{comment_id:${c.id},status:'approved'})">承認</button>
         <button class="b-orange" onclick="act('set_status',{comment_id:${c.id},status:'rejected'})">却下</button>
@@ -278,8 +279,22 @@ async function viewUser(uid){
   setMsg("読み込み中…");
   try {
     const d = await api("list", { user_id: uid, limit: 200 });
-    render(d.comments||[]);
-    setMsg(`このユーザーの投稿 ${(d.comments||[]).length} 件（上のフィルタを選ぶと通常一覧に戻ります）`);
+    const rows = d.comments || [];
+    render(rows);
+    // 先頭に「どのユーザーを見ているか」の見出し（uuid・ニックネーム・戻る）を差し込む。
+    const list = document.getElementById("list");
+    const nick = rows.length ? rows[0].nickname : "（このユーザーの投稿はありません）";
+    const banner = document.createElement("div");
+    banner.className = "card";
+    banner.style.borderLeft = "5px solid #2a64c0";
+    banner.innerHTML = `<div><span class="pill" style="background:#2a64c0">ユーザー指定ひょうじ</span><span class="meta">${esc(nick)} さんの投稿</span></div>
+      <div class="meta" style="word-break:break-all;user-select:all">user_id: ${esc(uid)}</div>
+      <div class="row">
+        <button class="b-gray" onclick="load()">← 通常一覧にもどる</button>
+        <button class="b-red" onclick="banUser('${esc(uid)}')">このユーザーをBAN</button>
+      </div>`;
+    list.insertBefore(banner, list.firstChild);
+    setMsg(`このユーザーの投稿 ${rows.length} 件`);
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
 }
 
