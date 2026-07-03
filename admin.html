@@ -151,9 +151,12 @@ async function load(){
       return;
     }
     const kind = document.getElementById("kindfilter").value;
-    const d = await api("list", { status, limit: 200, kind });
-    render(d.comments||[]);
-    setMsg(`${(d.comments||[]).length} 件`);
+    const d = await api("list", { status, limit: PAGE, kind });
+    const rows = d.comments||[];
+    render(rows);
+    _more = null;
+    if (rows.length === PAGE) addMoreButton({ status, kind }, PAGE);
+    setMsg(`${rows.length}${rows.length===PAGE?"+":""} 件`);
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
 }
 
@@ -245,10 +248,49 @@ async function showReporters(comment_id){
   } catch(e){}
 }
 
+const PAGE = 200;           // 1回の取得件数（サーバ上限と同じ）
+let _more = null;            // 「もっと見る」の文脈 {params, offset}
+
+// #more_anchor があればその直前へ、無ければ一覧末尾へHTMLを差し込む
+// （ユーザー指定ひょうじでは「この人が通報した投稿」より上に続きを出すため）。
+function insertAtAnchor(html){
+  const a = document.getElementById("more_anchor");
+  if (a) a.insertAdjacentHTML("beforebegin", html);
+  else document.getElementById("list").insertAdjacentHTML("beforeend", html);
+}
+
+function addMoreButton(params, offset){
+  _more = { params, offset };
+  insertAtAnchor(`<div class="card" id="morecard"><div class="row"><button class="b-blue" id="morebtn" onclick="loadMore()">▼ もっと見る（つぎの${PAGE}件）</button></div></div>`);
+}
+
+async function loadMore(){
+  if (!_more) return;
+  const btn = document.getElementById("morebtn");
+  if (btn){ btn.disabled = true; btn.textContent = "読み込み中…"; }
+  try {
+    const d = await api("list", Object.assign({}, _more.params, { limit: PAGE, offset: _more.offset }));
+    const rows = d.comments || [];
+    const card = document.getElementById("morecard");
+    if (card) card.remove();
+    insertAtAnchor(rows.map(cardHtml).join(""));
+    if (rows.length === PAGE) addMoreButton(_more.params, _more.offset + PAGE);
+    else _more = null;
+    setMsg(`さらに ${rows.length} 件 よみこみました`);
+  } catch(e){
+    setMsg("読み込み失敗: " + (e && e.message ? e.message : e));
+    if (btn){ btn.disabled = false; btn.textContent = `▼ もっと見る（つぎの${PAGE}件）`; }
+  }
+}
+
 function render(rows){
   const list = document.getElementById("list");
   if (!rows.length){ list.innerHTML = '<p class="muted">該当するコメントはありません。</p>'; return; }
-  list.innerHTML = rows.map(c => {
+  list.innerHTML = rows.map(cardHtml).join("");
+}
+
+function cardHtml(c){
+  {
     const pill = c.status==="approved"?'<span class="pill p-approved">公開中</span>'
                : c.status==="rejected"?'<span class="pill p-rejected">却下</span>'
                : '<span class="pill p-pending">承認待ち</span>';
@@ -272,15 +314,19 @@ function render(rows){
         <button class="b-red" onclick="banUser('${esc(c.user_id)}')">このユーザーをBAN</button>
       </div>
     </div>`;
-  }).join("");
+  }
 }
 
 async function viewUser(uid){
   setMsg("読み込み中…");
   try {
-    const d = await api("list", { user_id: uid, limit: 200 });
+    const d = await api("list", { user_id: uid, limit: PAGE });
     const rows = d.comments || [];
     render(rows);
+    // 続き（もっと見る）の差し込み位置＝コメント末尾（通報一覧より上）。
+    document.getElementById("list").insertAdjacentHTML("beforeend", '<div id="more_anchor"></div>');
+    _more = null;
+    if (rows.length === PAGE) addMoreButton({ user_id: uid }, PAGE);
     // 先頭に「どのユーザーを見ているか」の見出し（uuid・ニックネーム・戻る）を差し込む。
     const list = document.getElementById("list");
     const nick = rows.length ? rows[0].nickname : "（このユーザーの投稿はありません）";
@@ -298,7 +344,7 @@ async function viewUser(uid){
     let reports = [];
     try { const rd = await api("reports_by_user", { user_id: uid }); reports = rd.reports || []; } catch(e){}
     list.insertAdjacentHTML("beforeend", renderUserReports(reports));
-    setMsg(`このユーザーの投稿 ${rows.length} 件 ・ 通報 ${reports.length} 件`);
+    setMsg(`このユーザーの投稿 ${rows.length}${rows.length===PAGE?"+":""} 件 ・ 通報 ${reports.length} 件`);
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
 }
 
