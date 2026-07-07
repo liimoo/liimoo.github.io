@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日本都市パズル｜市区町村まで遊んで覚える、日本まるごと地理パズル</title>
-<meta name="description" content="きっと、びっくりします。一生遊べる地理パズル。全62マップ・1,746市区町村を完全収録。パズル・クイズ・スタディの3つの遊び方 × 都道府県・山・川の3カテゴリ。親子で・受験対策にも。">
+<title>日本都市パズル｜日本全国 1,746市区町村ぜんぶ遊べる地理パズル</title>
+<meta name="description" content="日本全国、1,746の市区町村すべてが遊べる地理パズル。あなたの推しの街の今日の運勢を占う『街占い』、全国のプレイヤーと応援・お祝いを送り合える『みんなの声』も。親子で・受験対策にも。">
 
 <!-- OGP / Twitter Card -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="日本都市パズル">
-<meta property="og:description" content="きっと、びっくりします。一生遊べる地理パズル。全62マップ・1,746市区町村を完全収録。">
+<meta property="og:description" content="日本全国、1,746の市区町村すべてが遊べる地理パズル。街占い・みんなの声で毎日たのしい。">
 <meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
 <meta property="og:url" content="https://japan-map.app/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="日本都市パズル">
-<meta name="twitter:description" content="きっと、びっくりします。一生遊べる地理パズル。全62マップ・1,746市区町村を完全収録。">
+<meta name="twitter:description" content="日本全国、1,746の市区町村すべてが遊べる地理パズル。街占い・みんなの声で毎日たのしい。">
 <meta name="twitter:image" content="https://japan-map.app/assets/japanmap/ogp.png">
 
 <style>
@@ -41,17 +41,24 @@
     margin:0; color:var(--ink); background:var(--page); line-height:1.8;
     -webkit-font-smoothing:antialiased;
   }
+  /* 背景の都市パズル散布（.leaves）はページ全体の固定背景。その上に1枚だけ暗幕を重ねて可読性を確保する。 */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:rgba(8,22,55,.56);
+  }
+  @media (prefers-color-scheme: light){
+    body::before{ background:rgba(244,248,255,.74); }
+  }
   .wrap{ max-width:960px; margin:0 auto; padding:0 20px; }
   a{ color:var(--blue); }
 
   /* ---- hero ---- */
   .hero{
-    position:relative; overflow:hidden; isolation:isolate;
-    background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%);
-    color:#fff; text-align:center; padding:64px 20px 68px; min-height:600px;
+    position:relative; isolation:isolate; background:transparent;
+    color:var(--ink); text-align:center; padding:64px 20px 68px; min-height:600px;
   }
-  /* 背景の散らばったスクショ（落ち葉演出） */
-  .leaves{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+  /* 散らばった都市パズルのスクショ = ページ全体の固定背景 */
+  .leaves{ position:fixed; inset:0; z-index:-2; pointer-events:none; overflow:hidden; }
   .leaves .leaf{
     position:absolute; border-radius:11px;
     transform:translate(-50%,-50%) rotate(var(--r));
@@ -67,75 +74,48 @@
   @media (prefers-reduced-motion: reduce){
     .leaves .leaf{ animation:none; }
   }
-  /* タイトル/ボタンの可読性確保：中央を少し沈ませ、上下を締める覆い */
-  .hero::after{
-    content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-    background:
-      radial-gradient(58% 48% at 50% 42%, rgba(8,36,92,.72), rgba(8,36,92,.18) 68%, rgba(8,36,92,0) 80%),
-      linear-gradient(180deg, rgba(10,52,120,.40), rgba(10,52,120,0) 24%, rgba(10,52,120,0) 76%, rgba(10,52,120,.50));
+  .hero-inner{ position:relative; z-index:2; text-shadow:0 1px 12px rgba(255,255,255,.65); }
+  @media (prefers-color-scheme: dark){
+    .hero-inner{ text-shadow:0 2px 16px rgba(6,24,64,.6); }
   }
-  .hero-inner{ position:relative; z-index:2; }
   .hero img.icon{
     width:108px; height:108px; border-radius:23%;
     box-shadow:0 10px 30px rgba(0,0,0,.35);
   }
   .hero h1{ font-size:2.05em; margin:18px 0 6px; letter-spacing:.02em; }
-  .hero .tag{ font-size:1.1em; opacity:.96; margin:0 auto 8px; max-width:30em; }
-  .hero .sub{ font-size:.92em; opacity:.82; margin:0 0 24px; }
+  .hero .tag{ font-size:1.15em; opacity:.98; margin:0 auto 8px; max-width:30em; font-weight:700; }
+  .hero .sub{ font-size:.95em; opacity:.9; margin:0 0 24px; }
   .badges{ display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; }
-  /* App Store 公式バッジ */
   .badge-link{ display:inline-block; transition:transform .12s ease; line-height:0; }
   .badge-link:hover{ transform:translateY(-2px); }
   .badge-img{ display:block; height:54px; width:auto; border-radius:9px; }
-  /* Google Play 近日公開（公開後に公式バッジへ差し替え） */
-  .badge-soon{
-    display:inline-flex; flex-direction:column; justify-content:center;
-    height:54px; padding:0 20px; border-radius:10px; text-align:left;
-    background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.4); cursor:default;
-  }
-  .badge-soon small{ font-size:.7em; font-weight:500; opacity:.78; line-height:1.3; }
-  .badge-soon .big{ font-size:1.05em; font-weight:700; line-height:1.2; }
 
-  /* ---- stats: カラフルなカード（黄色い帯は廃止し、ヒーローに重ねる） ---- */
+  /* ---- stats: カラフルなカード（ヒーローに重ねる） ---- */
   .stats{ position:relative; z-index:3; margin-top:-46px; margin-bottom:6px; }
-  .stats .wrap{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .stats .wrap{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
   .stat{ border-radius:18px; padding:22px 10px 18px; color:#fff; text-align:center;
-          box-shadow:0 12px 28px rgba(0,0,0,.24); transition:transform .12s ease; }
+          box-shadow:0 12px 28px rgba(0,0,0,.28); transition:transform .12s ease; }
   .stat:hover{ transform:translateY(-4px); }
+  .stat.big{ background:linear-gradient(145deg,#33d6a6,#0e9f73); }
   .stat.c1{ background:linear-gradient(145deg,#4f9bff,#1d5fd6); }
-  .stat.c2{ background:linear-gradient(145deg,#33d6a6,#0e9f73); }
   .stat.c3{ background:linear-gradient(145deg,#ff9d4d,#f0682a); }
-  .stat.c4{ background:linear-gradient(145deg,#b07bff,#7a3ff0); }
   .stat .num{ font-size:2.4em; font-weight:800; line-height:1.1; letter-spacing:-.01em; }
+  .stat.big .num{ font-size:2.9em; }
   .stat .num small{ font-size:.42em; font-weight:700; margin-left:2px; }
   .stat .lbl{ font-size:.85em; opacity:.95; }
 
   /* ---- sections ---- */
   section{ padding:50px 0; }
-  h2{ font-size:1.55em; text-align:center; color:var(--blue); margin:0 0 6px; }
+  h2{ font-size:1.6em; text-align:center; color:var(--blue); margin:0 0 6px; }
+  .aud h2, .hl h2{ color:#fff; }
   .lead{ text-align:center; color:var(--muted); margin:0 0 30px; }
-
-  .modes{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-  .mode{ background:var(--card); border:1px solid var(--line); border-top:3px solid transparent;
-          border-radius:16px; padding:22px 16px 20px; text-align:center; transition:transform .12s ease; }
-  .mode:hover{ transform:translateY(-3px); }
-  .mode .emoji{ display:inline-grid; place-items:center; width:64px; height:64px; border-radius:50%; font-size:1.7em; margin-bottom:6px; }
-  .mode h3{ margin:6px 0 4px; font-size:1.15em; }
-  .mode p{ margin:0; font-size:.9em; color:var(--muted); }
-  .modes .mode:nth-child(1){ border-top-color:#4f9bff; } .modes .mode:nth-child(1) .emoji{ background:rgba(79,155,255,.18); }
-  .modes .mode:nth-child(2){ border-top-color:#ff7a59; } .modes .mode:nth-child(2) .emoji{ background:rgba(255,122,89,.18); }
-  .modes .mode:nth-child(3){ border-top-color:#33d6a6; } .modes .mode:nth-child(3) .emoji{ background:rgba(51,214,166,.18); }
-
-  .cats{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
-  .cat{ background:var(--card); border:1px solid var(--line); border-radius:999px; padding:10px 22px; font-weight:700; }
-  .cat .e{ margin-right:6px; }
+  .hl .lead{ color:rgba(255,255,255,.9); }
 
   .feat{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:18px; padding:0; }
   .feat li{ list-style:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
   .feat b{ color:var(--blue); }
 
-  /* ---- map wall (volume!) ---- */
-  .wall-sec{ background:var(--card); }
+  /* ---- map wall (全国すべての街) ---- */
   .wall{
     display:grid; grid-template-columns:repeat(auto-fill,minmax(108px,1fr));
     gap:8px; margin-top:8px;
@@ -143,42 +123,44 @@
   .wall img{
     width:100%; aspect-ratio:260/280; object-fit:cover; object-position:top center;
     border-radius:10px; background:#dfe7f2;
-    box-shadow:0 2px 8px rgba(0,0,0,.12);
+    box-shadow:0 2px 8px rgba(0,0,0,.18);
     transition:transform .12s ease, box-shadow .12s ease;
   }
   .wall img:hover{ transform:translateY(-3px) scale(1.03); box-shadow:0 8px 18px rgba(0,0,0,.22); }
   .wall-note{ text-align:center; color:var(--muted); font-size:.85em; margin-top:16px; }
 
-  /* ---- new features (みんなの声/街占い) ---- */
+  /* ---- 目玉機能（街占い / みんなの声）を大きく ---- */
+  .hl{ background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%); border-radius:22px;
+        padding:34px 22px 30px; margin-top:6px; box-shadow:0 14px 34px rgba(8,36,92,.35); }
   .duo{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:18px; }
-  .duo .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px 18px; text-align:center; }
-  .duo .card img{ height:420px; max-width:100%; object-fit:contain; border-radius:14px; box-shadow:0 8px 22px rgba(0,0,0,.18); }
-  .duo h3{ margin:14px 0 6px; font-size:1.2em; color:var(--blue); }
-  .duo p{ margin:0; font-size:.92em; color:var(--muted); text-align:left; }
+  .duo .card{ background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.28); border-radius:18px; padding:20px 18px; text-align:center; }
+  .duo .card img{ height:420px; max-width:100%; object-fit:contain; border-radius:14px; box-shadow:0 8px 22px rgba(0,0,0,.28); }
+  .duo h3{ margin:14px 0 6px; font-size:1.28em; color:#fff; }
+  .duo p{ margin:0; font-size:.94em; color:rgba(255,255,255,.9); text-align:left; }
   .duo .new{ display:inline-block; background:var(--accent); color:#fff; font-size:.7em; font-weight:800;
               border-radius:999px; padding:2px 10px; vertical-align:middle; margin-left:6px; }
 
   /* ---- screenshots ---- */
   .shots{ display:flex; gap:16px; overflow-x:auto; padding:6px 4px 18px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
-  .shots img{ height:520px; border-radius:18px; scroll-snap-align:center; flex:0 0 auto; box-shadow:0 8px 24px rgba(0,0,0,.18); }
+  .shots img{ height:520px; border-radius:18px; scroll-snap-align:center; flex:0 0 auto; box-shadow:0 8px 24px rgba(0,0,0,.22); }
 
   /* ---- audience ---- */
   .aud{ background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%); color:#fff; border-radius:18px; padding:30px 22px; text-align:center; }
-  .aud h2{ color:#fff; }
   .aud p{ margin:.3em 0; }
 
   /* ---- footer ---- */
-  footer{ border-top:1px solid var(--line); padding:28px 20px 48px; text-align:center; font-size:.9em; color:var(--muted); }
+  footer{ border-top:1px solid var(--line); padding:28px 20px 48px; text-align:center; font-size:.9em; color:var(--muted); background:var(--bg); }
   footer a{ margin:0 10px; }
 
   @media (max-width:640px){
     .hero{ min-height:540px; padding:52px 20px 56px; }
     .leaves .leaf{ box-shadow:0 5px 14px rgba(0,0,0,.28); }
     .hero h1{ font-size:1.75em; }
-    .stats .wrap{ grid-template-columns:repeat(2,1fr); gap:18px 8px; }
-    .stat .num{ font-size:2.1em; }
-    .modes{ grid-template-columns:1fr; }
+    .stats .wrap{ gap:10px; }
+    .stat .num{ font-size:1.7em; }
+    .stat.big .num{ font-size:2.0em; }
     .feat{ grid-template-columns:1fr; }
+    .duo{ grid-template-columns:1fr; }
     .shots img{ height:440px; }
     .wall{ grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:6px; }
   }
@@ -186,8 +168,7 @@
 </head>
 <body>
 
-<header class="hero">
-  <div class="leaves" aria-hidden="true">
+<div class="leaves" aria-hidden="true">
     <img class="leaf" src="assets/japanmap/scatter/p1.jpg" alt="" loading="lazy" decoding="async" style="left:3%;top:2%;width:300px;opacity:0.7;--r:-28deg;--amp:7px;--rd:-3deg;--dur:7.5s;--delay:-0.0s">
     <img class="leaf" src="assets/japanmap/scatter/p13.jpg" alt="" loading="lazy" decoding="async" style="left:-2%;top:22%;width:190px;opacity:0.64;--r:14deg;--amp:9px;--rd:4deg;--dur:8.4s;--delay:-1.7s">
     <img class="leaf" src="assets/japanmap/scatter/p2.jpg" alt="" loading="lazy" decoding="async" style="left:5%;top:44%;width:290px;opacity:0.62;--r:33deg;--amp:11px;--rd:-5deg;--dur:9.3s;--delay:-3.4s">
@@ -220,12 +201,14 @@
     <img class="leaf" src="assets/japanmap/scatter/p7.jpg" alt="" loading="lazy" decoding="async" style="left:58%;top:48%;width:120px;opacity:0.42;--r:-42deg;--amp:15px;--rd:5deg;--dur:12.0s;--delay:-4.3s">
     <img class="leaf" src="assets/japanmap/scatter/p13.jpg" alt="" loading="lazy" decoding="async" style="left:24%;top:48%;width:130px;opacity:0.46;--r:-13deg;--amp:7px;--rd:-3deg;--dur:7.5s;--delay:-6.0s">
     <img class="leaf" src="assets/japanmap/scatter/p16.jpg" alt="" loading="lazy" decoding="async" style="left:76%;top:50%;width:130px;opacity:0.46;--r:16deg;--amp:9px;--rd:4deg;--dur:8.4s;--delay:-7.7s">
-  </div>
+</div>
+
+<header class="hero">
   <div class="hero-inner">
     <img class="icon" src="assets/japanmap/icon.png" alt="日本都市パズル アイコン">
     <h1>日本都市パズル</h1>
-    <p class="tag">きっと、びっくりします。<br>一生遊べる地理パズル。</p>
-    <p class="sub">パズル・クイズ・スタディ × 都道府県・山・川</p>
+    <p class="tag">日本全国、すべての街が遊べる。<br>一生遊べる地理パズル。</p>
+    <p class="sub">1,746の市区町村を、まるごと収録。</p>
     <div class="badges">
       <a class="badge-link" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeでダウンロード">
         <img class="badge-img" src="assets/japanmap/appstore_badge.svg" alt="App Storeで手に入れよう" width="162" height="54">
@@ -237,39 +220,22 @@
   </div>
 </header>
 
-<!-- 数字で見るボリューム -->
+<!-- 数字で見るボリューム: 主役は 1,746市区町村 -->
 <div class="stats">
   <div class="wrap">
-    <div class="stat c1"><div class="num">62</div><div class="lbl">マップ</div></div>
-    <div class="stat c2"><div class="num">1,746</div><div class="lbl">市区町村</div></div>
+    <div class="stat big"><div class="num">1,746</div><div class="lbl">市区町村ぜんぶ</div></div>
+    <div class="stat c1"><div class="num">47</div><div class="lbl">都道府県</div></div>
     <div class="stat c3"><div class="num">184<small>ピース</small></div><div class="lbl">最大(北海道)</div></div>
-    <div class="stat c4"><div class="num">9</div><div class="lbl">通りの遊び方</div></div>
   </div>
 </div>
 
 <main>
 
-<section class="wrap">
-  <h2>3つの遊び方</h2>
-  <p class="lead">気分やレベルに合わせて、同じ地図を3通りに楽しめます。</p>
-  <div class="modes">
-    <div class="mode"><div class="emoji">🧩</div><h3>パズル</h3><p>ピースを正しい場所へ。完成めざしてタイムアタック。</p></div>
-    <div class="mode"><div class="emoji">❓</div><h3>クイズ</h3><p>「ここはどこ？」全10問。名前と場所が自然に身につく。</p></div>
-    <div class="mode"><div class="emoji">📖</div><h3>スタディ</h3><p>自分のペースで。タップで読み上げ＆豆知識も。</p></div>
-  </div>
-  <p class="lead" style="margin-top:28px">さらに3つのカテゴリで、遊びは9通りに広がる。</p>
-  <div class="cats">
-    <span class="cat"><span class="e">🗾</span>都道府県</span>
-    <span class="cat"><span class="e">⛰️</span>山</span>
-    <span class="cat"><span class="e">🌊</span>川</span>
-  </div>
-</section>
-
-<!-- ボリュームの主役: 全62マップの壁 -->
+<!-- 主役1: 全国すべての街が遊べる -->
 <section class="wall-sec">
   <div class="wrap">
-    <h2>全62マップ、ぜんぶ遊べる。</h2>
-    <p class="lead">日本全国＋47都道府県＋政令指定都市の区。<br>市区町村まで、これだけのボリューム。</p>
+    <h2>日本全国、すべての街が遊べる。</h2>
+    <p class="lead">47都道府県も、1,746の市区町村も。<br>あなたの街が、まるごとパズルになる。</p>
     <div class="wall">
     <img src="assets/japanmap/wall/zenkoku.jpg" alt="" loading="lazy" decoding="async">
     <img src="assets/japanmap/wall/pref_01.jpg" alt="" loading="lazy" decoding="async">
@@ -334,23 +300,26 @@
     <img src="assets/japanmap/wall/sp_S40100.jpg" alt="" loading="lazy" decoding="async">
     <img src="assets/japanmap/wall/sp_S40130.jpg" alt="" loading="lazy" decoding="async">
     </div>
-    <p class="wall-note">↑ 全62マップを並べたもの。山・川モードのマップはさらに別途収録。</p>
+    <p class="wall-note">↑ 全国＋47都道府県＋政令市の区。さらに市区町村それぞれも1つずつ遊べます（山・川モードも別途収録）。</p>
   </div>
 </section>
 
+<!-- 主役2: 街占い・みんなの声 -->
 <section class="wrap">
-  <h2>あたらしい遊び、続々。</h2>
-  <p class="lead">アップデートで遊びがどんどん広がっています。</p>
-  <div class="duo">
-    <div class="card">
-      <img src="assets/japanmap/community.png" alt="みんなの声" loading="lazy">
-      <h3>💬 みんなの声<span class="new">NEW</span></h3>
-      <p>全国のプレイヤーと「地域紹介・応援・お祝い」のコメントを送り合える。パズル中には応援コメントが流れ、クリアするとお祝いが届く。あなたの街の魅力をひとことで紹介しよう。</p>
-    </div>
-    <div class="card">
-      <img src="assets/japanmap/fortune.png" alt="街占い" loading="lazy">
-      <h3>🔮 街占い</h3>
-      <p>1,747都市の中から、あなたの「推しの街」の今日の運勢と全国順位を毎日占える。仕事・恋愛・金・健康・学業の5項目＋今日の日本一も発表。公式Xで毎朝の1位も公開中。</p>
+  <div class="hl">
+    <h2>毎日たのしい、あたらしい遊び。</h2>
+    <p class="lead">パズルだけじゃない。あなたの街と、全国とつながる。</p>
+    <div class="duo">
+      <div class="card">
+        <img src="assets/japanmap/fortune.png" alt="街占い" loading="lazy">
+        <h3>🔮 街占い</h3>
+        <p>あなたの「推しの街」の今日の運勢と、全国順位を毎日占える。仕事・恋愛・金・健康・学業の5項目に、今日の日本一も発表。公式Xで毎朝の1位も公開中。</p>
+      </div>
+      <div class="card">
+        <img src="assets/japanmap/community.png" alt="みんなの声" loading="lazy">
+        <h3>💬 みんなの声<span class="new">NEW</span></h3>
+        <p>全国のプレイヤーと「地域紹介・応援・お祝い」のコメントを送り合える。パズル中は応援が画面に流れ、クリアするとお祝いが届く。あなたの街の魅力をひとことで紹介しよう。</p>
+      </div>
     </div>
   </div>
 </section>
@@ -359,14 +328,14 @@
   <h2>充実の機能</h2>
   <p class="lead">遊びごたえも、学びやすさも。</p>
   <ul class="feat">
+    <li><b>市区町村ぜんぶ</b><br>全国どの街も、それぞれがひとつのパズル。</li>
     <li><b>政令指定都市の区まで</b><br>大都市は区の単位でこまかく遊べる。</li>
-    <li><b>山・川モード</b><br>日本の名峰・有名な河川もパズル/クイズ/スタディで。</li>
-    <li><b>圧倒的な作り込み</b><br>北海道はなんと184ピース。</li>
+    <li><b>山・川モード</b><br>日本の名峰・有名な河川も遊べる。</li>
     <li><b>共通ランキング</b><br>iOS・Android合同で全国のプレイヤーとタイムを競える。</li>
     <li><b>クラウドで記録復元</b><br>機種変・再インストールでも進捗そのまま。</li>
     <li><b>自動モード</b><br>むずかしい時はおまかせ。見ているだけでも楽しい。</li>
     <li><b>シェアカード・称号</b><br>クリアの記録をカードにして共有。集める楽しみも。</li>
-    <li><b>スタディの豆知識</b><br>地名の読み・由来など、学びがふくらむ。</li>
+    <li><b>基本プレイ無料・広告なし</b><br>まずは気軽に。買い切りのフル版で町丁目パズルも。</li>
   </ul>
 </section>
 
@@ -376,7 +345,7 @@
   <div class="shots">
     <img src="assets/japanmap/10_title.png" alt="タイトル画面" loading="lazy">
     <img src="assets/japanmap/2_zenkoku.png" alt="日本全国パズル" loading="lazy">
-    <img src="assets/japanmap/1_maplist.png" alt="全62マップ" loading="lazy">
+    <img src="assets/japanmap/1_maplist.png" alt="全国マップ一覧" loading="lazy">
     <img src="assets/japanmap/3_hokkaido.png" alt="北海道184ピース" loading="lazy">
     <img src="assets/japanmap/4_tokyo.png" alt="あなたの街は何ピース？" loading="lazy">
     <img src="assets/japanmap/geo_mountain.png" alt="山モード" loading="lazy">
@@ -388,7 +357,7 @@
   <div class="aud">
     <h2>こんな方に</h2>
     <p>📚 小学生の地理学習に・中学受験対策に</p>
-    <p>👨‍👩‍👧 親子でいっしょに、クイズで盛り上がる</p>
+    <p>👨‍👩‍👧 親子でいっしょに、日本地図で盛り上がる</p>
     <p>🗾 大人の学び直し・ご当地ファンにも</p>
     <p style="margin-top:1.2em;opacity:.85;font-size:.9em">基本プレイ無料・広告なし／買い切りのフル版で「みんなの声」への投稿や町丁目パズルも</p>
   </div>
