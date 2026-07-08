@@ -55,7 +55,7 @@
   /* ---- hero ---- */
   .hero{
     position:relative; isolation:isolate; background:transparent;
-    color:var(--ink); text-align:center; padding:64px 20px 68px; min-height:600px;
+    color:var(--ink); text-align:center; padding:64px 20px 40px;
   }
   /* 散らばった都市パズルのスクショ = ページ全体の固定背景 */
   .leaves{ position:fixed; inset:0; z-index:-2; pointer-events:none; overflow:hidden; }
@@ -139,7 +139,7 @@
   footer a{ margin:0 10px; }
 
   @media (max-width:640px){
-    .hero{ min-height:540px; padding:52px 20px 56px; }
+    .hero{ padding:48px 20px 34px; }
     .leaves .leaf{ box-shadow:0 5px 14px rgba(0,0,0,.28); }
     .hero h1{ font-size:1.75em; }
     .feat{ grid-template-columns:1fr; }
@@ -206,7 +206,7 @@
 <main>
 
 <!-- 実際のプレイの様子（バッジ直下・動画で一目で伝える） -->
-<section class="wrap" style="padding-top:30px">
+<section class="wrap" style="padding-top:14px">
   <h2>実際のプレイの様子</h2>
   <p class="lead">→ 横にスクロールできます</p>
   <div class="shots">
