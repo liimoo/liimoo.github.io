@@ -134,7 +134,7 @@
         padding:34px 22px 30px; margin-top:6px; box-shadow:0 14px 34px rgba(8,36,92,.35); }
   .duo{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:18px; }
   .duo .card{ background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.28); border-radius:18px; padding:20px 18px; text-align:center; }
-  .duo .card img{ height:420px; max-width:100%; object-fit:contain; border-radius:14px; box-shadow:0 8px 22px rgba(0,0,0,.28); }
+  .duo .card img, .duo .card video{ height:420px; max-width:100%; object-fit:contain; border-radius:14px; box-shadow:0 8px 22px rgba(0,0,0,.28); }
   .duo h3{ margin:14px 0 6px; font-size:1.28em; color:#fff; }
   .duo p{ margin:0; font-size:.94em; color:rgba(255,255,255,.9); text-align:left; }
   .duo .new{ display:inline-block; background:var(--accent); color:#fff; font-size:.7em; font-weight:800;
@@ -142,7 +142,7 @@
 
   /* ---- screenshots ---- */
   .shots{ display:flex; gap:16px; overflow-x:auto; padding:6px 4px 18px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
-  .shots img{ height:520px; border-radius:18px; scroll-snap-align:center; flex:0 0 auto; box-shadow:0 8px 24px rgba(0,0,0,.22); }
+  .shots img, .shots video{ height:520px; border-radius:18px; scroll-snap-align:center; flex:0 0 auto; box-shadow:0 8px 24px rgba(0,0,0,.22); }
 
   /* ---- audience ---- */
   .aud{ background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%); color:#fff; border-radius:18px; padding:30px 22px; text-align:center; }
@@ -311,12 +311,16 @@
     <p class="lead">パズルだけじゃない。あなたの街と、全国とつながる。</p>
     <div class="duo">
       <div class="card">
-        <img src="assets/japanmap/fortune.png" alt="街占い" loading="lazy">
+        <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_fortune.jpg" aria-label="街占いのプレイ映像">
+          <source src="assets/japanmap/clips/lp_fortune.mp4" type="video/mp4">
+        </video>
         <h3>🔮 街占い</h3>
         <p>あなたの「推しの街」の今日の運勢と、全国順位を毎日占える。仕事・恋愛・金・健康・学業の5項目に、今日の日本一も発表。公式Xで毎朝の1位も公開中。</p>
       </div>
       <div class="card">
-        <img src="assets/japanmap/community.png" alt="みんなの声" loading="lazy">
+        <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_menu.jpg" aria-label="メニューでみんなの声が流れるプレイ映像">
+          <source src="assets/japanmap/clips/lp_menu.mp4" type="video/mp4">
+        </video>
         <h3>💬 みんなの声<span class="new">NEW</span></h3>
         <p>全国のプレイヤーと「地域紹介・応援・お祝い」のコメントを送り合える。パズル中は応援が画面に流れ、クリアするとお祝いが届く。あなたの街の魅力をひとことで紹介しよう。</p>
       </div>
@@ -340,9 +344,18 @@
 </section>
 
 <section class="wrap">
-  <h2>スクリーンショット</h2>
+  <h2>プレイの様子・スクリーンショット</h2>
   <p class="lead">→ 横にスクロールできます</p>
   <div class="shots">
+    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_countdown.jpg" aria-label="カウントダウンに応援コメントが流れる様子">
+      <source src="assets/japanmap/clips/lp_countdown.mp4" type="video/mp4">
+    </video>
+    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_auto.jpg" aria-label="自動モードでピースが次々ハマる様子">
+      <source src="assets/japanmap/clips/lp_auto.mp4" type="video/mp4">
+    </video>
+    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_clear.jpg" aria-label="クリア時にお祝いコメントが流れる様子">
+      <source src="assets/japanmap/clips/lp_clear.mp4" type="video/mp4">
+    </video>
     <img src="assets/japanmap/10_title.png" alt="タイトル画面" loading="lazy">
     <img src="assets/japanmap/2_zenkoku.png" alt="日本全国パズル" loading="lazy">
     <img src="assets/japanmap/1_maplist.png" alt="全国マップ一覧" loading="lazy">
