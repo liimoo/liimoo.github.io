@@ -90,20 +90,6 @@
   .badge-link:hover{ transform:translateY(-2px); }
   .badge-img{ display:block; height:54px; width:auto; border-radius:9px; }
 
-  /* ---- stats: カラフルなカード（ヒーローに重ねる） ---- */
-  .stats{ position:relative; z-index:3; margin-top:-46px; margin-bottom:6px; }
-  .stats .wrap{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-  .stat{ border-radius:18px; padding:22px 10px 18px; color:#fff; text-align:center;
-          box-shadow:0 12px 28px rgba(0,0,0,.28); transition:transform .12s ease; }
-  .stat:hover{ transform:translateY(-4px); }
-  .stat.big{ background:linear-gradient(145deg,#33d6a6,#0e9f73); }
-  .stat.c1{ background:linear-gradient(145deg,#4f9bff,#1d5fd6); }
-  .stat.c3{ background:linear-gradient(145deg,#ff9d4d,#f0682a); }
-  .stat .num{ font-size:2.4em; font-weight:800; line-height:1.1; letter-spacing:-.01em; }
-  .stat.big .num{ font-size:2.9em; }
-  .stat .num small{ font-size:.42em; font-weight:700; margin-left:2px; }
-  .stat .lbl{ font-size:.85em; opacity:.95; }
-
   /* ---- sections ---- */
   section{ padding:50px 0; }
   h2{ font-size:1.6em; text-align:center; color:var(--blue); margin:0 0 6px; }
@@ -156,9 +142,6 @@
     .hero{ min-height:540px; padding:52px 20px 56px; }
     .leaves .leaf{ box-shadow:0 5px 14px rgba(0,0,0,.28); }
     .hero h1{ font-size:1.75em; }
-    .stats .wrap{ gap:10px; }
-    .stat .num{ font-size:1.7em; }
-    .stat.big .num{ font-size:2.0em; }
     .feat{ grid-template-columns:1fr; }
     .duo{ grid-template-columns:1fr; }
     .shots img{ height:440px; }
@@ -220,16 +203,24 @@
   </div>
 </header>
 
-<!-- 数字で見るボリューム: 主役は 1,746市区町村 -->
-<div class="stats">
-  <div class="wrap">
-    <div class="stat big"><div class="num">1,746</div><div class="lbl">市区町村ぜんぶ</div></div>
-    <div class="stat c1"><div class="num">47</div><div class="lbl">都道府県</div></div>
-    <div class="stat c3"><div class="num">184<small>ピース</small></div><div class="lbl">最大(北海道)</div></div>
-  </div>
-</div>
-
 <main>
+
+<!-- 実際のプレイの様子（バッジ直下・動画で一目で伝える） -->
+<section class="wrap" style="padding-top:30px">
+  <h2>実際のプレイの様子</h2>
+  <p class="lead">→ 横にスクロールできます</p>
+  <div class="shots">
+    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_countdown.jpg" aria-label="カウントダウンに応援コメントが流れる様子">
+      <source src="assets/japanmap/clips/lp_countdown.mp4" type="video/mp4">
+    </video>
+    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_auto.jpg" aria-label="自動モードでピースが次々ハマる様子">
+      <source src="assets/japanmap/clips/lp_auto.mp4" type="video/mp4">
+    </video>
+    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_clear.jpg" aria-label="クリア時にお祝いコメントが流れる様子">
+      <source src="assets/japanmap/clips/lp_clear.mp4" type="video/mp4">
+    </video>
+  </div>
+</section>
 
 <!-- 主役1: 全国すべての街が遊べる -->
 <section class="wall-sec">
@@ -344,18 +335,9 @@
 </section>
 
 <section class="wrap">
-  <h2>プレイの様子・スクリーンショット</h2>
+  <h2>スクリーンショット</h2>
   <p class="lead">→ 横にスクロールできます</p>
   <div class="shots">
-    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_countdown.jpg" aria-label="カウントダウンに応援コメントが流れる様子">
-      <source src="assets/japanmap/clips/lp_countdown.mp4" type="video/mp4">
-    </video>
-    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_auto.jpg" aria-label="自動モードでピースが次々ハマる様子">
-      <source src="assets/japanmap/clips/lp_auto.mp4" type="video/mp4">
-    </video>
-    <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_clear.jpg" aria-label="クリア時にお祝いコメントが流れる様子">
-      <source src="assets/japanmap/clips/lp_clear.mp4" type="video/mp4">
-    </video>
     <img src="assets/japanmap/10_title.png" alt="タイトル画面" loading="lazy">
     <img src="assets/japanmap/2_zenkoku.png" alt="日本全国パズル" loading="lazy">
     <img src="assets/japanmap/1_maplist.png" alt="全国マップ一覧" loading="lazy">
