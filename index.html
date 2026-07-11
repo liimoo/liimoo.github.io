@@ -3,19 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日本都市パズル｜日本全国 1,746市区町村ぜんぶ遊べる地理パズル</title>
-<meta name="description" content="日本全国、1,746の市区町村すべてが遊べる地理パズル。あなたの推しの街の今日の運勢を占う『街占い』、全国のプレイヤーと応援・お祝いを送り合える『みんなの声』も。親子で・受験対策にも。">
+<title>日本地図 都市パズル｜市区町村まで完璧！全国1,746市区町村ぜんぶ遊べる地理パズル</title>
+<meta name="description" content="『日本地図 都市パズル』は、日本全国1,746の市区町村すべてが遊べる地理パズル。市区町村まで完璧！推しの街の今日の運勢を占う『街占い』、全国のプレイヤーと応援・お祝いを送り合える『みんなの声』も。親子で・受験対策にも。">
 
 <!-- OGP / Twitter Card -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="日本都市パズル">
-<meta property="og:description" content="日本全国、1,746の市区町村すべてが遊べる地理パズル。街占い・みんなの声で毎日たのしい。">
+<meta property="og:title" content="市区町村まで完璧！日本地図 都市パズル">
+<meta property="og:description" content="『日本地図 都市パズル』は日本全国1,746市区町村すべてが遊べる地理パズル。街占い・みんなの声で毎日たのしい。">
 <meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
 <meta property="og:url" content="https://japan-map.app/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="日本都市パズル">
-<meta name="twitter:description" content="日本全国、1,746の市区町村すべてが遊べる地理パズル。街占い・みんなの声で毎日たのしい。">
+<meta name="twitter:title" content="市区町村まで完璧！日本地図 都市パズル">
+<meta name="twitter:description" content="『日本地図 都市パズル』は日本全国1,746市区町村すべてが遊べる地理パズル。街占い・みんなの声で毎日たのしい。">
 <meta name="twitter:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+
+<!-- 構造化データ（検索での「日本地図」対策） -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"市区町村まで完璧！日本地図 都市パズル","alternateName":["日本地図 都市パズル","日本地図都市パズル"],"applicationCategory":"GameApplication","operatingSystem":"iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"description":"日本全国1,746の市区町村すべてが遊べる地理パズル。市区町村まで完璧！","url":"https://japan-map.app/","image":"https://japan-map.app/assets/japanmap/ogp.png"}
+</script>
 
 <style>
   :root{
@@ -78,15 +83,14 @@
   @media (prefers-color-scheme: dark){
     .hero-inner{ text-shadow:0 2px 16px rgba(6,24,64,.6); }
   }
-  .hero img.icon{
-    width:108px; height:108px; border-radius:23%;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
-  }
-  .hero img.stamp{
-    display:block; margin:14px auto 2px; width:min(320px,72%);
-    filter:drop-shadow(0 4px 10px rgba(0,0,0,.28));
-  }
-  .hero h1{ font-size:2.05em; margin:10px 0 6px; letter-spacing:.02em; }
+  .hero-logo{ position:relative; display:block; width:min(560px,92%);
+    margin:8px auto 14px; padding:0; }
+  .hero-logo .logo{ display:block; width:100%; height:auto;
+    filter:drop-shadow(0 8px 22px rgba(0,0,0,.45)); }
+  .hero-logo .stamp{ position:absolute; width:46%; top:-15%; right:-2%;
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.3)); }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   .hero .tag{ font-size:1.15em; opacity:.98; margin:0 auto 8px; max-width:30em; font-weight:700; }
   .hero .sub{ font-size:.95em; opacity:.9; margin:0 0 24px; }
   .badges{ display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; }
@@ -204,9 +208,11 @@
 
 <header class="hero">
   <div class="hero-inner">
-    <img class="icon" src="assets/japanmap/icon.png" alt="日本都市パズル アイコン">
-    <img class="stamp" src="assets/japanmap/stamp.png" alt="市区町村も完璧！">
-    <h1>日本都市パズル</h1>
+    <h1 class="hero-logo">
+      <span class="sr-only">市区町村まで完璧！日本地図 都市パズル</span>
+      <img class="logo" src="assets/japanmap/logo.png" alt="日本地図 都市パズル">
+      <img class="stamp" src="assets/japanmap/stamp.png" alt="市区町村も完璧！">
+    </h1>
     <p class="tag">市区町村も完璧！ 日本全国すべての街が、<br>一生遊べる地理パズル。</p>
     <p class="sub">1,746の市区町村を、まるごと収録。</p>
     <div class="badges">
