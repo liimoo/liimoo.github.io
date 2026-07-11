@@ -82,7 +82,11 @@
     width:108px; height:108px; border-radius:23%;
     box-shadow:0 10px 30px rgba(0,0,0,.35);
   }
-  .hero h1{ font-size:2.05em; margin:18px 0 6px; letter-spacing:.02em; }
+  .hero img.stamp{
+    display:block; margin:14px auto 2px; width:min(320px,72%);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.28));
+  }
+  .hero h1{ font-size:2.05em; margin:10px 0 6px; letter-spacing:.02em; }
   .hero .tag{ font-size:1.15em; opacity:.98; margin:0 auto 8px; max-width:30em; font-weight:700; }
   .hero .sub{ font-size:.95em; opacity:.9; margin:0 0 24px; }
   .badges{ display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; }
@@ -201,8 +205,9 @@
 <header class="hero">
   <div class="hero-inner">
     <img class="icon" src="assets/japanmap/icon.png" alt="日本都市パズル アイコン">
+    <img class="stamp" src="assets/japanmap/stamp.png" alt="市区町村も完璧！">
     <h1>日本都市パズル</h1>
-    <p class="tag">日本全国、すべての街が遊べる。<br>一生遊べる地理パズル。</p>
+    <p class="tag">市区町村も完璧！ 日本全国すべての街が、<br>一生遊べる地理パズル。</p>
     <p class="sub">1,746の市区町村を、まるごと収録。</p>
     <div class="badges">
       <a class="badge-link" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeでダウンロード">
