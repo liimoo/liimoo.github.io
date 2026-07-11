@@ -21,6 +21,12 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"市区町村まで完璧！日本地図 都市パズル","alternateName":["日本地図 都市パズル","日本地図都市パズル"],"applicationCategory":"GameApplication","operatingSystem":"iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"description":"日本全国1,746の市区町村すべてが遊べる地理パズル。市区町村まで完璧！","url":"https://japan-map.app/","image":"https://japan-map.app/assets/japanmap/ogp.png"}
 </script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"日本地図 都市パズル","alternateName":"市区町村まで完璧！日本地図 都市パズル","url":"https://japan-map.app/"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"「日本地図 都市パズル」はどんなアプリ？","acceptedAnswer":{"@type":"Answer","text":"日本全国の都道府県・市区町村を並べて覚える地理パズルアプリです。日本全国から市区町村、山・川モードまで、遊びながら日本地図が身につきます。"}},{"@type":"Question","name":"無料で遊べますか？","acceptedAnswer":{"@type":"Answer","text":"はい。全コース無料で遊べます。買い切りのフル版で広告が消え、「みんなの声」への投稿もできます。"}},{"@type":"Question","name":"市区町村はどこまで収録していますか？","acceptedAnswer":{"@type":"Answer","text":"全国1,746の市区町村すべてを収録しています。政令指定都市は「区」の単位まで細かく遊べます。"}},{"@type":"Question","name":"都道府県や日本全国のパズルもありますか？","acceptedAnswer":{"@type":"Answer","text":"あります。日本全国（47都道府県）のパズルから、各都道府県内の市区町村パズルまで段階的に楽しめます。"}},{"@type":"Question","name":"山や川のパズルもありますか？","acceptedAnswer":{"@type":"Answer","text":"はい。日本の名峰・有名な河川を並べる「山モード・川モード」も収録しています。"}},{"@type":"Question","name":"子どもの地理学習や中学受験に使えますか？","acceptedAnswer":{"@type":"Answer","text":"遊びながら都道府県・市区町村の位置と名前が覚えられるので、小学生の地理学習や中学受験の対策にもおすすめです。ふりがな付きでお子さまでも安心です。"}},{"@type":"Question","name":"iPhoneとAndroidどちらでも遊べますか？","acceptedAnswer":{"@type":"Answer","text":"どちらでも遊べます。App Store / Google Play で「日本地図 都市パズル」と検索してください。記録はクラウドで復元でき、共通ランキングにも参加できます。"}},{"@type":"Question","name":"「街占い」「みんなの声」とは？","acceptedAnswer":{"@type":"Answer","text":"「街占い」は推しの街の今日の運勢と全国順位を毎日占える機能、「みんなの声」は全国のプレイヤーと応援・お祝い・地域紹介コメントを送り合える機能です。"}}]}
+</script>
 
 <style>
   :root{
@@ -85,12 +91,17 @@
   }
   .hero-logo{ position:relative; display:block; width:min(560px,92%);
     margin:8px auto 14px; padding:0; }
+  .hero-logo picture{ display:block; line-height:0; }
   .hero-logo .logo{ display:block; width:100%; height:auto;
     filter:drop-shadow(0 8px 22px rgba(0,0,0,.45)); }
   .hero-logo .stamp{ position:absolute; width:46%; top:-15%; right:-2%;
     filter:drop-shadow(0 4px 10px rgba(0,0,0,.3)); }
   .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px;
     overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  .faq{ max-width:720px; margin:0 auto; text-align:left; }
+  .faq .qa{ padding:15px 2px; border-bottom:1px solid rgba(128,128,128,.22); }
+  .faq .qa h3{ margin:0 0 6px; font-size:1.05em; }
+  .faq .qa p{ margin:0; opacity:.9; line-height:1.75; }
   .hero .tag{ font-size:1.15em; opacity:.98; margin:0 auto 8px; max-width:30em; font-weight:700; }
   .hero .sub{ font-size:.95em; opacity:.9; margin:0 0 24px; }
   .badges{ display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; }
@@ -210,8 +221,11 @@
   <div class="hero-inner">
     <h1 class="hero-logo">
       <span class="sr-only">市区町村まで完璧！日本地図 都市パズル</span>
-      <img class="logo" src="assets/japanmap/logo.png" alt="日本地図 都市パズル">
-      <img class="stamp" src="assets/japanmap/stamp.png" alt="市区町村も完璧！">
+      <picture>
+        <source srcset="assets/japanmap/logo.webp" type="image/webp">
+        <img class="logo" src="assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" fetchpriority="high">
+      </picture>
+      <img class="stamp" src="assets/japanmap/stamp.png" alt="市区町村も完璧！" width="418" height="149">
     </h1>
     <p class="tag">市区町村も完璧！ 日本全国すべての街が、<br>一生遊べる地理パズル。</p>
     <p class="sub">1,746の市区町村を、まるごと収録。</p>
@@ -378,6 +392,20 @@
     <p>👨‍👩‍👧 親子でいっしょに、日本地図で盛り上がる</p>
     <p>🗾 大人の学び直し・ご当地ファンにも</p>
     <p style="margin-top:1.2em;opacity:.85;font-size:.9em">全コース無料で遊べる／買い切りのフル版で広告なし・「みんなの声」への投稿も</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>よくある質問</h2>
+  <div class="faq">
+    <div class="qa"><h3>「日本地図 都市パズル」はどんなアプリ？</h3><p>日本全国の都道府県・市区町村を並べて覚える地理パズルアプリです。日本全国から市区町村、山・川モードまで、遊びながら日本地図が身につきます。</p></div>
+    <div class="qa"><h3>無料で遊べますか？</h3><p>はい。全コース無料で遊べます。買い切りのフル版で広告が消え、「みんなの声」への投稿もできます。</p></div>
+    <div class="qa"><h3>市区町村はどこまで収録していますか？</h3><p>全国1,746の市区町村すべてを収録しています。政令指定都市は「区」の単位まで細かく遊べます。</p></div>
+    <div class="qa"><h3>都道府県や日本全国のパズルもありますか？</h3><p>あります。日本全国（47都道府県）のパズルから、各都道府県内の市区町村パズルまで段階的に楽しめます。</p></div>
+    <div class="qa"><h3>山や川のパズルもありますか？</h3><p>はい。日本の名峰・有名な河川を並べる「山モード・川モード」も収録しています。</p></div>
+    <div class="qa"><h3>子どもの地理学習や中学受験に使えますか？</h3><p>遊びながら都道府県・市区町村の位置と名前が覚えられるので、小学生の地理学習や中学受験の対策にもおすすめです。ふりがな付きでお子さまでも安心です。</p></div>
+    <div class="qa"><h3>iPhoneとAndroidどちらでも遊べますか？</h3><p>どちらでも遊べます。App Store / Google Play で「日本地図 都市パズル」と検索してください。記録はクラウドで復元でき、共通ランキングにも参加できます。</p></div>
+    <div class="qa"><h3>「街占い」「みんなの声」とは？</h3><p>「街占い」は推しの街の今日の運勢と全国順位を毎日占える機能、「みんなの声」は全国のプレイヤーと応援・お祝い・地域紹介コメントを送り合える機能です。</p></div>
   </div>
 </section>
 
