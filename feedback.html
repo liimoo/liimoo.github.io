@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>ごいけん・ふぐあい 管理</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+         margin: 0; background: #0e1626; color: #e8edf6; line-height: 1.6; }
+  header { background: #142036; padding: 14px 18px; position: sticky; top: 0; display: flex;
+           align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #24344f; }
+  header h1 { font-size: 1.1em; margin: 0; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 16px; }
+  input, select, button { font-size: 15px; }
+  input, select { padding: 9px 11px; border-radius: 9px; border: 1px solid #2c3e5d;
+                  background: #0b1322; color: #e8edf6; }
+  button { padding: 9px 14px; border-radius: 9px; border: 0; cursor: pointer; font-weight: 700; color: #fff; }
+  .b-blue { background: #2a64c0; } .b-green { background: #1f9d57; } .b-gray { background: #5a6b86; }
+  .b-orange { background: #d9742a; } .b-red { background: #c0392b; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card { background: #16233c; border: 1px solid #26385a; border-radius: 14px; padding: 14px; margin: 12px 0; }
+  .body { font-size: 16px; white-space: pre-wrap; word-break: break-word; margin: 6px 0 10px; }
+  .meta { font-size: 12px; color: #9fb0cc; }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
+  .s-new { background: #6b5a16; } .s-read { background: #2a4a6a; } .s-done { background: #1c5e38; }
+  .muted { color: #9fb0cc; }
+  #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
+  #msg { color: #ffd27a; min-height: 1.2em; font-size: 13px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="login" class="wrap">
+  <h1>ごいけん・ふぐあい 管理ログイン</h1>
+  <input id="email" type="email" placeholder="管理者メール" autocomplete="username">
+  <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
+  <button class="b-blue" onclick="login()">ログイン</button>
+  <div id="loginmsg" class="muted" style="font-size:13px"></div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>📮 ごいけん・ふぐあい</h1>
+    <select id="filter" onchange="load()">
+      <option value="new">未読</option>
+      <option value="read">既読</option>
+      <option value="done">対応済み</option>
+      <option value="all">すべて</option>
+    </select>
+    <select id="typefilter" onchange="load()">
+      <option value="">種類：すべて</option>
+      <option value="bug">🐛 ふぐあい</option>
+      <option value="request">💡 ようぼう</option>
+      <option value="reading">🗣️ 地名のよみ</option>
+    </select>
+    <button class="b-gray" onclick="load()">更新</button>
+    <span id="msg"></span>
+    <span style="margin-left:auto"></span>
+    <a class="b-gray" href="./admin.html" style="text-decoration:none;padding:9px 14px;border-radius:9px">💬 みんなの声へ</a>
+    <button class="b-gray" onclick="logout()">ログアウト</button>
+  </header>
+  <div class="wrap"><div id="list"></div></div>
+</div>
+
+<script>
+const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
+const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
+let token = sessionStorage.getItem("jm_admin_token") || "";
+
+function esc(s){ return String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+function setMsg(t){ document.getElementById("msg").textContent = t||""; }
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  document.getElementById("loginmsg").textContent = "ログイン中…";
+  try {
+    const r = await fetch(`${SUPABASE}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": ANON },
+      body: JSON.stringify({ email, password }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.access_token) { document.getElementById("loginmsg").textContent = "ログイン失敗: " + (d.error_description||d.msg||r.status); return; }
+    token = d.access_token;
+    sessionStorage.setItem("jm_admin_token", token);
+    showApp();
+  } catch(e){ document.getElementById("loginmsg").textContent = "通信エラー: " + e; }
+}
+
+function logout(){ token=""; sessionStorage.removeItem("jm_admin_token"); document.getElementById("app").classList.add("hidden"); document.getElementById("login").classList.remove("hidden"); }
+
+function showApp(){ document.getElementById("loginmsg").textContent=""; document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); load(); }
+
+async function api(action, params){
+  const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": ANON, "Authorization": "Bearer " + token },
+    body: JSON.stringify(Object.assign({ action }, params||{})),
+  });
+  const d = await r.json().catch(()=>({}));
+  if (r.status === 401 || r.status === 403) { setMsg("権限がありません（再ログインしてください）"); throw new Error("auth"); }
+  if (!r.ok) { setMsg("エラー: " + (d.error||r.status)); throw new Error(d.error||r.status); }
+  return d;
+}
+
+async function load(){
+  setMsg("読み込み中…");
+  try {
+    const status = document.getElementById("filter").value;
+    const type = document.getElementById("typefilter").value;
+    const d = await api("list_feedback", { status, type, limit: 200 });
+    render(d.feedback || []);
+    setMsg(`${(d.feedback||[]).length} 件`);
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+
+function typePill(t){
+  if (t === "bug") return '<span class="pill" style="background:#7a3a3a">🐛 ふぐあい</span>';
+  if (t === "reading") return '<span class="pill" style="background:#2a5a6a">🗣️ 地名のよみ</span>';
+  return '<span class="pill" style="background:#8a5a16">💡 ようぼう</span>';
+}
+function statusPill(s){
+  if (s === "done") return '<span class="pill s-done">対応済み</span>';
+  if (s === "read") return '<span class="pill s-read">既読</span>';
+  return '<span class="pill s-new">未読</span>';
+}
+
+function render(rows){
+  const list = document.getElementById("list");
+  if (!rows.length){ list.innerHTML = '<p class="muted">該当するフィードバックはありません。</p>'; return; }
+  list.innerHTML = rows.map(f => {
+    const who = f.user_id ? `<span class="meta" style="word-break:break-all">user_id: ${esc(f.user_id)}</span>` : '<span class="meta">匿名</span>';
+    const ver = f.app_version ? ` ・ v${esc(f.app_version)}` : "";
+    return `<div class="card">
+      <div>${typePill(f.type)}${statusPill(f.status)}<span class="meta">${esc(f.platform||"unknown")}${ver} ・ ${esc((f.created_at||"").replace("T"," ").slice(0,16))} ・ #${f.id}</span></div>
+      <div class="body">${esc(f.body)}</div>
+      ${who}
+      <div class="row" style="margin-top:8px">
+        <button class="b-blue" onclick="act(${f.id},'read')">既読にする</button>
+        <button class="b-green" onclick="act(${f.id},'done')">対応済みに</button>
+        <button class="b-gray" onclick="act(${f.id},'new')">未読に戻す</button>
+        <button class="b-red" onclick="del(${f.id})">削除</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function act(feedback_id, status){
+  try { await api("set_feedback_status", { feedback_id, status }); await load(); } catch(e){}
+}
+
+async function del(feedback_id){
+  if (!confirm("このフィードバックを削除します。よろしいですか？")) return;
+  try { await api("delete_feedback", { feedback_id }); await load(); } catch(e){}
+}
+
+if (token) showApp();
+</script>
+</body>
+</html>
