@@ -149,6 +149,7 @@
   /* ---- screenshots ---- */
   .shots{ display:flex; gap:16px; overflow-x:auto; padding:6px 4px 18px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
   .shots img, .shots video{ height:520px; width:auto; border-radius:18px; scroll-snap-align:center; flex:0 0 auto; box-shadow:0 8px 24px rgba(0,0,0,.22); }
+  .shots-land img{ height:300px; }   /* 横画面スクショは高さを抑えて横長に見せる */
 
   /* ---- audience ---- */
   .aud{ background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%); color:#fff; border-radius:18px; padding:30px 22px; text-align:center; }
@@ -177,6 +178,7 @@
     .feat{ grid-template-columns:1fr; }
     .duo{ grid-template-columns:1fr; }
     .shots img{ height:440px; }
+    .shots-land img{ height:200px; }
     .wall{ grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:6px; }
   }
 </style>
@@ -391,6 +393,18 @@
     <img src="assets/japanmap/shots/12_city_puzzle.webp" alt="市区町村パズル（大阪市）" loading="lazy" width="720" height="1600">
     <img src="assets/japanmap/shots/13_city_quiz.webp" alt="市区町村クイズ" loading="lazy" width="720" height="1600">
     <img src="assets/japanmap/shots/14_city_study.webp" alt="市区町村スタディ（名古屋市）" loading="lazy" width="720" height="1600">
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>よこ画面にも対応</h2>
+  <p class="lead">タイトルからパズル・クイズ・占いまで、<b>すべての画面がよこ向きに対応</b>。タブレットや大きな画面でも快適に遊べます（ゲームパッドにも対応）。→ 横にスクロールできます</p>
+  <div class="shots shots-land">
+    <img src="assets/japanmap/shots/land_01_title.webp" alt="よこ画面のタイトル画面" loading="lazy" width="1280" height="720">
+    <img src="assets/japanmap/shots/land_02_pref_puzzle.webp" alt="よこ画面の都道府県パズル（東京都）" loading="lazy" width="1280" height="720">
+    <img src="assets/japanmap/shots/land_03_city_puzzle.webp" alt="よこ画面の市区町村パズル（東京23区・応援コメント）" loading="lazy" width="1280" height="720">
+    <img src="assets/japanmap/shots/land_04_yama_quiz.webp" alt="よこ画面の山クイズ" loading="lazy" width="1280" height="720">
+    <img src="assets/japanmap/shots/land_05_fortune.webp" alt="よこ画面のまち占い" loading="lazy" width="1280" height="720">
   </div>
 </section>
 
