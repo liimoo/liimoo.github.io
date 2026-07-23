@@ -117,6 +117,20 @@
   .badge-link{ display:inline-block; transition:transform .12s ease; line-height:0; }
   .badge-link:hover{ transform:translateY(-2px); }
   .badge-img{ display:block; height:54px; width:auto; border-radius:9px; }
+  /* Steam版の「近日登場」。ストアページ公開までは押せないので <a> にしない。
+     公開後は .badge-soon を .badge-link + 公式バッジ画像に差し替える。 */
+  .badge-soon{
+    display:flex; align-items:center; gap:10px; height:54px; box-sizing:border-box;
+    padding:0 16px; border-radius:9px; text-decoration:none; cursor:default;
+    background:#171a21; color:#e8edf5; border:1px solid #2b3345;
+  }
+  .badge-soon .mark{ width:26px; height:26px; flex:none; opacity:.92; }
+  .badge-soon .txt{ display:flex; flex-direction:column; line-height:1.15; text-align:left; }
+  .badge-soon .txt small{ font-size:.66em; letter-spacing:.08em; opacity:.72; }
+  .badge-soon .txt b{ font-size:1.02em; font-weight:700; letter-spacing:.02em; }
+  @media (prefers-color-scheme: light){
+    .badge-soon{ background:#1b2838; border-color:#1b2838; }
+  }
 
   /* ---- sections ---- */
   section{ padding:50px 0; }
@@ -251,6 +265,22 @@
       <a class="badge-link" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playでダウンロード">
         <img class="badge-img" src="assets/japanmap/googleplay_badge.png" alt="Google Playで手に入れよう" height="54">
       </a>
+      <!-- PC（Steam）版は近日登場。ストアページ https://store.steampowered.com/app/4966740/ が
+           公開されるまでは <a> にしないこと（未公開の App ID はSteamのトップへ
+           リダイレクトされ、押しても何も起きない死んだリンクになる）。
+           公開後は、このブロックを丸ごと次に差し替える:
+             <a class="badge-link" href="https://store.steampowered.com/app/4966740/" aria-label="Steamでウィッシュリストに追加">
+               <img class="badge-img" src="assets/japanmap/steam_badge.png" alt="Steamで手に入れよう" height="54">
+             </a>
+           バッジ画像は Steamworks の「マーケティング用アセット」から公式のものを落として使う。 -->
+      <span class="badge-soon" aria-label="PC（Steam）版は近日登場">
+        <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <rect x="2.5" y="3.5" width="19" height="13" rx="2"></rect>
+          <path d="M8 20.5h8M12 16.5v4"></path>
+        </svg>
+        <span class="txt"><small>近日登場</small><b>PC / Steam</b></span>
+      </span>
     </div>
   </div>
 </header>
