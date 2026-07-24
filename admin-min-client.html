@@ -62,12 +62,23 @@
   </header>
   <div class="wrap">
     <div class="hint">
-      <b>min_client</b> は「この対抗戦をちゃんと遊べる最低クライアント版」です。これ未満の旧クライアントが
-      対抗戦を開くと <b>アップデートうながし</b>（お知らせのみ・遊びはブロックしない）が出ます。<br>
-      ・空 = うながしなし　・効くのは <b>「開催中」</b> のシーズンの値だけ　・
-      いまの配信版以下を入れると誰にも出ません（例 <code>2.1.0</code>）。
+      <b>最低クライアント版（min_client）</b>は対抗戦全体で <b>1つだけ</b> の設定です（イベントごとの
+      設定は不要）。これ未満の旧クライアントが対抗戦を開くと <b>アップデートうながし</b>
+      （お知らせのみ・遊びはブロックしない）が出ます。<br>
+      ・空 = うながしなし　・いまの配信版以下を入れると誰にも出ません（例 <code>2.1.0</code>）。
     </div>
-    <div id="list"></div>
+    <div class="card">
+      <div class="row">
+        <label class="title">対抗戦の最低クライアント版</label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <input class="verinput" id="minclient" type="text" placeholder="(空=なし)">
+        <button class="b-blue" onclick="save()">保存</button>
+        <button class="b-gray" onclick="clearVal()">空にする</button>
+        <span class="spacer"></span>
+      </div>
+      <div class="note muted" id="note"></div>
+    </div>
   </div>
 </div>
 
@@ -122,46 +133,20 @@ async function api(action, params){
 async function load(){
   setMsg("読み込み中…");
   try {
-    const d = await api("event_seasons");
+    const d = await api("get_event_min_client");
+    document.getElementById("minclient").value = d.value || "";
+    document.getElementById("note").textContent =
+      (d.value ? "現在: min_client = '" + d.value + "'" : "現在: うながしなし（空）");
+    document.getElementById("note").className = "note muted";
     setMsg("");
-    render(d.seasons||[]);
   } catch(e){}
 }
 
-function render(seasons){
-  const box = document.getElementById("list");
-  if (!seasons.length){ box.innerHTML = '<p class="muted">シーズンがありません。</p>'; return; }
-  box.innerHTML = "";
-  for (const s of seasons){
-    const card = document.createElement("div");
-    card.className = "card" + (s.state === "running" ? " running" : "");
-    const period = (s.starts_at||"").slice(0,10) + " 〜 " + (s.ends_at||"").slice(0,10);
-    card.innerHTML = `
-      <div class="row">
-        <span class="pill p-${s.state}">${STATE_JP[s.state]||s.state}</span>
-        <span class="title">#${s.id} ${esc(s.title||"(無題)")}</span>
-        <span class="meta">${period}</span>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <label class="meta">min_client</label>
-        <input class="verinput" type="text" value="${esc(s.min_client||"")}" placeholder="(空=なし)" data-id="${s.id}">
-        <button class="b-blue" data-save="${s.id}">保存</button>
-        <button class="b-gray" data-clear="${s.id}">空にする</button>
-        <span class="spacer"></span>
-      </div>
-      <div class="note muted" data-note="${s.id}"></div>`;
-    box.appendChild(card);
-  }
-  box.querySelectorAll("button[data-save]").forEach(b =>
-    b.onclick = () => save(b.getAttribute("data-save")));
-  box.querySelectorAll("button[data-clear]").forEach(b =>
-    b.onclick = () => { const id=b.getAttribute("data-clear");
-      box.querySelector(`input[data-id="${id}"]`).value=""; save(id); });
-}
+function clearVal(){ document.getElementById("minclient").value = ""; save(); }
 
-async function save(id){
-  const input = document.querySelector(`input[data-id="${id}"]`);
-  const note = document.querySelector(`[data-note="${id}"]`);
+async function save(){
+  const input = document.getElementById("minclient");
+  const note = document.getElementById("note");
   const val = input.value.trim();
   if (!/^(\d+(\.\d+){0,3})?$/.test(val)){
     note.textContent = "✗ 空か「2.1.0」のような数字だけの版にしてください。";
@@ -169,8 +154,8 @@ async function save(id){
   }
   note.textContent = "保存中…"; note.className = "note muted";
   try {
-    const d = await api("set_min_client", { season_id: Number(id), min_client: val });
-    note.textContent = "✓ 保存しました（min_client = '" + (d.row?.min_client||"") + "'）";
+    const d = await api("set_event_min_client", { value: val });
+    note.textContent = "✓ 保存しました（" + (d.value ? "min_client = '" + d.value + "'" : "うながしなし（空）") + "）";
     note.className = "note ok";
   } catch(e){
     note.textContent = "✗ 保存に失敗しました。"; note.className = "note err";
