@@ -117,20 +117,15 @@
   .badge-link{ display:inline-block; transition:transform .12s ease; line-height:0; }
   .badge-link:hover{ transform:translateY(-2px); }
   .badge-img{ display:block; height:54px; width:auto; border-radius:9px; }
-  /* Steam版の「近日登場」。ストアページ公開までは押せないので <a> にしない。
-     公開後は .badge-soon を .badge-link + 公式バッジ画像に差し替える。 */
-  .badge-soon{
-    display:flex; align-items:center; gap:12px; height:54px; box-sizing:border-box;
-    padding:0 18px; border-radius:9px; text-decoration:none; cursor:default;
-    background:#171a21; color:#c5c3c0; border:1px solid #2b3345;
+  /* Steam版バッジ。ストアページ（近日登場＋ウィッシュリスト）へリンク。
+     公式ロゴだけを Steam カラーの箱に載せ、Apple/Google バッジと高さ・角丸を揃える。 */
+  .badge-steam{
+    display:flex; align-items:center; justify-content:center; height:54px; box-sizing:border-box;
+    padding:0 22px; border-radius:9px; background:#171a21; border:1px solid #2b3345;
   }
-  .badge-soon .steam{ height:20px; width:auto; flex:none; }
-  .badge-soon .soon{
-    font-size:.82em; font-weight:700; letter-spacing:.04em; color:#e8edf5;
-    padding-left:12px; border-left:1px solid #3a4256;
-  }
+  .badge-steam .steam{ height:22px; width:auto; flex:none; }
   @media (prefers-color-scheme: light){
-    .badge-soon{ background:#1b2838; border-color:#1b2838; }
+    .badge-steam{ background:#1b2838; border-color:#1b2838; }
   }
 
   /* ---- sections ---- */
@@ -266,19 +261,16 @@
       <a class="badge-link" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playでダウンロード">
         <img class="badge-img" src="assets/japanmap/googleplay_badge.png" alt="Google Playで手に入れよう" height="54">
       </a>
-      <!-- PC（Steam）版は近日登場。ストアページ https://store.steampowered.com/app/4966740/ が
-           公開されるまでは <a> にしないこと（未公開の App ID はSteamのトップへ
-           リダイレクトされ、押しても何も起きない死んだリンクになる）。
-           公開後は「近日登場」を外し、この span を <a> に変えるだけでよい:
-             <a class="badge-soon" href="https://store.steampowered.com/app/4966740/" aria-label="Steamでウィッシュリストに追加">
-               <img class="steam" src="assets/japanmap/steam_logo.svg" alt="Steam" width="66" height="20">
-             </a>
+      <!-- PC（Steam）版。ストアページ（近日登場＋ウィッシュリスト）が公開されたのでリンク化した。
+           ページ側が既に「Coming Soon」表示なので、LP側の「近日登場」テキストは外し、
+           公式ロゴだけでウィッシュリストへ飛ばす。誤解防止は aria-label で担保。
+           発売後もURL・体裁はそのままでよい（発売後はストアの購入ボタンに変わるだけ）。
            ロゴ assets/japanmap/steam_logo.svg は Steam ストア本体の公式ヘッダーロゴ
            (store.steampowered.com の logo_steam.svg / #C5C3C0)。壊れていた viewBox のみ正規化済み。 -->
-      <span class="badge-soon" aria-label="PC（Steam）版は近日登場">
+      <a class="badge-link badge-steam" href="https://store.steampowered.com/app/4966740/"
+         aria-label="Steamでウィッシュリストに追加（PC版・近日登場）" target="_blank" rel="noopener">
         <img class="steam" src="assets/japanmap/steam_logo.svg" alt="Steam" width="66" height="20">
-        <span class="soon">近日登場</span>
-      </span>
+      </a>
     </div>
   </div>
 </header>
