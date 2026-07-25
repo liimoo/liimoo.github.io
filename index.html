@@ -121,11 +121,12 @@
      公式ロゴだけを Steam カラーの箱に載せ、Apple/Google バッジと高さ・角丸を揃える。 */
   .badge-steam{
     display:flex; align-items:center; justify-content:center; height:54px; box-sizing:border-box;
-    padding:0 22px; border-radius:9px; background:#171a21; border:1px solid #2b3345;
+    padding:0 22px; border-radius:9px; background:#171a21;
+    border:1px solid rgba(255,255,255,.9);   /* App Store/Google Play に合わせた白枠 */
   }
   .badge-steam .steam{ height:22px; width:auto; flex:none; }
   @media (prefers-color-scheme: light){
-    .badge-steam{ background:#1b2838; border-color:#1b2838; }
+    .badge-steam{ background:#1b2838; }       /* 枠は白のまま（ライト背景では自然に控えめになる） */
   }
 
   /* ---- sections ---- */
@@ -259,7 +260,9 @@
         <img class="badge-img" src="assets/japanmap/appstore_badge.svg" alt="App Storeで手に入れよう" width="162" height="54">
       </a>
       <a class="badge-link" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playでダウンロード">
-        <img class="badge-img" src="assets/japanmap/googleplay_badge.png" alt="Google Playで手に入れよう" height="54">
+        <!-- 公式PNGは上下に29pxの透明余白があり、height:54だと黒枠が42pxに縮んでApp Storeと不揃いになる。
+             余白を切った _hero 版を使い、黒枠を実寸54pxに揃える（県ページは元PNGのまま）。 -->
+        <img class="badge-img" src="assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" height="54">
       </a>
       <!-- PC（Steam）版。ストアページ（近日登場＋ウィッシュリスト）が公開されたのでリンク化した。
            ページ側が既に「Coming Soon」表示なので、LP側の「近日登場」テキストは外し、
