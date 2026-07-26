@@ -58,6 +58,7 @@
       <option value="reporters">通報者ランキング</option>
       <option value="profiles_pending">プロフィール承認待ち</option>
       <option value="profiles_reported">プロフィール通報あり</option>
+      <option value="scores">🏆 ランキング記録</option>
     </select>
     <select id="kindfilter" onchange="load()">
       <option value="">種類：すべて</option>
@@ -152,6 +153,11 @@ async function load(){
       setMsg(`${(d.profiles||[]).length} 件`);
       return;
     }
+    if (status === "scores") {
+      renderScoresForm();
+      setMsg("");
+      return;
+    }
     const kind = document.getElementById("kindfilter").value;
     const d = await api("list", { status, limit: PAGE, kind });
     const rows = d.comments||[];
@@ -160,6 +166,63 @@ async function load(){
     if (rows.length === PAGE) addMoreButton({ status, kind }, PAGE);
     setMsg(`${rows.length}${rows.length===PAGE?"+":""} 件`);
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+
+// ── 🏆 ランキング記録の管理 ────────────────────────────────────────────
+let SCORES_BOARD = "";
+function renderScoresForm(){
+  const list = document.getElementById("list");
+  const prefs = (CITY && CITY.prefs) ? CITY.prefs : {};
+  const opts = Object.keys(prefs).sort().map(c => `<option value="${c}">${c} ${esc(prefs[c])}（県全体）</option>`).join("");
+  list.innerHTML = `
+    <div class="card">
+      <div class="row" style="margin-bottom:8px">
+        <label>ボード:</label>
+        <select id="boardpick" onchange="document.getElementById('boardid').value=this.value">
+          <option value="">— 都道府県を選ぶ —</option>${opts}
+        </select>
+        <input id="boardid" placeholder="board_id 直接入力（例 02, S27100）" value="${esc(SCORES_BOARD)}" style="min-width:230px">
+        <button class="b-blue" onclick="loadScores()">表示</button>
+      </div>
+      <div class="meta">県全体＝2桁県コード（青森＝02）／政令市などは S27100 形式。best_score が小さい＝速い＝上位。</div>
+    </div>
+    <div id="scorelist"></div>`;
+  if (SCORES_BOARD) loadScores();
+}
+async function loadScores(){
+  const board = (document.getElementById("boardid").value||"").trim();
+  if (!board){ setMsg("ボードを選んでください"); return; }
+  SCORES_BOARD = board;
+  setMsg("読み込み中…");
+  try {
+    const d = await api("list_scores", { board_id: board, limit: 300 });
+    renderScores(board, d.scores||[]);
+    setMsg(`${(d.scores||[]).length} 件（board ${board}）`);
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+function fmtScore(cs){ return (cs/100).toFixed(2) + "秒"; }
+function renderScores(board, rows){
+  const el = document.getElementById("scorelist");
+  if (!el) return;
+  if (!rows.length){ el.innerHTML = '<p class="muted">この board に記録はありません。</p>'; return; }
+  el.innerHTML = rows.map(s => `
+    <div class="card">
+      <div><span class="pill p-approved">${s.rank}位</span>
+        <span class="meta">${esc(s.display_name||"（名前なし）")} ・ ${esc(s.platform||"")} ・ ${esc((s.updated_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div class="body">${fmtScore(s.best_score)}　<span class="muted">(${s.best_score}cs)</span></div>
+      <div class="meta" style="word-break:break-all">user_id: ${esc(s.user_id)}</div>
+      <div class="row">
+        <button class="b-red" onclick="delScore('${esc(board)}','${esc(s.user_id)}',${s.rank},${s.best_score})">この記録を削除</button>
+      </div>
+    </div>`).join("");
+}
+async function delScore(board, user_id, rank, cs){
+  if (!confirm(`board ${board} の ${rank}位（${fmtScore(cs)}）\nuser_id: ${user_id}\nこの記録を削除します。よろしいですか？`)) return;
+  try {
+    await api("delete_score", { board_id: board, user_id });
+    setMsg("削除しました");
+    loadScores();
+  } catch(e){ setMsg("削除失敗: " + (e && e.message ? e.message : e)); }
 }
 
 function renderBanned(rows){
