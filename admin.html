@@ -170,21 +170,62 @@ async function load(){
 
 // ── 🏆 ランキング記録の管理 ────────────────────────────────────────────
 let SCORES_BOARD = "";
+// 都道府県内のマップ（県全体＋市町村＋政令市）を admin-cities.json から絞り込む。
+function mapsForPref(pref){
+  const codes = (CITY && CITY.codes) ? CITY.codes : {};
+  const out = [];
+  for (const k of Object.keys(codes)){
+    let inPref = false;
+    if (k === pref) inPref = true;                                    // 県全体
+    else if (/^\d{5}$/.test(k) && k.slice(0,2) === pref) inPref = true; // 市町村
+    else if (k[0] === "S" && k.slice(1,3) === pref) inPref = true;      // 政令市（市全体）
+    if (inPref){
+      const full = codes[k] || k;
+      const sp = full.indexOf(" ");
+      const label = (k === pref) ? "県全体" : (sp >= 0 ? full.slice(sp+1) : full);
+      out.push({ code:k, label });
+    }
+  }
+  out.sort((a,b)=> (a.code===pref?"":"1")+a.code < (b.code===pref?"":"1")+b.code ? -1 : 1);
+  return out;
+}
+function onPrefPick(){
+  const pref = document.getElementById("prefpick").value;
+  const sel = document.getElementById("mappick");
+  if (!pref){ sel.innerHTML = '<option value="">— マップ —</option>'; return; }
+  const maps = mapsForPref(pref);
+  sel.innerHTML = maps.map(m => `<option value="${m.code}">${esc(m.label)}（${m.code}）</option>`).join("");
+  // 先頭（県全体）を選んで自動表示
+  if (maps.length){ sel.value = maps[0].code; onMapPick(); }
+}
+function onMapPick(){
+  const code = document.getElementById("mappick").value;
+  if (!code) return;
+  document.getElementById("boardid").value = code;
+  loadScores();
+}
 function renderScoresForm(){
   const list = document.getElementById("list");
   const prefs = (CITY && CITY.prefs) ? CITY.prefs : {};
-  const opts = Object.keys(prefs).sort().map(c => `<option value="${c}">${c} ${esc(prefs[c])}（県全体）</option>`).join("");
+  const opts = Object.keys(prefs).sort().map(c => `<option value="${c}">${c} ${esc(prefs[c])}</option>`).join("");
   list.innerHTML = `
     <div class="card">
       <div class="row" style="margin-bottom:8px">
-        <label>ボード:</label>
-        <select id="boardpick" onchange="document.getElementById('boardid').value=this.value">
-          <option value="">— 都道府県を選ぶ —</option>${opts}
+        <label>都道府県:</label>
+        <select id="prefpick" onchange="onPrefPick()">
+          <option value="">— 都道府県 —</option>${opts}
         </select>
-        <input id="boardid" placeholder="board_id 直接入力（例 02, S27100）" value="${esc(SCORES_BOARD)}" style="min-width:230px">
+        <label>マップ:</label>
+        <select id="mappick" onchange="onMapPick()">
+          <option value="">— マップ —</option>
+        </select>
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <label>board_id:</label>
+        <input id="boardid" placeholder="直接入力（例 02, 02201, S01100, quiz:02, GEO_M_0）" value="${esc(SCORES_BOARD)}" style="min-width:280px">
         <button class="b-blue" onclick="loadScores()">表示</button>
       </div>
-      <div class="meta">県全体＝2桁県コード（青森＝02）／政令市などは S27100 形式。best_score が小さい＝速い＝上位。</div>
+      <div class="meta">県全体＝2桁県コード（青森＝02）／市町村＝5桁／政令市＝S…／クイズ＝quiz:…／山川＝GEO_…。best_score が小さい＝速い＝上位。</div>
     </div>
     <div id="scorelist"></div>`;
   if (SCORES_BOARD) loadScores();
