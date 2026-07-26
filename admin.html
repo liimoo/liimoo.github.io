@@ -58,6 +58,7 @@
       <option value="reporters">通報者ランキング</option>
       <option value="profiles_pending">プロフィール承認待ち</option>
       <option value="profiles_reported">プロフィール通報あり</option>
+      <option value="moderation">🚩 通報された投稿(対抗戦/占い)</option>
       <option value="scores">🏆 ランキング記録</option>
     </select>
     <select id="kindfilter" onchange="load()">
@@ -151,6 +152,12 @@ async function load(){
       const d = await api("list_profiles", { filter, limit: 200 });
       renderProfiles(d.profiles||[]);
       setMsg(`${(d.profiles||[]).length} 件`);
+      return;
+    }
+    if (status === "moderation") {
+      const d = await api("list_moderation", { status: "open", limit: 200 });
+      renderModeration(d.logs||[]);
+      setMsg(`${(d.logs||[]).length} 件`);
       return;
     }
     if (status === "scores") {
@@ -264,6 +271,32 @@ async function delScore(board, user_id, rank, cs){
     setMsg("削除しました");
     loadScores();
   } catch(e){ setMsg("削除失敗: " + (e && e.message ? e.message : e)); }
+}
+
+// ── 🚩 通報された投稿（対抗戦/占い・リセット後も残るスナップショット）──────────
+function chLabel(ch){ return ch==="team_cheer"?"応援":ch==="team_labor"?"ねぎらい":ch==="fortune"?"占い":ch; }
+function renderModeration(rows){
+  const list = document.getElementById("list");
+  if (!rows.length){ list.innerHTML = '<p class="muted">未対応の通報はありません。</p>'; return; }
+  list.innerHTML = rows.map(r => `
+    <div class="card">
+      <div><span class="pill p-rejected">🚩 通報 ${r.report_count}</span>
+        <span class="pill p-pending">${esc(chLabel(r.channel))}</span>
+        <span class="meta">${esc(r.nickname||"（名前なし）")} ・ ${esc(r.platform||"")} ・ ${esc(cityName(r.region)||r.region||"")} ・ ${esc((r.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div class="body">${esc(r.body)}</div>
+      <div class="meta">理由: ${esc(r.reason||"（なし）")}</div>
+      <div class="meta" style="word-break:break-all">投稿者 user_id: ${esc(r.author_id||"（不明）")}</div>
+      <div class="row">
+        <button class="b-gray" onclick="resolveModeration(${r.id})">対応済み(削除)</button>
+        ${r.author_id ? `<button class="b-blue" onclick="viewUser('${esc(r.author_id)}')">この人の投稿</button>` : ""}
+        ${r.author_id ? `<button class="b-red" onclick="banUser('${esc(r.author_id)}')">投稿者をBAN</button>` : ""}
+      </div>
+    </div>`).join("");
+}
+async function resolveModeration(id){
+  if (!confirm("この通報ログを『対応済み』にして削除します。よろしいですか？")) return;
+  try { await api("resolve_moderation", { id }); setMsg("対応済みにしました"); load(); }
+  catch(e){ setMsg("失敗: " + (e && e.message ? e.message : e)); }
 }
 
 function renderBanned(rows){
