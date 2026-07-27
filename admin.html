@@ -59,6 +59,9 @@
       <option value="profiles_pending">プロフィール承認待ち</option>
       <option value="profiles_reported">プロフィール通報あり</option>
       <option value="moderation">🚩 通報された投稿(対抗戦/占い)</option>
+      <option value="live_team_cheer">📣 対抗戦の応援コメント</option>
+      <option value="live_team_labor">💐 対抗戦のねぎらいコメント</option>
+      <option value="live_fortune">🔮 占いの今日のひとこと</option>
       <option value="scores">🏆 ランキング記録</option>
     </select>
     <select id="kindfilter" onchange="load()">
@@ -158,6 +161,13 @@ async function load(){
       const d = await api("list_moderation", { status: "open", limit: 200 });
       renderModeration(d.logs||[]);
       setMsg(`${(d.logs||[]).length} 件`);
+      return;
+    }
+    if (status.indexOf("live_") === 0) {
+      const channel = status.slice(5);   // team_cheer / team_labor / fortune
+      const d = await api("list_live_comments", { channel, status: "all", limit: 300 });
+      renderLiveComments(channel, d.comments||[]);
+      setMsg(`${(d.comments||[]).length} 件`);
       return;
     }
     if (status === "scores") {
@@ -296,6 +306,34 @@ function renderModeration(rows){
 async function resolveModeration(id){
   if (!confirm("この通報ログを『対応済み』にして削除します。よろしいですか？")) return;
   try { await api("resolve_moderation", { id }); setMsg("対応済みにしました"); load(); }
+  catch(e){ setMsg("失敗: " + (e && e.message ? e.message : e)); }
+}
+
+// ── 📣💐🔮 対抗戦/占いの「今あるコメント」（通報有無に関わらず閲覧・非表示）──────
+function renderLiveComments(channel, rows){
+  const list = document.getElementById("list");
+  if (!rows.length){ list.innerHTML = '<p class="muted">コメントはありません。</p>'; return; }
+  list.innerHTML = rows.map(c => {
+    const hidden = c.status === "rejected";
+    const statusPill = hidden ? '<span class="pill p-rejected">非表示</span>' : '<span class="pill p-approved">表示中</span>';
+    const rep = c.report_count > 0 ? `<span class="pill p-pending">🚩 ${c.report_count}</span>` : "";
+    const toggle = hidden
+      ? `<button class="b-green" onclick="setLive('${channel}',${c.id},'approved')">表示に戻す</button>`
+      : `<button class="b-orange" onclick="setLive('${channel}',${c.id},'rejected')">非表示にする</button>`;
+    return `<div class="card">
+      <div>${statusPill}${rep}<span class="meta">${esc(c.nickname||"（名前なし）")} ・ ${esc(c.platform||"")} ・ ${esc(cityName(c.region)||c.region||"")} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div class="body">${esc(c.body)}</div>
+      <div class="meta" style="word-break:break-all">user_id: ${esc(c.author_id||"")}</div>
+      <div class="row">
+        ${toggle}
+        ${c.author_id ? `<button class="b-blue" onclick="viewUser('${esc(c.author_id)}')">この人の投稿</button>` : ""}
+        ${c.author_id ? `<button class="b-red" onclick="banUser('${esc(c.author_id)}')">投稿者をBAN</button>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+}
+async function setLive(channel, id, status){
+  try { await api("set_live_comment_status", { channel, id, status }); setMsg(status==="rejected"?"非表示にしました":"表示に戻しました"); load(); }
   catch(e){ setMsg("失敗: " + (e && e.message ? e.message : e)); }
 }
 
