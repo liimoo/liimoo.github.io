@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>ゲーム設定 管理</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+         margin: 0; background: #0e1626; color: #e8edf6; line-height: 1.6; }
+  header { background: #142036; padding: 14px 18px; position: sticky; top: 0; display: flex;
+           align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #24344f; z-index: 10; }
+  header h1 { font-size: 1.1em; margin: 0; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 16px; }
+  input, button { font-size: 15px; }
+  input { padding: 9px 11px; border-radius: 9px; border: 1px solid #2c3e5d;
+          background: #0b1322; color: #e8edf6; }
+  button { padding: 9px 14px; border-radius: 9px; border: 0; cursor: pointer; font-weight: 700; color: #fff; }
+  .b-blue { background: #2a64c0; } .b-gray { background: #5a6b86; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card { background: #16233c; border: 1px solid #26385a; border-radius: 14px; padding: 14px; margin: 12px 0; }
+  .title { font-weight: 700; font-size: 15px; }
+  .meta { font-size: 12px; color: #9fb0cc; }
+  .muted { color: #9fb0cc; }
+  .note { font-size: 12px; min-height: 1.1em; margin-top: 8px; }
+  .ok { color: #7fe0a3; } .err { color: #ff9b8f; }
+  .hint { background: #1a2c14; border: 1px solid #2f5222; border-radius: 12px; padding: 13px 15px;
+          font-size: 13px; margin: 12px 0 18px; }
+  .hint b { color: #cdeeb8; }
+  code { background: #0b1322; padding: 1px 6px; border-radius: 5px; color: #ffd27a; }
+  #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
+  .spacer { flex: 1; }
+  .hidden { display: none !important; }
+  .verinput { width: 130px; }
+  .numinput { width: 90px; }
+  a.link { color: #7fb0ff; }
+</style>
+</head>
+<body>
+
+<div id="login" class="wrap">
+  <h1>⚙️ ゲーム設定 ログイン</h1>
+  <input id="email" type="email" placeholder="管理者メール" autocomplete="username">
+  <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
+  <button class="b-blue" onclick="login()">ログイン</button>
+  <div id="loginmsg" class="muted" style="font-size:13px"></div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>⚙️ ゲーム設定</h1>
+    <button class="b-gray" onclick="load()">更新</button>
+    <span id="msg" class="meta"></span>
+    <span class="spacer"></span>
+    <a class="b-gray" href="./admin.html" style="text-decoration:none;padding:9px 14px;border-radius:9px">💬 みんなの声</a>
+    <button class="b-gray" onclick="logout()">ログアウト</button>
+  </header>
+  <div class="wrap">
+
+    <!-- 対抗戦の最低クライアント版 -->
+    <div class="hint">
+      <b>最低クライアント版（min_client）</b>は対抗戦全体で <b>1つだけ</b> の設定です（イベントごとの
+      設定は不要）。これ未満の旧クライアントが対抗戦を開くと <b>アップデートうながし</b>
+      （お知らせのみ・遊びはブロックしない）が出ます。<br>
+      ・空 = うながしなし　・いまの配信版以下を入れると誰にも出ません（例 <code>2.1.0</code>）。
+    </div>
+    <div class="card">
+      <div class="row">
+        <label class="title">対抗戦の最低クライアント版</label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <input class="verinput" id="minclient" type="text" placeholder="(空=なし)">
+        <button class="b-blue" onclick="saveMin()">保存</button>
+        <button class="b-gray" onclick="clearMin()">空にする</button>
+        <span class="spacer"></span>
+      </div>
+      <div class="note muted" id="minnote"></div>
+    </div>
+
+    <!-- 通報の自動非表示しきい値 -->
+    <div class="hint">
+      <b>通報の自動非表示しきい値</b>は、みんなの声・対抗戦・まち占いの <b>すべてに共通</b> です。
+      信頼できる通報が <b>この件数以上</b> 集まったコメントは、自動で非表示になります。<br>
+      ・小さいほど厳しく（早く隠れる）、大きいほど緩く（隠れにくい）。<br>
+      ・非表示になっても管理ページの「通報あり」には残るので、誤通報なら もどせます（既定 <code>3</code>）。
+    </div>
+    <div class="card">
+      <div class="row">
+        <label class="title">通報の自動非表示しきい値（件）</label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <input class="numinput" id="threshold" type="number" min="1" step="1" placeholder="3">
+        <button class="b-blue" onclick="saveThreshold()">保存</button>
+        <span class="spacer"></span>
+      </div>
+      <div class="note muted" id="thnote"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
+const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
+let token = sessionStorage.getItem("jm_admin_token") || "";
+
+function setMsg(t){ document.getElementById("msg").textContent = t||""; }
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  document.getElementById("loginmsg").textContent = "ログイン中…";
+  try {
+    const r = await fetch(`${SUPABASE}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": ANON },
+      body: JSON.stringify({ email, password }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.access_token) { document.getElementById("loginmsg").textContent = "ログイン失敗: " + (d.error_description||d.msg||r.status); return; }
+    token = d.access_token;
+    sessionStorage.setItem("jm_admin_token", token);
+    showApp();
+  } catch(e){ document.getElementById("loginmsg").textContent = "通信エラー: " + e; }
+}
+
+function logout(){ token=""; sessionStorage.removeItem("jm_admin_token");
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden"); }
+
+function showApp(){ document.getElementById("loginmsg").textContent="";
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden"); load(); }
+
+async function api(action, params){
+  const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": ANON, "Authorization": "Bearer " + token },
+    body: JSON.stringify(Object.assign({ action }, params||{})),
+  });
+  const d = await r.json().catch(()=>({}));
+  if (r.status === 401 || r.status === 403) { setMsg("権限がありません（再ログインしてください）"); throw new Error("auth"); }
+  if (!r.ok) { setMsg("エラー: " + (d.error||r.status)); throw new Error(d.error||r.status); }
+  return d;
+}
+
+async function load(){
+  setMsg("読み込み中…");
+  try {
+    const d = await api("get_event_min_client");
+    document.getElementById("minclient").value = d.value || "";
+    const mn = document.getElementById("minnote");
+    mn.textContent = (d.value ? "現在: min_client = '" + d.value + "'" : "現在: うながしなし（空）");
+    mn.className = "note muted";
+  } catch(e){}
+  try {
+    const t = await api("get_report_threshold");
+    document.getElementById("threshold").value = t.value;
+    const tn = document.getElementById("thnote");
+    tn.textContent = "現在: " + t.value + " 件で自動非表示";
+    tn.className = "note muted";
+  } catch(e){}
+  setMsg("");
+}
+
+function clearMin(){ document.getElementById("minclient").value = ""; saveMin(); }
+
+async function saveMin(){
+  const input = document.getElementById("minclient");
+  const note = document.getElementById("minnote");
+  const val = input.value.trim();
+  if (!/^(\d+(\.\d+){0,3})?$/.test(val)){
+    note.textContent = "✗ 空か「2.1.0」のような数字だけの版にしてください。";
+    note.className = "note err"; return;
+  }
+  note.textContent = "保存中…"; note.className = "note muted";
+  try {
+    const d = await api("set_event_min_client", { value: val });
+    note.textContent = "✓ 保存しました（" + (d.value ? "min_client = '" + d.value + "'" : "うながしなし（空）") + "）";
+    note.className = "note ok";
+  } catch(e){
+    note.textContent = "✗ 保存に失敗しました。"; note.className = "note err";
+  }
+}
+
+async function saveThreshold(){
+  const input = document.getElementById("threshold");
+  const note = document.getElementById("thnote");
+  const n = Math.round(Number(input.value));
+  if (!Number.isFinite(n) || n < 1){
+    note.textContent = "✗ 1以上の整数を入れてください。";
+    note.className = "note err"; return;
+  }
+  note.textContent = "保存中…"; note.className = "note muted";
+  try {
+    const d = await api("set_report_threshold", { value: n });
+    input.value = d.value;
+    note.textContent = "✓ 保存しました（" + d.value + " 件で自動非表示）";
+    note.className = "note ok";
+  } catch(e){
+    note.textContent = "✗ 保存に失敗しました。"; note.className = "note err";
+  }
+}
+
+if (token) showApp();
+</script>
+</body>
+</html>
