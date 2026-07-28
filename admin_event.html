@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>対抗戦ダッシュボード</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+         margin: 0; background: #0e1626; color: #e8edf6; line-height: 1.6; }
+  header { background: #142036; padding: 14px 18px; position: sticky; top: 0; display: flex;
+           align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #24344f; z-index: 10; }
+  header h1 { font-size: 1.1em; margin: 0; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
+  input, button, select { font-size: 15px; }
+  input, select { padding: 9px 11px; border-radius: 9px; border: 1px solid #2c3e5d;
+          background: #0b1322; color: #e8edf6; }
+  button { padding: 9px 14px; border-radius: 9px; border: 0; cursor: pointer; font-weight: 700; color: #fff; }
+  .b-blue { background: #2a64c0; } .b-gray { background: #5a6b86; }
+  a.btn { text-decoration:none; display:inline-block; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card { background: #16233c; border: 1px solid #26385a; border-radius: 14px; padding: 14px; margin: 12px 0; }
+  .card.running { border-color: #1f9d57; box-shadow: 0 0 0 1px #1f9d5766 inset; }
+  .title { font-weight: 700; font-size: 15px; }
+  .meta { font-size: 12px; color: #9fb0cc; }
+  .muted { color: #9fb0cc; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; margin-right: 6px; }
+  .p-running { background: #1c5e38; } .p-upcoming { background: #1f3b6b; } .p-ended { background: #3a4152; color: #b9c2d2; }
+  #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
+  .spacer { flex: 1; }
+  .hidden { display: none !important; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .stat { background: #0b1322; border: 1px solid #26385a; border-radius: 12px; padding: 12px; }
+  .stat .n { font-size: 22px; font-weight: 800; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #9fb0cc; font-weight: 700; border-bottom: 1px solid #26385a; padding: 6px 8px; }
+  td { padding: 6px 8px; border-bottom: 1px solid #1b2942; }
+  td.r, th.r { text-align: right; }
+  .sec-title { font-weight: 700; font-size: 15px; margin: 6px 2px; }
+  a.link { color: #7fb0ff; }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<div id="login" class="wrap">
+  <h1>🚩 対抗戦ダッシュボード ログイン</h1>
+  <input id="email" type="email" placeholder="管理者メール" autocomplete="username">
+  <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
+  <button class="b-blue" onclick="login()">ログイン</button>
+  <div id="loginmsg" class="muted" style="font-size:13px"></div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>🚩 対抗戦ダッシュボード</h1>
+    <select id="season" onchange="loadSummary()"></select>
+    <button class="b-gray" onclick="reloadAll()">更新</button>
+    <span id="msg" class="meta"></span>
+    <span class="spacer"></span>
+    <a class="b-gray btn" href="./admin.html" style="padding:9px 14px;border-radius:9px">💬 みんなの声</a>
+    <a class="b-gray btn" href="./game-config.html" style="padding:9px 14px;border-radius:9px">⚙️ ゲーム設定</a>
+    <button class="b-gray" onclick="logout()">ログアウト</button>
+  </header>
+  <div class="wrap">
+    <div id="seasons"></div>
+    <div id="summary"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
+const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
+let token = sessionStorage.getItem("jm_admin_token") || "";
+let CITY = null;
+
+function esc(s){ return String(s??"").replace(/[&<>"']/g, c => (
+  {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+function setMsg(t){ document.getElementById("msg").textContent = t||""; }
+function prefName(c){ return (CITY && CITY.prefs && CITY.prefs[c]) ? CITY.prefs[c] : (c||""); }
+function cityName(c){ if (!CITY || !c) return c||""; if (CITY.codes && CITY.codes[c]) return CITY.codes[c]; return c; }
+function jstDate(iso){
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleString("ja-JP", { timeZone:"Asia/Tokyo", year:"numeric", month:"2-digit",
+    day:"2-digit", hour:"2-digit", minute:"2-digit" });
+}
+
+async function fetchCities(){
+  if (CITY) return;
+  try { const r = await fetch("./admin-cities.json"); CITY = await r.json(); } catch(e){ CITY = null; }
+}
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  document.getElementById("loginmsg").textContent = "ログイン中…";
+  try {
+    const r = await fetch(`${SUPABASE}/auth/v1/token?grant_type=password`, {
+      method: "POST", headers: { "Content-Type": "application/json", "apikey": ANON },
+      body: JSON.stringify({ email, password }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.access_token) { document.getElementById("loginmsg").textContent = "ログイン失敗: " + (d.error_description||d.msg||r.status); return; }
+    token = d.access_token; sessionStorage.setItem("jm_admin_token", token);
+    showApp();
+  } catch(e){ document.getElementById("loginmsg").textContent = "通信エラー: " + e; }
+}
+function logout(){ token=""; sessionStorage.removeItem("jm_admin_token");
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden"); }
+async function showApp(){ document.getElementById("loginmsg").textContent="";
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  await fetchCities(); reloadAll(); }
+
+async function api(action, params){
+  const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": ANON, "Authorization": "Bearer " + token },
+    body: JSON.stringify(Object.assign({ action }, params||{})),
+  });
+  const d = await r.json().catch(()=>({}));
+  if (r.status === 401 || r.status === 403) { setMsg("権限がありません（再ログインしてください）"); throw new Error("auth"); }
+  if (!r.ok) { setMsg("エラー: " + (d.error||r.status)); throw new Error(d.error||r.status); }
+  return d;
+}
+
+async function reloadAll(){
+  setMsg("読み込み中…");
+  try {
+    const d = await api("list_event_seasons");
+    renderSeasons(d.seasons || []);
+    setMsg("");
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+
+function seasonState(s){ return s.active ? "running" : (new Date(s.starts_at) > new Date() ? "upcoming" : "ended"); }
+function statePill(st){ return st==="running" ? '<span class="pill p-running">開催中</span>'
+  : st==="upcoming" ? '<span class="pill p-upcoming">開催前</span>' : '<span class="pill p-ended">終了</span>'; }
+
+function renderSeasons(seasons){
+  // セレクタ（開催中→開催前→終了 の優先で既定選択）
+  const sel = document.getElementById("season");
+  sel.innerHTML = seasons.map(s => `<option value="${s.id}">#${s.id} ${esc(s.title||"")}（${statePillText(seasonState(s))}）</option>`).join("");
+  // 一覧カード
+  const el = document.getElementById("seasons");
+  el.innerHTML = `<div class="sec-title">シーズン一覧</div>` + seasons.map(s => {
+    const st = seasonState(s);
+    return `<div class="card ${st==='running'?'running':''}">
+      <div class="row"><div class="title">${statePill(st)} #${s.id} ${esc(s.title||"")}</div>
+        <span class="spacer"></span>
+        <span class="meta">${s.finalized ? "確定済み" : "未確定"}</span></div>
+      <div class="meta">${jstDate(s.starts_at)} 〜 ${jstDate(s.ends_at)}（JST）</div>
+      <div class="grid" style="margin-top:8px">
+        <div class="stat"><div class="meta">参加者</div><div class="n">${s.participants}</div></div>
+        <div class="stat"><div class="meta">合計ポイント</div><div class="n">${s.points}</div></div>
+        <div class="stat"><div class="meta">合計クリア</div><div class="n">${s.courses}</div></div>
+      </div>
+    </div>`;
+  }).join("") || '<p class="muted">シーズンがありません。</p>';
+  // 既定選択: 開催中 > 開催前 > 新しい終了
+  let pick = seasons.find(s=>seasonState(s)==="running") || seasons.find(s=>seasonState(s)==="upcoming") || seasons[0];
+  if (pick){ sel.value = pick.id; loadSummary(); }
+  else document.getElementById("summary").innerHTML = "";
+}
+function statePillText(st){ return st==="running"?"開催中":st==="upcoming"?"開催前":"終了"; }
+
+async function loadSummary(){
+  const sid = document.getElementById("season").value;
+  if (!sid) return;
+  setMsg("集計中…");
+  try {
+    const d = await api("event_summary", { season_id: Number(sid) });
+    renderSummary(sid, d);
+    setMsg("");
+  } catch(e){ setMsg("集計失敗: " + (e && e.message ? e.message : e)); }
+}
+
+function renderSummary(sid, d){
+  const el = document.getElementById("summary");
+  const t = d.totals || { participants:0, points:0, courses:0 };
+  const platforms = d.platforms || [];
+  const prefs = d.prefs || [];
+  const cities = d.cities || [];
+  const users = d.users || [];
+
+  if (!t.participants){
+    el.innerHTML = `<div class="sec-title">シーズン#${esc(sid)} の集計</div>
+      <p class="muted">このシーズンの参加者はまだいません。</p>`;
+    return;
+  }
+
+  const os = platforms.map(p => `${esc(p.platform)}：${p.members}人 / ${p.points}pt`).join("　");
+
+  const prefRows = prefs.map((p,i) => `<tr>
+    <td class="r">${i+1}</td><td>${esc(prefName(p.pref))} <span class="muted">${esc(p.pref)}</span></td>
+    <td class="r">${p.points}</td><td class="r">${p.members}</td></tr>`).join("");
+
+  const cityRows = cities.map((c,i) => `<tr>
+    <td class="r">${i+1}</td><td>${esc(cityName(c.city))} <span class="muted">${esc(c.city)}</span></td>
+    <td>${esc(prefName(c.pref))}</td><td class="r">${c.points}</td><td class="r">${c.members}</td></tr>`).join("");
+
+  const userRows = users.map((u,i) => `<tr>
+    <td class="r">${i+1}</td>
+    <td>${esc(u.name)} <span class="muted">${esc(u.platform)}</span></td>
+    <td>${esc(prefName(u.pref))} / ${esc(cityName(u.city))}</td>
+    <td class="r">${u.points}</td><td class="r">${u.courses}</td>
+    <td><a class="link" href="./admin.html?clears=${encodeURIComponent(u.user_id)}" target="_blank" rel="noopener">🕵️ 履歴</a></td>
+  </tr>`).join("");
+
+  el.innerHTML = `
+    <div class="sec-title">シーズン#${esc(sid)} の集計</div>
+    <div class="card">
+      <div class="grid">
+        <div class="stat"><div class="meta">参加者</div><div class="n">${t.participants}</div></div>
+        <div class="stat"><div class="meta">合計ポイント</div><div class="n">${t.points}</div></div>
+        <div class="stat"><div class="meta">合計クリア</div><div class="n">${t.courses}</div></div>
+      </div>
+      <div class="meta" style="margin-top:8px">OS別：${os || "—"}</div>
+    </div>
+
+    <div class="sec-title">都道府県ランキング</div>
+    <div class="card scroll"><table>
+      <thead><tr><th class="r">順</th><th>都道府県</th><th class="r">ポイント</th><th class="r">参加</th></tr></thead>
+      <tbody>${prefRows}</tbody></table></div>
+
+    <div class="sec-title">街ランキング（上位30）</div>
+    <div class="card scroll"><table>
+      <thead><tr><th class="r">順</th><th>街</th><th>県</th><th class="r">ポイント</th><th class="r">参加</th></tr></thead>
+      <tbody>${cityRows}</tbody></table></div>
+
+    <div class="sec-title">ユーザーランキング（上位30）</div>
+    <div class="card scroll"><table>
+      <thead><tr><th class="r">順</th><th>なまえ</th><th>県 / 街</th><th class="r">点</th><th class="r">クリア</th><th>調査</th></tr></thead>
+      <tbody>${userRows}</tbody></table></div>`;
+}
+
+if (token) showApp();
+</script>
+</body>
+</html>

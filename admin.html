@@ -75,6 +75,7 @@
     <span id="msg"></span>
     <span style="margin-left:auto"></span>
     <a class="b-gray" href="./feedback.html" style="text-decoration:none;padding:9px 14px;border-radius:9px">📮 ごいけん・ふぐあい</a>
+    <a class="b-gray" href="./admin_event.html" style="text-decoration:none;padding:9px 14px;border-radius:9px">🚩 対抗戦</a>
     <a class="b-gray" href="./game-config.html" style="text-decoration:none;padding:9px 14px;border-radius:9px">⚙️ ゲーム設定</a>
     <button class="b-gray" onclick="logout()">ログアウト</button>
   </header>
@@ -121,7 +122,11 @@ async function login(){
 
 function logout(){ token=""; sessionStorage.removeItem("jm_admin_token"); document.getElementById("app").classList.add("hidden"); document.getElementById("login").classList.remove("hidden"); }
 
-async function showApp(){ document.getElementById("loginmsg").textContent=""; document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); await fetchCities(); load(); }
+async function showApp(){ document.getElementById("loginmsg").textContent=""; document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); await fetchCities();
+  // admin_event.html などから ?clears=<user_id> で来たら「プレイヤー取得履歴」を自動で開く。
+  const qc = new URLSearchParams(location.search).get("clears");
+  if (qc){ CLEARS_UID = qc; document.getElementById("filter").value = "player_clears"; }
+  load(); }
 
 async function api(action, params){
   const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
