@@ -63,6 +63,7 @@
       <option value="live_team_labor">💐 対抗戦のねぎらいコメント</option>
       <option value="live_fortune">🔮 占いの今日のひとこと</option>
       <option value="scores">🏆 ランキング記録</option>
+      <option value="player_clears">🕵️ プレイヤー取得履歴（対抗戦）</option>
     </select>
     <select id="kindfilter" onchange="load()">
       <option value="">種類：すべて</option>
@@ -175,6 +176,11 @@ async function load(){
       setMsg("");
       return;
     }
+    if (status === "player_clears") {
+      renderClearsForm();
+      setMsg("");
+      return;
+    }
     const kind = document.getElementById("kindfilter").value;
     const d = await api("list", { status, limit: PAGE, kind });
     const rows = d.comments||[];
@@ -281,6 +287,112 @@ async function delScore(board, user_id, rank, cs){
     setMsg("削除しました");
     loadScores();
   } catch(e){ setMsg("削除失敗: " + (e && e.message ? e.message : e)); }
+}
+
+// ── 🕵️ プレイヤー取得履歴（対抗戦・怪しいプレイヤーの調査）─────────────────────
+let CLEARS_UID = "";
+// board_id → 読みやすいコース名（規約: 2桁=県 / 5桁=市町村 / S…=政令市 / quiz:…=クイズ / GEO_…=山川）。
+function boardName(b){
+  if (!b) return b;
+  if (b === "00") return "全国（パズル）";
+  if (b === "quiz:00") return "全国（クイズ）";
+  if (/^\d{2}$/.test(b)) return ((CITY&&CITY.prefs[b])||b) + "（県・パズル）";
+  if (/^quiz:\d{2}$/.test(b)){ const p=b.slice(5); return ((CITY&&CITY.prefs[p])||p) + "（県・クイズ）"; }
+  if (/^\d{5}$/.test(b)) return cityName(b) + "（市町村）";
+  if (/^quiz:\d{5}$/.test(b)) return cityName(b.slice(5)) + "（市町村クイズ）";
+  if (b[0] === "S") return cityName(b) + "（政令市）";
+  if (b.indexOf("GEO") >= 0) return b + "（山・川）";
+  return b;
+}
+function jstTime(iso){
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleString("ja-JP", { timeZone:"Asia/Tokyo", year:"numeric", month:"2-digit",
+    day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit" });
+}
+function fmtGap(sec){
+  if (sec == null) return "—";
+  if (sec < 60) return sec + "秒";
+  if (sec < 3600) return Math.floor(sec/60) + "分" + (sec%60) + "秒";
+  return Math.floor(sec/3600) + "時間" + Math.floor((sec%3600)/60) + "分";
+}
+function renderClearsForm(){
+  const list = document.getElementById("list");
+  list.innerHTML = `
+    <div class="card">
+      <div class="row" style="margin-bottom:8px">
+        <label>user_id:</label>
+        <input id="clearsuid" placeholder="調べたいプレイヤーの user_id（通報一覧やランキング記録から）"
+               value="${esc(CLEARS_UID)}" style="min-width:340px">
+        <label>季節:</label>
+        <input id="clearsseason" placeholder="(空=すべて)" style="width:110px">
+        <button class="b-blue" onclick="loadClears()">表示</button>
+      </div>
+      <div class="meta">対抗戦で「誰が・いつ・どのコースを・何点」取得したかの時系列。加点されたクリアのみ（自動モード=0点は残りません）。
+        <b>間隔が極端に短い</b>（数十秒未満で次々）と自動化/不正の疑い。180日で自動削除。</div>
+    </div>
+    <div id="clearsout"></div>`;
+  if (CLEARS_UID) loadClears();
+}
+async function loadClears(){
+  const uid = (document.getElementById("clearsuid").value||"").trim();
+  const season = (document.getElementById("clearsseason").value||"").trim();
+  if (!uid){ setMsg("user_id を入れてください"); return; }
+  CLEARS_UID = uid;
+  setMsg("読み込み中…");
+  try {
+    const d = await api("get_player_clears", { user_id: uid, season_id: season });
+    renderClears(d);
+    setMsg(`${(d.clears||[]).length} クリア`);
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+function renderClears(d){
+  const el = document.getElementById("clearsout");
+  if (!el) return;
+  const p = d.profile || {};
+  const titles = (p.event_titles||[]).map(t=>esc(t)).join(" / ");
+  const entries = (d.entries||[]).map(e =>
+    `<div class="meta">季節#${e.season_id}: ${esc(cityName(e.city_code)||e.city_code)}（${esc((CITY&&CITY.prefs[e.pref_code])||e.pref_code)}）… ${e.points}点 / ${e.courses}コース</div>`
+  ).join("") || '<div class="meta muted">参加記録なし</div>';
+
+  // クリアを時刻昇順に並べて「前クリアからの間隔」を計算 → 表示は新しい順。
+  const clears = (d.clears||[]).slice().sort((a,b)=> new Date(a.cleared_at) - new Date(b.cleared_at));
+  const withGap = clears.map((c,i)=>{
+    let gap = null;
+    if (i>0){ gap = Math.round((new Date(c.cleared_at) - new Date(clears[i-1].cleared_at))/1000); }
+    return Object.assign({}, c, { gap });
+  }).reverse();
+
+  const header = `
+    <div class="card">
+      <div class="title">${esc(p.display_name||"（名前なし）")} <span class="meta">・ ${esc(p.platform||"")}</span></div>
+      ${titles ? `<div class="meta">称号: ${titles}</div>`:""}
+      <div class="meta" style="word-break:break-all">user_id: ${esc(CLEARS_UID)}</div>
+      <div style="margin-top:6px">${entries}</div>
+    </div>`;
+
+  if (!withGap.length){ el.innerHTML = header + '<p class="muted">この季節のクリア取得履歴はありません（未参加/未クリア、または180日経過で削除済み）。</p>'; return; }
+
+  const rows = withGap.map(c=>{
+    const fast = c.gap != null && c.gap < 20;   // 20秒未満で連続=要注意
+    return `<tr${fast?' style="background:#3a1a1a"':''}>
+      <td style="white-space:nowrap">${esc(jstTime(c.cleared_at))}</td>
+      <td>${esc(boardName(c.board_id))} <span class="muted">[${esc(c.board_id)}${c.mode?("・"+esc(c.mode)):""}${c.piece_count?("・"+c.piece_count+"P"):""}]</span></td>
+      <td style="text-align:right">${c.points}</td>
+      <td style="text-align:right;${fast?'color:#ff9b8f;font-weight:700':''}">${esc(fmtGap(c.gap))}</td>
+      <td class="muted">#${c.season_id}</td>
+    </tr>`;
+  }).join("");
+  el.innerHTML = header + `
+    <div class="card" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="text-align:left;color:#9fb0cc">
+          <th>時刻（JST）</th><th>コース</th><th style="text-align:right">点</th><th style="text-align:right">前から</th><th>季節</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
 // ── 🚩 通報された投稿（対抗戦/占い・リセット後も残るスナップショット）──────────
