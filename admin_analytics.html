@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>アクセス解析</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+         margin: 0; background: #0e1626; color: #e8edf6; line-height: 1.6; }
+  header { background: #142036; padding: 14px 18px; position: sticky; top: 0; display: flex;
+           align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #24344f; z-index: 10; }
+  header h1 { font-size: 1.1em; margin: 0; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
+  input, button, select { font-size: 15px; }
+  input, select { padding: 9px 11px; border-radius: 9px; border: 1px solid #2c3e5d;
+          background: #0b1322; color: #e8edf6; }
+  button { padding: 9px 14px; border-radius: 9px; border: 0; cursor: pointer; font-weight: 700; color: #fff; }
+  .b-blue { background: #2a64c0; } .b-gray { background: #5a6b86; }
+  a.link { color: #7fb0ff; }
+  .card { background: #16233c; border: 1px solid #26385a; border-radius: 14px; padding: 14px; margin: 12px 0; }
+  .meta { font-size: 12px; color: #9fb0cc; }
+  .muted { color: #9fb0cc; }
+  #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
+  .spacer { flex: 1; }
+  .hidden { display: none !important; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .stat { background: #0b1322; border: 1px solid #26385a; border-radius: 12px; padding: 12px; }
+  .stat .n { font-size: 22px; font-weight: 800; }
+  .sec-title { font-weight: 700; font-size: 15px; margin: 6px 2px; }
+  /* 棒グラフ */
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 200px; overflow-x: auto;
+           padding: 6px 2px; }
+  .bar-wrap { display: flex; flex-direction: column; align-items: center; min-width: 16px; flex: 1; }
+  .bar { width: 70%; min-width: 8px; background: linear-gradient(#5fa0ff, #2a64c0);
+         border-radius: 3px 3px 0 0; }
+  .bar.uniq { background: linear-gradient(#7fe0a3, #1f9d57); }
+  .bar-lbl { font-size: 9px; color: #7f90ac; margin-top: 3px; transform: rotate(-60deg);
+             transform-origin: top left; white-space: nowrap; height: 26px; }
+  .legend { font-size: 12px; color: #9fb0cc; }
+  .legend b { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #9fb0cc; border-bottom: 1px solid #26385a; padding: 6px 8px; }
+  td { padding: 6px 8px; border-bottom: 1px solid #1b2942; }
+  td.r, th.r { text-align: right; }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<div id="login" class="wrap">
+  <h1>📈 アクセス解析 ログイン</h1>
+  <input id="email" type="email" placeholder="管理者メール" autocomplete="username">
+  <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
+  <button class="b-blue" onclick="login()">ログイン</button>
+  <div id="loginmsg" class="muted" style="font-size:13px"></div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>📈 アクセス解析</h1>
+    <select id="days" onchange="load()">
+      <option value="7">7日</option>
+      <option value="30" selected>30日</option>
+      <option value="90">90日</option>
+      <option value="180">180日</option>
+      <option value="365">365日</option>
+    </select>
+    <button class="b-gray" onclick="load()">更新</button>
+    <span id="msg" class="meta"></span>
+    <span class="spacer"></span>
+    <a class="b-gray" href="./admin.html" style="text-decoration:none;padding:9px 14px;border-radius:9px">💬 みんなの声</a>
+    <a class="b-gray" href="./admin_event.html" style="text-decoration:none;padding:9px 14px;border-radius:9px">🚩 対抗戦</a>
+    <button class="b-gray" onclick="logout()">ログアウト</button>
+  </header>
+  <div class="wrap">
+    <div class="card meta">
+      japan-map.app のアクセス（Cloudflare）。<b>ページビュー</b>＝トップページの表示回数が目安。
+      <b>リクエスト</b>は画像・CSS等も含む総数。<b>ユニーク</b>は日別IPの合計で、複数日の来訪は重複します。
+      Cloudflareを通り始めた日以降のみ記録されます。
+    </div>
+    <div id="summary"></div>
+    <div id="chart_area"></div>
+    <div id="table_area"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
+const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
+let token = sessionStorage.getItem("jm_admin_token") || "";
+
+function esc(s){ return String(s??"").replace(/[&<>"']/g, c => (
+  {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+function setMsg(t){ document.getElementById("msg").textContent = t||""; }
+function fmt(n){ return Number(n||0).toLocaleString("ja-JP"); }
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  document.getElementById("loginmsg").textContent = "ログイン中…";
+  try {
+    const r = await fetch(`${SUPABASE}/auth/v1/token?grant_type=password`, {
+      method: "POST", headers: { "Content-Type": "application/json", "apikey": ANON },
+      body: JSON.stringify({ email, password }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.access_token) { document.getElementById("loginmsg").textContent = "ログイン失敗: " + (d.error_description||d.msg||r.status); return; }
+    token = d.access_token; sessionStorage.setItem("jm_admin_token", token);
+    showApp();
+  } catch(e){ document.getElementById("loginmsg").textContent = "通信エラー: " + e; }
+}
+function logout(){ token=""; sessionStorage.removeItem("jm_admin_token");
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden"); }
+function showApp(){ document.getElementById("loginmsg").textContent="";
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden"); load(); }
+
+async function api(action, params){
+  const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": ANON, "Authorization": "Bearer " + token },
+    body: JSON.stringify(Object.assign({ action }, params||{})),
+  });
+  const d = await r.json().catch(()=>({}));
+  if (r.status === 401 || r.status === 403) { setMsg("権限がありません（再ログインしてください）"); throw new Error("auth"); }
+  if (!r.ok) { setMsg("エラー: " + (d.error||r.status) + (d.detail?(" / "+d.detail):"")); throw new Error(d.error||r.status); }
+  return d;
+}
+
+async function load(){
+  const days = Number(document.getElementById("days").value);
+  setMsg("読み込み中…");
+  try {
+    const d = await api("cf_analytics", { days });
+    render(d.rows || []);
+    setMsg("");
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+
+function render(rows){
+  const sum = rows.reduce((a,r)=>({
+    requests:a.requests+(r.requests||0), pageViews:a.pageViews+(r.pageViews||0),
+    uniques:a.uniques+(r.uniques||0),
+  }), {requests:0,pageViews:0,uniques:0});
+  const period = rows.length ? (rows[0].date + " 〜 " + rows[rows.length-1].date) : "データなし";
+
+  // サマリー
+  document.getElementById("summary").innerHTML = `
+    <div class="sec-title">サマリー <span class="meta">（${esc(period)}・${rows.length}日）</span></div>
+    <div class="card"><div class="grid">
+      <div class="stat"><div class="meta">ページビュー</div><div class="n">${fmt(sum.pageViews)}</div></div>
+      <div class="stat"><div class="meta">ユニーク（日別和）</div><div class="n">${fmt(sum.uniques)}</div></div>
+      <div class="stat"><div class="meta">リクエスト総数</div><div class="n">${fmt(sum.requests)}</div></div>
+    </div></div>`;
+
+  // 棒グラフ（日別ページビュー＋ユニーク）
+  const maxV = Math.max(1, ...rows.map(r=>Math.max(r.pageViews||0, r.uniques||0)));
+  const bars = rows.map(r=>{
+    const pvH = Math.round((r.pageViews||0)/maxV*180);
+    const uqH = Math.round((r.uniques||0)/maxV*180);
+    const md = (r.date||"").slice(5); // MM-DD
+    return `<div class="bar-wrap" title="${esc(r.date)}: PV ${fmt(r.pageViews)} / ユニーク ${fmt(r.uniques)}">
+        <div style="display:flex;align-items:flex-end;gap:2px;height:180px">
+          <div class="bar" style="height:${pvH}px"></div>
+          <div class="bar uniq" style="height:${uqH}px"></div>
+        </div>
+        <div class="bar-lbl">${esc(md)}</div>
+      </div>`;
+  }).join("");
+  document.getElementById("chart_area").innerHTML = `
+    <div class="sec-title">日別グラフ</div>
+    <div class="card">
+      <div class="legend"><b style="background:#2a64c0"></b> ページビュー
+        <b style="background:#1f9d57"></b> ユニーク</div>
+      <div class="chart">${bars || '<span class="muted">データなし</span>'}</div>
+    </div>`;
+
+  // 表（新しい順）
+  const trs = rows.slice().reverse().map(r=>`<tr>
+      <td>${esc(r.date)}</td>
+      <td class="r">${fmt(r.pageViews)}</td>
+      <td class="r">${fmt(r.uniques)}</td>
+      <td class="r">${fmt(r.requests)}</td>
+    </tr>`).join("");
+  document.getElementById("table_area").innerHTML = `
+    <div class="sec-title">日別テーブル</div>
+    <div class="card scroll"><table>
+      <thead><tr><th>日付</th><th class="r">ページビュー</th><th class="r">ユニーク</th><th class="r">リクエスト</th></tr></thead>
+      <tbody>${trs || ''}</tbody>
+    </table></div>`;
+}
+
+if (token) showApp();
+</script>
+</body>
+</html>
