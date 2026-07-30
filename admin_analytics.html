@@ -136,46 +136,72 @@ async function load(){
   setMsg("読み込み中…");
   try {
     const d = await api("cf_analytics", { days });
-    render(d.rows || []);
+    render(d);
     setMsg("");
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
 }
 
-function render(rows){
+function render(d){
+  const rows = d.rows || [];
+  const rum = d.rum || [];
   const sum = rows.reduce((a,r)=>({
     requests:a.requests+(r.requests||0), pageViews:a.pageViews+(r.pageViews||0),
     uniques:a.uniques+(r.uniques||0),
   }), {requests:0,pageViews:0,uniques:0});
+  const rsum = rum.reduce((a,r)=>({
+    pageViews:a.pageViews+(r.pageViews||0), visits:a.visits+(r.visits||0),
+  }), {pageViews:0,visits:0});
   const period = rows.length ? (rows[0].date + " 〜 " + rows[rows.length-1].date) : "データなし";
+  const rperiod = rum.length ? (rum[0].date + " 〜 " + rum[rum.length-1].date) : "";
 
-  // サマリー
-  document.getElementById("summary").innerHTML = `
-    <div class="sec-title">サマリー <span class="meta">（${esc(period)}・${rows.length}日）</span></div>
+  // ① 実訪問（ボット除外・Web Analytics）＝ほぼ人間。こちらを主役に上へ。
+  const realHtml = rum.length ? `
+    <div class="sec-title">🟢 実訪問（ボット除外）<span class="meta">＝JSを実行する実ブラウザのみ＝ほぼ人間 / ${esc(rperiod)}・${rum.length}日</span></div>
+    <div class="card"><div class="grid">
+      <div class="stat"><div class="meta">訪問（visits）</div><div class="n" style="color:#7fe0a3">${fmt(rsum.visits)}</div></div>
+      <div class="stat"><div class="meta">ページビュー</div><div class="n" style="color:#7fe0a3">${fmt(rsum.pageViews)}</div></div>
+    </div>
+    <div class="meta" style="margin-top:8px">※ Cloudflare Web Analytics。数値は10単位に丸められます。計測開始日以降ぶんのみ。</div>
+    </div>`
+    : `<div class="sec-title">🟢 実訪問（ボット除外）</div>
+       <div class="card meta">Web Analytics のデータが取得できませんでした（計測開始前、または権限不足）。</div>`;
+
+  // ② ゾーン全体（ボット込み）
+  document.getElementById("summary").innerHTML = realHtml + `
+    <div class="sec-title" style="margin-top:14px">全体トラフィック（ボット込み）<span class="meta">＝Cloudflareの全リクエスト / ${esc(period)}・${rows.length}日</span></div>
     <div class="card"><div class="grid">
       <div class="stat"><div class="meta">ページビュー</div><div class="n">${fmt(sum.pageViews)}</div></div>
       <div class="stat"><div class="meta">ユニーク（日別和）</div><div class="n">${fmt(sum.uniques)}</div></div>
       <div class="stat"><div class="meta">リクエスト総数</div><div class="n">${fmt(sum.requests)}</div></div>
-    </div></div>`;
+    </div>
+    <div class="meta" style="margin-top:8px">※ 画像・CSS等の読み込みや、検索/SNS/スキャナ等のボットも含む数字です。</div>
+    </div>`;
 
-  // 棒グラフ（日別ページビュー＋ユニーク）
-  const maxV = Math.max(1, ...rows.map(r=>Math.max(r.pageViews||0, r.uniques||0)));
-  const bars = rows.map(r=>{
-    const pvH = Math.round((r.pageViews||0)/maxV*180);
-    const uqH = Math.round((r.uniques||0)/maxV*180);
-    const md = (r.date||"").slice(5); // MM-DD
-    return `<div class="bar-wrap" title="${esc(r.date)}: PV ${fmt(r.pageViews)} / ユニーク ${fmt(r.uniques)}">
+  // 棒グラフ：実訪問(RUM)があればそれを主役に、無ければ全体(ボット込み)を出す。
+  const useRum = rum.length > 0;
+  const src = useRum ? rum : rows;
+  const aKey = useRum ? "visits" : "pageViews";   // 緑
+  const bKey = useRum ? "pageViews" : "uniques";  // 青
+  const aName = useRum ? "訪問" : "ページビュー";
+  const bName = useRum ? "ページビュー" : "ユニーク";
+  const maxV = Math.max(1, ...src.map(r=>Math.max(r[aKey]||0, r[bKey]||0)));
+  const bars = src.map(r=>{
+    const aH = Math.round((r[aKey]||0)/maxV*180);
+    const bH = Math.round((r[bKey]||0)/maxV*180);
+    const md = (r.date||"").slice(5);
+    return `<div class="bar-wrap" title="${esc(r.date)}: ${aName} ${fmt(r[aKey])} / ${bName} ${fmt(r[bKey])}">
         <div style="display:flex;align-items:flex-end;gap:2px;height:180px">
-          <div class="bar" style="height:${pvH}px"></div>
-          <div class="bar uniq" style="height:${uqH}px"></div>
+          <div class="bar uniq" style="height:${aH}px"></div>
+          <div class="bar" style="height:${bH}px"></div>
         </div>
         <div class="bar-lbl">${esc(md)}</div>
       </div>`;
   }).join("");
   document.getElementById("chart_area").innerHTML = `
-    <div class="sec-title">日別グラフ</div>
+    <div class="sec-title">日別グラフ<span class="meta">（${useRum?"実訪問・ボット除外":"全体・ボット込み"}）</span></div>
     <div class="card">
-      <div class="legend"><b style="background:#2a64c0"></b> ページビュー
-        <b style="background:#1f9d57"></b> ユニーク</div>
+      <div class="legend"><b style="background:#1f9d57"></b> ${esc(aName)}
+        <b style="background:#2a64c0"></b> ${esc(bName)}</div>
       <div class="chart">${bars || '<span class="muted">データなし</span>'}</div>
     </div>`;
 
