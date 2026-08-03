@@ -140,6 +140,17 @@
   .feat li{ list-style:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
   .feat b{ color:var(--blue); }
 
+  /* ---- 更新情報（トップの抜粋・詳細は /news/） ---- */
+  .home-news{ margin-top:8px; }
+  .home-news .rel{ background:var(--card); border:1px solid var(--line); border-radius:12px;
+        padding:14px 16px; margin:0 0 12px; text-align:left; }
+  .home-news .rel-head{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:2px; }
+  .home-news .ver{ background:var(--blue); color:#fff; font-weight:700; font-size:.8em; padding:2px 9px; border-radius:999px; }
+  .home-news .date{ color:var(--muted); font-size:.85em; }
+  .home-news h3{ font-size:1.02em; margin:4px 0 6px; }
+  .home-news .changes{ margin:0; padding-left:1.15em; }
+  .home-news .changes li{ margin:3px 0; }
+
   /* ---- map wall (全国すべての街) ---- */
   .wall{
     display:grid; grid-template-columns:repeat(auto-fill,minmax(108px,1fr));
@@ -479,8 +490,34 @@
 </section>
 
 <section class="wrap">
+  <h2>更新情報</h2>
+  <p class="lead">最近のアップデート。くわしくは<a href="/news/">更新情報ページ</a>へ。</p>
+  <div class="home-news">
+    <!-- NEWS:START -->
+    <article class="rel">
+      <div class="rel-head"><span class="ver">v2.0.6</span><time class="date">2026年8月3日</time></div>
+      <h3>不具合 しゅうしいと、読み上げの こえを えらべるように なったよ！</h3>
+      <ul class="changes"><li>都道府県対抗で、クリアしたのに ポイントが 入らないことが ある 不具合を 直しました。入らなかった ぶんの ポイントは あとから 足しておきました。ごふべんを おかけしました。</li><li>読み上げの こえが あたらしく なったよ。スマホでも パソコンでも 同じ こえで 読み上げるように なったよ</li><li>せってい画面の「こえの プリセット」で、女の人・男の人・子ども・ロボットの こえに かえられるように したよ。これは「ご当地劇場」の新機能のじゅんび でもあるよ</li><li>「こえのはやさ」「たかさ」「こえしつ」を スライダーで こまかく ちょうせい できるように したよ</li><li>町丁目の「字」の よみが「じ」に なっていたのを「あざ」に なおしたよ</li><li>コントローラーで あそぶ ときの ボタン案内を なおして、パズルを 中断すると 時間が 止まるように したよ</li></ul>
+    </article>
+    <article class="rel">
+      <div class="rel-head"><span class="ver">v2.0.5</span><time class="date">2026年8月1日</time></div>
+      <h3>対抗戦を もっと あそびやすく！</h3>
+      <ul class="changes"><li>対抗戦で「まちを 変える」や 応援メッセージを やめた とき、タイトルが 一瞬 見えて 音が なる 不具合を なおしたよ。すぐ 対抗戦に もどるように なったよ</li><li>「自分のチーム」を ひらいた とき、順位が 一瞬 チカチカ する 不具合を なおしたよ</li><li>対抗戦の「クリア済」の はたマークが 白黒だったのを、赤い はたに して 見やすく したよ</li><li>あたらしく「ご当地劇場」を じゅんびちゅう だよ。ご当地キャラの かけあいが 見られる たのしい もので、いつか ユーザーも 作れるように するよ。お楽しみに！</li></ul>
+    </article>
+    <article class="rel">
+      <div class="rel-head"><span class="ver">v2.0.4</span><time class="date">2026年7月30日</time></div>
+      <h3>「ちしき王」「おうえん王」ランキング とうじょう！</h3>
+      <ul class="changes"><li>みんなの声で たくさん 書いて、いいねを もらった 人の ランキングを つくったよ</li><li>「📚 ちしき王」は 地域紹介、「📣 おうえん王」は 応援・お祝いの コメントで きまるよ</li><li>ポイントは 👍（いいね）の 数 ×2 ＋ 書いた コメントの 数。いいねが おおいほど 上位だよ</li><li>ランキング画面の「集計」で「総合」や「〇〇地方」を えらぶと 見られるよ</li><li>みんなの声の コメントが、とうこう後 すぐに みんなに ひょうじされるように なったよ</li><li>「関東地方」の 読み上げが「かんとん」に きこえる 不具合を なおしたよ</li></ul>
+    </article>
+    <!-- NEWS:END -->
+  </div>
+  <p style="text-align:center;margin-top:8px"><a href="/news/" style="font-weight:700">▶ すべての更新情報を見る</a></p>
+</section>
+
+<section class="wrap">
   <h2>公式SNSで最新情報を</h2>
-  <p class="lead">今日の日本一・新機能・激ムズプレイ動画を毎日配信中！フォローしてね。</p>
+  <p class="lead">今日の日本一・新機能・激ムズプレイ動画を毎日配信中！フォローしてね。<br>
+    アプリの<a href="/news/">更新情報・お知らせ</a>はこちら。</p>
   <div class="social">
     <a class="x" href="https://x.com/japan_puzzle" target="_blank" rel="noopener"><span class="glyph">𝕏</span> X</a>
     <a class="yt" href="https://www.youtube.com/channel/UC_i-NXoW66D4YNASfVFxIQg" target="_blank" rel="noopener"><span class="glyph">▶</span> YouTube</a>
@@ -500,6 +537,7 @@
     <a href="https://www.tiktok.com/@japanmap.app" target="_blank" rel="noopener">TikTok</a>
   </p>
   <p>
+    <a href="/news/">更新情報</a>・
     <a href="japanmap-support.html">サポート</a>・
     <a href="japanmap-privacy.html">プライバシーポリシー</a>・
     <a href="/press/">プレスキット</a>・
