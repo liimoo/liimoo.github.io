@@ -151,6 +151,24 @@
   .home-news .changes{ margin:0; padding-left:1.15em; }
   .home-news .changes li{ margin:3px 0; }
 
+  /* ---- 都道府県対抗戦（トップの告知バナー） ---- */
+  .event{ background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%);
+    border-radius:22px; overflow:hidden; box-shadow:0 14px 34px rgba(8,36,92,.35);
+    display:grid; grid-template-columns:1fr; }
+  .event .ev-img{ display:block; width:100%; height:auto; }
+  .event .ev-body{ padding:22px 24px 26px; color:#fff; text-align:center; }
+  .event .ev-badge{ display:inline-block; background:var(--accent); color:#fff; font-weight:700;
+    font-size:.82em; padding:3px 12px; border-radius:999px; margin-bottom:10px; }
+  .event .ev-body h2{ color:#fff; margin:0 0 8px; }
+  .event .ev-body p{ margin:0 0 8px; color:rgba(255,255,255,.94); }
+  .event .ev-lead{ font-size:1.15em; font-weight:800; color:#fff; margin:0 0 8px; }
+  .event .ev-date{ font-weight:700; }
+  .event .ev-beta{ font-size:.85em; color:rgba(255,255,255,.82); margin:10px 0 0; }
+  @media (min-width:720px){
+    .event{ grid-template-columns:1.05fr .95fr; align-items:center; }
+    .event .ev-body{ text-align:left; padding:26px 30px; }
+  }
+
   /* ---- map wall (全国すべての街) ---- */
   .wall{
     display:grid; grid-template-columns:repeat(auto-fill,minmax(108px,1fr));
@@ -292,6 +310,24 @@
 <main>
 
 <!-- 公式PV（YouTube埋め込み。mp4直置きより軽く、再生数もチャンネルに積まれる） -->
+<section class="wrap" style="padding-top:8px">
+  <div class="event">
+    <picture>
+      <source srcset="assets/japanmap/event.webp" type="image/webp">
+      <img class="ev-img" src="assets/japanmap/event.jpg" width="1280" height="720" loading="lazy"
+           alt="都道府県対抗戦のイメージ。47都道府県が陣営に分かれて競う日本地図。">
+    </picture>
+    <div class="ev-body">
+      <span class="ev-badge">🚩 オンラインイベント</span>
+      <h2>都道府県対抗戦</h2>
+      <p class="ev-lead">お気に入りの県を、みんなで優勝させよう！</p>
+      <p>住んでいる県などのチームに分かれて、全国のプレイヤーとクリア数を競うイベント。約2週間・毎月くり返し開催予定です。</p>
+      <p class="ev-date">第1回：2026年8月15日〜8月29日</p>
+      <p class="ev-beta">※ 現在ベータテスト中です</p>
+    </div>
+  </div>
+</section>
+
 <section class="wrap" style="padding-top:14px">
   <h2>公式PV</h2>
   <div class="pv">
