@@ -10,12 +10,12 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日本地図パズル｜ブラウザで無料であそべる（全国47都道府県）</title>
-<meta name="description" content="インストール不要、ブラウザでそのまま遊べる無料の日本地図パズル。全国47都道府県のピースを下のトレイから選んでドラッグ。全国47都道府県・政令市の区・市区町村（全1,746）はアプリで。">
+<title>日本地図パズル（全国47都道府県）｜無料・ブラウザで遊べる</title>
+<meta name="description" content="全国47都道府県をドラッグして日本地図を完成させる無料のブラウザ地図パズル。インストール不要、北海・青森・岩手…など全47ピース。市区町村まで（全1,746）はアプリで。">
 <link rel="canonical" href="https://japan-map.app/play/japan/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="日本地図パズル（全国47都道府県）｜ブラウザで無料であそべる">
-<meta property="og:description" content="インストール不要、ブラウザで遊べる無料の日本地図パズル。ピースをドラッグして完成させよう。">
+<meta property="og:description" content="全国47都道府県をドラッグして日本地図を完成させる無料のブラウザ地図パズル。インストール不要、北海・青森・岩手…など全47ピース。市区町村まで（全1,746）はアプリで。">
 <meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
 <meta property="og:url" content="https://japan-map.app/play/japan/">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,6 +36,8 @@
   header.pg{ text-align:center; padding:6px 0 2px; }
   header.pg h1{ font-size:1.4em; color:var(--blue); margin:0 0 3px; }
   header.pg p{ color:var(--muted); margin:0; font-size:.92em; }
+  header.pg .intro{ max-width:600px; margin:4px auto 0; }
+  .wards{ text-align:center; color:var(--muted); font-size:.78em; line-height:1.7; margin:14px 0 0; }
   .pzlist{ display:flex; gap:6px; overflow-x:auto; padding:8px 2px 4px; align-items:center; font-size:.84em;
     -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
   .pzlist .lbl{ color:var(--muted); font-weight:700; flex:0 0 auto; }
@@ -136,7 +138,7 @@
     <div class="top"><a href="/">← 日本地図 都市パズル トップ</a></div>
     <header class="pg">
       <h1>日本地図パズル（全国47都道府県）</h1>
-      <p>下のトレイからピースを選んで、地図の上へドラッグしよう！無料・登録不要。</p>
+      <p class="intro">「日本地図パズル」は、全国47都道府県のピースをドラッグして日本地図を完成させる無料のブラウザゲームです。遊びながら都道府県の位置と名前が身につき、地理学習や中学受験対策にもおすすめ。</p>
     </header>
     <nav class="pzlist" aria-label="ほかのパズル"><span class="lbl">パズル一覧：</span><a href="/play/">東京23区</a><b class="cur">全国</b><a href="/play/osaka/">大阪</a><a href="/play/yokohama/">横浜</a><a href="/play/nagoya/">名古屋</a><a href="/play/sapporo/">札幌</a><a href="/play/kobe/">神戸</a><a href="/play/kyoto/">京都</a><a href="/play/fukuoka/">福岡</a><a href="/play/kawasaki/">川崎</a><a href="/play/saitama/">さいたま</a><a href="/play/hiroshima/">広島</a><a href="/play/sendai/">仙台</a><a href="/play/chiba/">千葉</a><a href="/play/kitakyushu/">北九州</a><a href="/play/niigata/">新潟</a><a href="/play/sakai/">堺</a><a href="/play/okayama/">岡山</a><a href="/play/kumamoto/">熊本</a><a href="/play/shizuoka/">静岡</a><a href="/play/hamamatsu/">浜松</a><a href="/play/sagamihara/">相模原</a></nav>
     <div class="hud">
@@ -262,6 +264,7 @@
     <button class="thumb" data-pid="p46" data-color="#845ef7" data-label="沖縄" data-reading="おきなわ" data-cx="70.5" data-cy="451.6" data-vb="6.6 425.1 127.8 53.1"><svg viewBox="6.6 425.1 127.8 53.1"><use href="#p46" fill="#845ef7"/></svg><span><ruby>沖縄<rt>おきなわ</rt></ruby></span></button>
     </div>
     <div class="cta"><a class="b" href="/">▶ 全国47都道府県・市区町村をアプリで（無料）</a></div>
+    <p class="wards">収録（全47都道府県）：北海道、青森県、岩手県、宮城県、秋田県、山形県、福島県、茨城県、栃木県、群馬県、埼玉県、千葉県、東京都、神奈川県、新潟県、富山県、石川県、福井県、山梨県、長野県、岐阜県、静岡県、愛知県、三重県、滋賀県、京都府、大阪府、兵庫県、奈良県、和歌山県、鳥取県、島根県、岡山県、広島県、山口県、徳島県、香川県、愛媛県、高知県、福岡県、佐賀県、長崎県、熊本県、大分県、宮崎県、鹿児島県、沖縄県</p>
     <footer class="pg">地図データ：国土交通省 国土数値情報（CC BY 4.0）／ <a href="/">japan-map.app</a></footer>
   </div>
 
