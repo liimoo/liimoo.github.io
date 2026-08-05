@@ -73,6 +73,20 @@ const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
 let token = sessionStorage.getItem("jm_admin_token") || "";
 
 function esc(s){ return String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+
+// 日時は DB から UTC で届く。管理ページは日本時間で判断するので必ず JST へ直して出す。
+// ⚠ そのまま slice すると9時間前に見える。実際に「昨夜20時台の投稿がランキングに
+//    入っていない」と誤解する原因になった（実際は当日早朝5時台＝集計後の投稿だった）。
+function jst(s){
+  if(!s) return "";
+  const d = new Date(s);
+  if(isNaN(d.getTime())) return String(s).replace("T"," ").slice(0,16);
+  const p = new Intl.DateTimeFormat("ja-JP", {timeZone:"Asia/Tokyo", year:"numeric",
+    month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hour12:false})
+    .formatToParts(d).reduce((a,x)=>(a[x.type]=x.value,a),{});
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
+}
+
 function setMsg(t){ document.getElementById("msg").textContent = t||""; }
 
 async function login(){
@@ -138,7 +152,7 @@ function render(rows){
     const who = f.user_id ? `<span class="meta" style="word-break:break-all">user_id: ${esc(f.user_id)}</span>` : '<span class="meta">匿名</span>';
     const ver = f.app_version ? ` ・ v${esc(f.app_version)}` : "";
     return `<div class="card">
-      <div>${typePill(f.type)}${statusPill(f.status)}<span class="meta">${esc(f.platform||"unknown")}${ver} ・ ${esc((f.created_at||"").replace("T"," ").slice(0,16))} ・ #${f.id}</span></div>
+      <div>${typePill(f.type)}${statusPill(f.status)}<span class="meta">${esc(f.platform||"unknown")}${ver} ・ ${esc(jst(f.created_at))} ・ #${f.id}</span></div>
       <div class="body">${esc(f.body)}</div>
       ${who}
       <div class="row" style="margin-top:8px">

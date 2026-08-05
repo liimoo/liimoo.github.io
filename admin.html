@@ -101,6 +101,20 @@ function cityName(code){
 }
 
 function esc(s){ return String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+
+// 日時は DB から UTC で届く。管理ページは日本時間で判断するので必ず JST へ直して出す。
+// ⚠ そのまま slice すると9時間前に見える。実際に「昨夜20時台の投稿がランキングに
+//    入っていない」と誤解する原因になった（実際は当日早朝5時台＝集計後の投稿だった）。
+function jst(s){
+  if(!s) return "";
+  const d = new Date(s);
+  if(isNaN(d.getTime())) return String(s).replace("T"," ").slice(0,16);
+  const p = new Intl.DateTimeFormat("ja-JP", {timeZone:"Asia/Tokyo", year:"numeric",
+    month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hour12:false})
+    .formatToParts(d).reduce((a,x)=>(a[x.type]=x.value,a),{});
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
+}
+
 function setMsg(t){ document.getElementById("msg").textContent = t||""; }
 
 async function login(){
@@ -278,7 +292,7 @@ function renderScores(board, rows){
   el.innerHTML = rows.map(s => `
     <div class="card">
       <div><span class="pill p-approved">${s.rank}位</span>
-        <span class="meta">${esc(s.display_name||"（名前なし）")} ・ ${esc(s.platform||"")} ・ ${esc((s.updated_at||"").replace("T"," ").slice(0,16))}</span></div>
+        <span class="meta">${esc(s.display_name||"（名前なし）")} ・ ${esc(s.platform||"")} ・ ${esc(jst(s.updated_at))}</span></div>
       <div class="body">${fmtScore(s.best_score)}　<span class="muted">(${s.best_score}cs)</span></div>
       <div class="meta" style="word-break:break-all">user_id: ${esc(s.user_id)}</div>
       <div class="row">
@@ -410,7 +424,7 @@ function renderModeration(rows){
     <div class="card">
       <div><span class="pill p-rejected">🚩 通報 ${r.report_count}</span>
         <span class="pill p-pending">${esc(chLabel(r.channel))}</span>
-        <span class="meta">${esc(r.nickname||"（名前なし）")} ・ ${esc(r.platform||"")} ・ ${esc(cityName(r.region)||r.region||"")} ・ ${esc((r.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+        <span class="meta">${esc(r.nickname||"（名前なし）")} ・ ${esc(r.platform||"")} ・ ${esc(cityName(r.region)||r.region||"")} ・ ${esc(jst(r.created_at))}</span></div>
       <div class="body">${esc(r.body)}</div>
       <div class="meta">理由: ${esc(r.reason||"（なし）")}</div>
       <div class="meta" style="word-break:break-all">投稿者 user_id: ${esc(r.author_id||"（不明）")}</div>
@@ -439,7 +453,7 @@ function renderLiveComments(channel, rows){
       ? `<button class="b-green" onclick="setLive('${channel}',${c.id},'approved')">表示に戻す</button>`
       : `<button class="b-orange" onclick="setLive('${channel}',${c.id},'rejected')">非表示にする</button>`;
     return `<div class="card">
-      <div>${statusPill}${rep}<span class="meta">${esc(c.nickname||"（名前なし）")} ・ ${esc(c.platform||"")} ・ ${esc(cityName(c.region)||c.region||"")} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div>${statusPill}${rep}<span class="meta">${esc(c.nickname||"（名前なし）")} ・ ${esc(c.platform||"")} ・ ${esc(cityName(c.region)||c.region||"")} ・ ${esc(jst(c.created_at))}</span></div>
       <div class="body">${esc(c.body)}</div>
       <div class="meta" style="word-break:break-all">user_id: ${esc(c.author_id||"")}</div>
       <div class="row">
@@ -461,7 +475,7 @@ function renderBanned(rows){
   list.innerHTML = rows.map(b => {
     const name = (b.profiles && b.profiles.display_name) ? b.profiles.display_name : "（名前なし）";
     return `<div class="card">
-      <div><span class="pill p-rejected">BAN中</span><span class="meta"><a class="ulink" onclick="viewUser('${esc(b.user_id)}')">${esc(name)}</a> ・ ${esc((b.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div><span class="pill p-rejected">BAN中</span><span class="meta"><a class="ulink" onclick="viewUser('${esc(b.user_id)}')">${esc(name)}</a> ・ ${esc(jst(b.created_at))}</span></div>
       <div class="body">理由: ${esc(b.reason||"（なし）")}</div>
       <div class="meta" style="word-break:break-all">user_id: ${esc(b.user_id)}</div>
       <div class="row">
@@ -507,7 +521,7 @@ function renderProfiles(rows){
     if (p.x_handle) sns.push(`X: <a class="ulink" href="https://x.com/${esc(p.x_handle)}" target="_blank" rel="noopener">@${esc(p.x_handle)}</a>`);
     if (p.ig_handle) sns.push(`IG: <a class="ulink" href="https://www.instagram.com/${esc(p.ig_handle)}" target="_blank" rel="noopener">@${esc(p.ig_handle)}</a>`);
     return `<div class="card">
-      <div>${pill}${rep}<span class="meta">${icon} ${esc(p.display_name||"（名前なし）")} ・ ${esc((p.updated_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div>${pill}${rep}<span class="meta">${icon} ${esc(p.display_name||"（名前なし）")} ・ ${esc(jst(p.updated_at))}</span></div>
       <div class="body">${esc(p.bio||"（自己紹介なし）")}</div>
       ${sns.length ? `<div class="meta">${sns.join(" 　 ")}</div>` : ""}
       ${p.report_reason ? `<div class="meta">通報理由: ${esc(p.report_reason)}</div>` : ""}
@@ -538,7 +552,7 @@ async function showReporters(comment_id){
     const d = await api("comment_reporters", { comment_id });
     const rs = d.reporters || [];
     if (!rs.length){ alert("通報者はいません。"); return; }
-    const lines = rs.map(r => `・${r.nickname}${r.untrusted?"（無効）":""}  理由:${r.reason||"なし"}  ${(r.created_at||"").replace("T"," ").slice(0,16)}`).join("\n");
+    const lines = rs.map(r => `・${r.nickname}${r.untrusted?"（無効）":""}  理由:${r.reason||"なし"}  ${jst(r.created_at)}`).join("\n");
     alert("通報者（" + rs.length + "人）\n\n" + lines + "\n\n※「通報者ランキング」から個別に無効化できます。");
   } catch(e){}
 }
@@ -596,7 +610,7 @@ function cardHtml(c){
                    : '<span class="pill" style="background:#2a5a6a">🗺️紹介</span>';
     const reason = (c.report_count>0 && c.report_reason) ? `<div class="meta" style="color:#ffb0a0">通報理由: ${esc(c.report_reason)}</div>` : "";
     return `<div class="card">
-      <div>${kindPill}${pill}${rep}${pin}<span class="meta">${esc(cityName(c.city_code))} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc((c.created_at||"").replace("T"," ").slice(0,16))}</span></div>
+      <div>${kindPill}${pill}${rep}${pin}<span class="meta">${esc(cityName(c.city_code))} ・ <a class="ulink" onclick="viewUser('${esc(c.user_id)}')">${esc(c.nickname)}</a> ・ 👍${c.good_count||0} 👎${c.bad_count||0} ・ ${esc(jst(c.created_at))}</span></div>
       ${reason}
       <div class="body">${esc(c.body)}</div>
       <div class="meta" style="word-break:break-all">user_id: ${esc(c.user_id)}</div>
@@ -649,7 +663,7 @@ function renderUserReports(reports){
   if (!reports.length){ return html + '<p class="muted">通報はありません。</p>'; }
   html += reports.map(r => {
     const c = r.comments || null;
-    const when = (r.created_at||"").replace("T"," ").slice(0,16);
+    const when = jst(r.created_at);
     if (!c || !c.id){
       return `<div class="card"><div><span class="pill" style="background:#8a5a16">通報: ${esc(r.reason||"なし")}</span><span class="meta">${esc(when)}</span></div><div class="body muted">（対象コメントは削除されています）</div></div>`;
     }
