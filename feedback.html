@@ -19,6 +19,7 @@
                   background: #0b1322; color: #e8edf6; }
   button { padding: 9px 14px; border-radius: 9px; border: 0; cursor: pointer; font-weight: 700; color: #fff; }
   .b-blue { background: #2a64c0; } .b-green { background: #1f9d57; } .b-gray { background: #5a6b86; }
+  .b-purple { background: #6a4fa3; }
   .b-orange { background: #d9742a; } .b-red { background: #c0392b; }
   button:disabled { opacity: .5; cursor: default; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -27,6 +28,7 @@
   .meta { font-size: 12px; color: #9fb0cc; }
   .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
   .s-new { background: #6b5a16; } .s-read { background: #2a4a6a; } .s-done { background: #1c5e38; }
+  .s-noaction { background: #4a3a6a; }
   .muted { color: #9fb0cc; }
   #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
   #msg { color: #ffd27a; min-height: 1.2em; font-size: 13px; }
@@ -50,6 +52,7 @@
       <option value="new">未読</option>
       <option value="read">既読</option>
       <option value="done">対応済み</option>
+      <option value="noaction">対応なし</option>
       <option value="all">すべて</option>
     </select>
     <select id="typefilter" onchange="load()">
@@ -141,6 +144,7 @@ function typePill(t){
 }
 function statusPill(s){
   if (s === "done") return '<span class="pill s-done">対応済み</span>';
+  if (s === "noaction") return '<span class="pill s-noaction">対応なし</span>';
   if (s === "read") return '<span class="pill s-read">既読</span>';
   return '<span class="pill s-new">未読</span>';
 }
@@ -158,6 +162,7 @@ function render(rows){
       <div class="row" style="margin-top:8px">
         <button class="b-blue" onclick="act(${f.id},'read')">既読にする</button>
         <button class="b-green" onclick="act(${f.id},'done')">対応済みに</button>
+        <button class="b-purple" onclick="act(${f.id},'noaction')">対応なしに</button>
         <button class="b-gray" onclick="act(${f.id},'new')">未読に戻す</button>
         <button class="b-red" onclick="del(${f.id})">削除</button>
       </div>
