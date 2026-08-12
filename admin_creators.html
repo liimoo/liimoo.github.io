@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>配信者のお知らせ 管理</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+         margin: 0; background: #0e1626; color: #e8edf6; line-height: 1.6; }
+  header { background: #142036; padding: 14px 18px; position: sticky; top: 0; display: flex;
+           align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #24344f; z-index: 5; }
+  header h1 { font-size: 1.1em; margin: 0; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 16px; }
+  input, select, button, textarea { font-size: 15px; font-family: inherit; }
+  input, select, textarea { padding: 9px 11px; border-radius: 9px; border: 1px solid #2c3e5d;
+                  background: #0b1322; color: #e8edf6; width: 100%; }
+  button { padding: 9px 14px; border-radius: 9px; border: 0; cursor: pointer; font-weight: 700; color: #fff; width: auto; }
+  .b-blue { background: #2a64c0; } .b-green { background: #1f9d57; } .b-gray { background: #5a6b86; }
+  .b-purple { background: #6a4fa3; }
+  .b-orange { background: #d9742a; } .b-red { background: #c0392b; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card { background: #16233c; border: 1px solid #26385a; border-radius: 14px; padding: 14px; margin: 12px 0; }
+  .form { background: #16233c; border: 1px solid #26385a; border-radius: 14px; padding: 14px; margin: 12px 0;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form label { font-size: 12px; color: #9fb0cc; display: grid; gap: 4px; }
+  .form .full { grid-column: 1 / -1; }
+  .body { font-size: 15px; white-space: pre-wrap; word-break: break-word; margin: 6px 0 10px; }
+  .meta { font-size: 12px; color: #9fb0cc; word-break: break-all; }
+  .meta a { color: #7fb0ff; }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
+  .s-pending { background: #6b5a16; } .s-approved { background: #1c5e38; } .s-rejected { background: #7a3a3a; }
+  .thumb { width: 128px; height: 72px; object-fit: cover; border-radius: 8px; background: #0b1322; float: left; margin: 0 12px 6px 0; }
+  .muted { color: #9fb0cc; }
+  #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
+  #msg { color: #ffd27a; min-height: 1.2em; font-size: 13px; }
+  .hidden { display: none !important; }
+  h2 { font-size: 1em; margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<div id="login" class="wrap">
+  <h1>配信者のお知らせ 管理ログイン</h1>
+  <input id="email" type="email" placeholder="管理者メール" autocomplete="username">
+  <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
+  <button class="b-blue" onclick="login()">ログイン</button>
+  <div id="loginmsg" class="muted" style="font-size:13px"></div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>📺 配信者のお知らせ</h1>
+    <select id="filter" onchange="load()">
+      <option value="approved">公開中（承認済み）</option>
+      <option value="pending">承認待ち</option>
+      <option value="rejected">却下</option>
+      <option value="all">すべて</option>
+    </select>
+    <button class="b-gray" onclick="load()">更新</button>
+    <span id="msg"></span>
+    <span style="margin-left:auto"></span>
+    <a class="b-gray" href="./admin.html" style="text-decoration:none;padding:9px 14px;border-radius:9px">💬 みんなの声へ</a>
+    <button class="b-gray" onclick="logout()">ログアウト</button>
+  </header>
+  <div class="wrap">
+    <h2>➕ あたらしく登録</h2>
+    <div class="form">
+      <label class="full">配信者名 <span class="muted">*</span><input id="f-name" placeholder="例: おもしろ地理"></label>
+      <label class="full">チャンネルURL <span class="muted">*</span><input id="f-channel" placeholder="https://www.youtube.com/@..."></label>
+      <label>プラットフォーム
+        <select id="f-platform">
+          <option value="youtube">YouTube</option>
+          <option value="twitch">Twitch</option>
+          <option value="tiktok">TikTok</option>
+          <option value="other">その他</option>
+        </select>
+      </label>
+      <label>公開状態
+        <select id="f-status">
+          <option value="approved">承認済み（すぐ公開）</option>
+          <option value="pending">承認待ち</option>
+        </select>
+      </label>
+      <label class="full">紹介動画URL（任意・サムネ自動取得）<input id="f-video" placeholder="https://www.youtube.com/watch?v=..."></label>
+      <label class="full">一言紹介（アプリ表示・任意）<input id="f-note" maxlength="200" placeholder="例: 都道府県を楽しく解説！"></label>
+      <label>連絡先メール（非公開・任意）<input id="f-email" placeholder="任意"></label>
+      <label>表示順（大きいほど上）<input id="f-sort" type="number" value="0"></label>
+      <label class="full">サムネURL（空なら動画URLから自動）<input id="f-thumb" placeholder="任意（https://img.youtube.com/vi/…）"></label>
+      <div class="full"><button class="b-green" onclick="addCreator()">登録する</button> <span id="addmsg" class="muted"></span></div>
+    </div>
+    <h2>一覧</h2>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
+const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
+let token = sessionStorage.getItem("jm_admin_token") || "";
+
+function esc(s){ return String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+function val(id){ return document.getElementById(id).value.trim(); }
+
+function jst(s){
+  if(!s) return "";
+  const d = new Date(s);
+  if(isNaN(d.getTime())) return String(s).replace("T"," ").slice(0,16);
+  const p = new Intl.DateTimeFormat("ja-JP", {timeZone:"Asia/Tokyo", year:"numeric",
+    month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hour12:false})
+    .formatToParts(d).reduce((a,x)=>(a[x.type]=x.value,a),{});
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
+}
+
+function setMsg(t){ document.getElementById("msg").textContent = t||""; }
+
+async function login(){
+  const email = val("email");
+  const password = document.getElementById("password").value;
+  document.getElementById("loginmsg").textContent = "ログイン中…";
+  try {
+    const r = await fetch(`${SUPABASE}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": ANON },
+      body: JSON.stringify({ email, password }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.access_token) { document.getElementById("loginmsg").textContent = "ログイン失敗: " + (d.error_description||d.msg||r.status); return; }
+    token = d.access_token;
+    sessionStorage.setItem("jm_admin_token", token);
+    showApp();
+  } catch(e){ document.getElementById("loginmsg").textContent = "通信エラー: " + e; }
+}
+
+function logout(){ token=""; sessionStorage.removeItem("jm_admin_token"); document.getElementById("app").classList.add("hidden"); document.getElementById("login").classList.remove("hidden"); }
+function showApp(){ document.getElementById("loginmsg").textContent=""; document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); load(); }
+
+async function api(action, params){
+  const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": ANON, "Authorization": "Bearer " + token },
+    body: JSON.stringify(Object.assign({ action }, params||{})),
+  });
+  const d = await r.json().catch(()=>({}));
+  if (r.status === 401 || r.status === 403) { setMsg("権限がありません（再ログインしてください）"); throw new Error("auth"); }
+  if (!r.ok) { setMsg("エラー: " + (d.error||r.status)); throw new Error(d.error||r.status); }
+  return d;
+}
+
+async function load(){
+  setMsg("読み込み中…");
+  try {
+    const status = document.getElementById("filter").value;
+    const d = await api("list_creators", { status, limit: 200 });
+    render(d.creators || []);
+    setMsg(`${(d.creators||[]).length} 件`);
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+
+async function addCreator(){
+  const name = val("f-name"), channel_url = val("f-channel");
+  const am = document.getElementById("addmsg");
+  if (!name || !/^https?:\/\//i.test(channel_url)) { am.textContent = "配信者名と正しいチャンネルURLは必須です"; return; }
+  am.textContent = "登録中…";
+  try {
+    await api("add_creator", {
+      name, channel_url,
+      video_url: val("f-video"), note: val("f-note"),
+      platform: document.getElementById("f-platform").value,
+      thumbnail_url: val("f-thumb"), contact_email: val("f-email"),
+      sort: Number(val("f-sort")||0), status: document.getElementById("f-status").value,
+    });
+    ["f-name","f-channel","f-video","f-note","f-email","f-thumb"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("f-sort").value = "0";
+    am.textContent = "登録しました";
+    await load();
+  } catch(e){ am.textContent = "登録失敗: " + (e && e.message ? e.message : e); }
+}
+
+function statusPill(s){
+  if (s === "approved") return '<span class="pill s-approved">公開中</span>';
+  if (s === "rejected") return '<span class="pill s-rejected">却下</span>';
+  return '<span class="pill s-pending">承認待ち</span>';
+}
+
+function render(rows){
+  const list = document.getElementById("list");
+  if (!rows.length){ list.innerHTML = '<p class="muted">該当する配信者はいません。</p>'; return; }
+  list.innerHTML = rows.map(c => {
+    const thumb = c.thumbnail_url ? `<img class="thumb" src="${esc(c.thumbnail_url)}" alt="">` : "";
+    const video = c.video_url ? ` ・ <a href="${esc(c.video_url)}" target="_blank" rel="noopener">動画</a>` : "";
+    const email = c.contact_email ? ` ・ 連絡先: ${esc(c.contact_email)}` : "";
+    return `<div class="card">
+      ${thumb}
+      <div>${statusPill(c.status)}<span class="meta">${esc(c.platform||"")} ・ 順${c.sort||0} ・ ${esc(jst(c.created_at))} ・ #${c.id}</span></div>
+      <div class="body"><b>${esc(c.name)}</b>${c.note ? " — " + esc(c.note) : ""}</div>
+      <div class="meta"><a href="${esc(c.channel_url)}" target="_blank" rel="noopener">${esc(c.channel_url)}</a>${video}${email}</div>
+      <div class="row" style="margin-top:10px">
+        <button class="b-green" onclick="setStatus(${c.id},'approved')">承認（公開）</button>
+        <button class="b-orange" onclick="setStatus(${c.id},'rejected')">却下（非公開）</button>
+        <button class="b-gray" onclick="setStatus(${c.id},'pending')">承認待ちに</button>
+        <button class="b-red" onclick="del(${c.id})">削除</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function setStatus(creator_id, status){
+  try { await api("set_creator_status", { creator_id, status }); await load(); } catch(e){}
+}
+async function del(creator_id){
+  if (!confirm("この配信者を削除します。よろしいですか？")) return;
+  try { await api("delete_creator", { creator_id }); await load(); } catch(e){}
+}
+
+if (token) showApp();
+</script>
+</body>
+</html>
