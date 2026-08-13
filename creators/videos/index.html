@@ -35,10 +35,21 @@
   h1{ font-size:1.55em; margin:.1em 0 .5em; }
   h2{ font-size:1.18em; margin:1.5em 0 .5em; border-left:5px solid var(--blue); padding-left:.5em; }
   .lead{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
-  .shots{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin:14px 0; }
+  .shots{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; align-items:flex-start; margin:14px 0; }
   .shot{ text-align:center; font-size:.85em; color:var(--muted); max-width:250px; }
   .shot img{ width:100%; max-width:250px; height:auto; border-radius:16px;
     border:1px solid var(--line); box-shadow:0 6px 20px rgba(10,52,120,.16); display:block; margin:0 auto 6px; }
+  /* アプリ内一覧の「イメージ」モック（実在名を出さないためのサンプル） */
+  .mock{ width:250px; margin:0 auto 6px; background:#fbf8f1; border:1px solid var(--line);
+    border-radius:16px; padding:14px 12px; box-shadow:0 6px 20px rgba(10,52,120,.16); }
+  .mock-title{ font-weight:800; color:#33261a; font-size:1.05em; }
+  .mock-sub{ color:#8a7f6f; font-size:.72em; margin-bottom:8px; }
+  .mock-row{ display:flex; gap:8px; align-items:center; text-align:left;
+    background:rgba(255,255,255,.6); border:1px solid rgba(40,28,12,.14); border-radius:12px; padding:7px; margin:7px 0; }
+  .mock-thumb{ width:70px; height:40px; flex:0 0 auto; border-radius:7px; background:rgba(40,28,12,.14);
+    display:flex; align-items:center; justify-content:center; color:rgba(40,28,12,.4); font-size:1.1em; }
+  .mock-txt{ line-height:1.35; color:#2a2016; }
+  .mock-txt b{ font-size:.9em; } .mock-txt small{ color:#6a5f4f; font-size:.72em; }
   table{ width:100%; border-collapse:collapse; margin:.4em 0; background:var(--card);
     border:1px solid var(--line); border-radius:12px; overflow:hidden; }
   th,td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); font-size:.95em; vertical-align:top; }
@@ -72,8 +83,16 @@
     <div class="shots">
       <figure class="shot"><img src="/assets/japanmap/feature_menu.jpg" alt="タイトル画面の「その他」にある「プレイ動画」ボタン" loading="lazy">
         <figcaption>タイトル → その他 →「プレイ動画」</figcaption></figure>
-      <figure class="shot"><img src="/assets/japanmap/feature_dialog.jpg" alt="プレイ動画の一覧。サムネイル付きで配信者が並ぶ" loading="lazy">
-        <figcaption>一覧をタップ → あなたの動画へ</figcaption></figure>
+      <figure class="shot">
+        <div class="mock" role="img" aria-label="プレイ動画の一覧イメージ。サムネイル付きで配信者が並ぶ">
+          <div class="mock-title">プレイ動画</div>
+          <div class="mock-sub">この ゲームの プレイ動画を 見てみよう！</div>
+          <div class="mock-row"><span class="mock-thumb">▶</span><span class="mock-txt"><b>サンプル配信者 Ａ</b><br><small>YouTube・ゲームのしょうかい</small></span></div>
+          <div class="mock-row"><span class="mock-thumb">▶</span><span class="mock-txt"><b>サンプル配信者 Ｂ</b><br><small>Twitch・じっきょうプレイ</small></span></div>
+          <div class="mock-row"><span class="mock-thumb">▶</span><span class="mock-txt"><b>サンプル配信者 Ｃ</b><br><small>YouTube・こうりゃく＆かいせつ</small></span></div>
+        </div>
+        <figcaption>一覧をタップ → あなたの動画へ（イメージ）</figcaption>
+      </figure>
     </div>
 
     <h2>対応プラットフォーム</h2>
