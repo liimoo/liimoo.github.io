@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18330119849"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18330119849');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>都道府県対抗の結果・順位｜日本地図 都市パズル</title>
+<meta name="description" content="『日本地図 都市パズル』の「都道府県対抗」オンラインイベントの開催情報と順位（合計・参加人数・1人あたりの3部門）、過去シーズンの結果ランキングが見られます。あなたの推し県は今何位？">
+<link rel="canonical" href="https://japan-map.app/event/">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="都道府県対抗の結果・順位｜日本地図 都市パズル">
+<meta property="og:description" content="「都道府県対抗」の開催情報と順位・過去の結果ランキング。あなたの推し県は今何位？">
+<meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<meta property="og:url" content="https://japan-map.app/event/">
+<style>
+  :root{ color-scheme: light dark;
+    --blue:#2a64c0; --blue-deep:#0a3478; --accent:#ff8a3d; --gold:#e0a400;
+    --ink:#1a1a1a; --muted:#666; --card:#f4f7fc; --line:#dbe4f2; --page:#f4f8ff; }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e8e8; --muted:#9aa4b2; --card:#15233c; --line:#27395a; --gold:#f1c44a; --page:#0b1428; } }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+    background:var(--page); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%; }
+  .top{ background:linear-gradient(160deg,var(--blue),var(--blue-deep)); padding:14px 18px; }
+  .top a{ color:#fff; text-decoration:none; font-weight:800; }
+  .wrap{ max-width:760px; margin:0 auto; padding:22px 18px 44px; }
+  .crumb{ font-size:.85em; color:var(--muted); margin:4px 0 10px; } .crumb a{ color:var(--muted); }
+  h1{ font-size:1.5em; margin:.1em 0 .4em; }
+  .lead{ color:var(--muted); margin:0 0 14px; }
+  .muted{ color:var(--muted); }
+  .banner{ border-radius:14px; padding:14px 16px; margin:12px 0; font-weight:700; }
+  .banner.live{ background:linear-gradient(120deg,#ff8a3d,#e0a400); color:#231400; }
+  .banner.next{ background:var(--card); border:1px solid var(--line); }
+  .banner .sub{ font-weight:500; font-size:.9em; opacity:.9; margin-top:2px; }
+  .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0 6px; }
+  select{ padding:8px 11px; border-radius:9px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:15px; }
+  .tabs{ display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+  .tabs button{ border:0; background:transparent; color:var(--ink); padding:8px 14px; font-size:14px; font-weight:700; cursor:pointer; }
+  .tabs button.on{ background:var(--blue); color:#fff; }
+  table{ width:100%; border-collapse:collapse; margin:.5em 0; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th,td{ padding:9px 10px; border-bottom:1px solid var(--line); font-size:.95em; text-align:right; white-space:nowrap; }
+  th{ background:rgba(42,100,192,.10); color:var(--muted); }
+  th.l,td.l{ text-align:left; } tr:last-child td{ border-bottom:0; }
+  td.rank{ font-weight:800; width:3em; } .pref{ font-weight:700; }
+  td.act{ color:var(--blue); font-weight:800; } th.act{ color:var(--blue); }
+  .cta{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin:18px 0; }
+  .btn{ display:inline-block; font-weight:800; text-decoration:none; border-radius:999px; padding:10px 18px; background:var(--blue); color:#fff; margin-top:6px; }
+  footer{ text-align:center; color:var(--muted); font-size:.85em; padding:22px; } footer a{ color:var(--blue); } a{ color:var(--blue); }
+</style>
+</head>
+<body>
+  <div class="top"><a href="/">🗾 日本地図 都市パズル</a></div>
+  <div class="wrap">
+    <nav class="crumb"><a href="/">ホーム</a> › 都道府県対抗</nav>
+    <h1>🏁 都道府県対抗の 結果・順位</h1>
+    <p class="lead">全国のプレイヤーが自分の“推し都道府県”の代表として競う、月イチのオンラインイベント。あなたの県は今、何位？</p>
+
+    <div id="banner"></div>
+
+    <div class="controls">
+      <label>シーズン：<select id="season"></select></label>
+      <span class="tabs" id="tabs">
+        <button data-s="points" class="on">合計</button>
+        <button data-s="members">参加人数</button>
+        <button data-s="per">1人あたり</button>
+      </span>
+    </div>
+
+    <div id="board"><p class="muted">読み込み中…</p></div>
+
+    <div class="cta">
+      <b>🎮 参加は アプリから（無料）</b><br>
+      推しの都道府県を選んで、パズルやクイズをクリアするほど県の得点になります。あなたの1プレイが順位を動かす！
+      <br><a class="btn" href="/">アプリを見る</a>
+    </div>
+    <p class="muted" style="font-size:.85em">※ 部門は「合計」＝県の総得点、「参加人数」＝参加した人数、「1人あたり」＝人数で割った平均点。人数が少ない県でも1位をねらえます。</p>
+
+    <p><a href="/ranking/">市区町村ランキング</a>　｜　<a href="/">トップへ</a></p>
+  </div>
+  <footer>© 日本地図 都市パズル ／ お問い合わせ：<a href="mailto:limo_game@outlook.jp">limo_game@outlook.jp</a></footer>
+
+<script>
+const SUPABASE="https://djgafiowdldqtearqtdd.supabase.co";
+const ANON="sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
+const PREF={ "01":"北海道","02":"青森県","03":"岩手県","04":"宮城県","05":"秋田県","06":"山形県","07":"福島県",
+ "08":"茨城県","09":"栃木県","10":"群馬県","11":"埼玉県","12":"千葉県","13":"東京都","14":"神奈川県","15":"新潟県",
+ "16":"富山県","17":"石川県","18":"福井県","19":"山梨県","20":"長野県","21":"岐阜県","22":"静岡県","23":"愛知県",
+ "24":"三重県","25":"滋賀県","26":"京都府","27":"大阪府","28":"兵庫県","29":"奈良県","30":"和歌山県","31":"鳥取県",
+ "32":"島根県","33":"岡山県","34":"広島県","35":"山口県","36":"徳島県","37":"香川県","38":"愛媛県","39":"高知県",
+ "40":"福岡県","41":"佐賀県","42":"長崎県","43":"熊本県","44":"大分県","45":"宮崎県","46":"鹿児島県","47":"沖縄県" };
+const MEDAL=["🥇","🥈","🥉"];
+let SEASONS=[], RUNNING=null, division="points";
+
+function prefName(id){ const k=String(id).padStart(2,"0"); return PREF[k]||("第"+id); }
+function num(n){ return Number(n||0).toLocaleString("ja-JP"); }
+function jstMD(iso, isEnd){
+  const t=Date.parse(iso)-(isEnd?60000:0);
+  const p=new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",month:"long",day:"numeric"}).format(new Date(t));
+  return p;
+}
+async function api(body){
+  const r=await fetch(`${SUPABASE}/functions/v1/event`,{method:"POST",
+    headers:{"Content-Type":"application/json","apikey":ANON,"Authorization":"Bearer "+ANON},
+    body:JSON.stringify(body)});
+  return r.json();
+}
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+
+async function boot(){
+  let status={}, seasonsRes={};
+  try{ [status,seasonsRes]=await Promise.all([api({action:"status"}), api({action:"seasons"})]); }
+  catch(e){ document.getElementById("board").innerHTML='<p class="muted">読み込みに失敗しました。時間をおいてお試しください。</p>'; return; }
+
+  // バナー（開催中／次回）
+  const s=status.season, next=status.next;
+  let bh="";
+  if(s && s.running){
+    bh=`<div class="banner live">🏁 開催中！ ${esc(s.title)}<div class="sub">${jstMD(s.starts_at)}〜${jstMD(s.ends_at,true)} まで／あなたの県を応援しよう</div></div>`;
+    RUNNING={id:s.id,title:s.title};
+  } else if(next){
+    bh=`<div class="banner next">🏁 次回：${esc(next.title)}　<b>${jstMD(next.starts_at)}〜${jstMD(next.ends_at,true)}</b> 開催予定！<div class="sub">アプリで“推し県”を選んでエントリーしてね</div></div>`;
+  }
+  document.getElementById("banner").innerHTML=bh;
+
+  // シーズン選択（開催中があれば先頭＋過去の確定シーズン）
+  SEASONS=seasonsRes.seasons||[];
+  const sel=document.getElementById("season");
+  let opts=[];
+  if(RUNNING) opts.push(`<option value="${RUNNING.id}">開催中：${esc(RUNNING.title)}</option>`);
+  for(const p of SEASONS){
+    if(RUNNING && p.id===RUNNING.id) continue;
+    opts.push(`<option value="${p.id}">${esc(p.title)}（${jstMD(p.starts_at)}〜${jstMD(p.ends_at,true)}）</option>`);
+  }
+  if(!opts.length){ sel.style.display="none"; document.getElementById("board").innerHTML='<p class="muted">まだ結果はありません。次回の開催をお楽しみに！</p>'; return; }
+  sel.innerHTML=opts.join("");
+  sel.onchange=render;
+  document.getElementById("tabs").querySelectorAll("button").forEach(b=>{
+    b.onclick=()=>{ division=b.dataset.s; document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b)); render(); };
+  });
+  render();
+}
+
+async function render(){
+  const seasonId=Number(document.getElementById("season").value);
+  const board=document.getElementById("board");
+  board.innerHTML='<p class="muted">読み込み中…</p>';
+  let d;
+  try{ d=await api({action:"standings",scope:"pref",sort:division,season_id:seasonId,limit:47}); }
+  catch(e){ board.innerHTML='<p class="muted">読み込みに失敗しました。</p>'; return; }
+  const rows=d.rows||[];
+  if(!rows.length){ board.innerHTML='<p class="muted">このシーズンの集計はまだありません。</p>'; return; }
+  const act=(k)=>division===k?" act":"";
+  const head=`<tr><th class="l">順位</th><th class="l">都道府県</th><th class="${act('points')}">合計</th><th class="${act('members')}">人数</th><th class="${act('per')}">1人あたり</th></tr>`;
+  const body=rows.map((r,i)=>{
+    const medal=i<3?MEDAL[i]+" ":"";
+    return `<tr>
+      <td class="rank l">${medal}${r.rank}</td>
+      <td class="pref l">${esc(prefName(r.id))}</td>
+      <td class="${act('points')}">${num(r.points)}</td>
+      <td class="${act('members')}">${num(r.members)}</td>
+      <td class="${act('per')}">${num(r.per)}</td>
+    </tr>`;
+  }).join("");
+  board.innerHTML=`<table>${head}${body}</table>`;
+}
+boot();
+</script>
+</body>
+</html>
