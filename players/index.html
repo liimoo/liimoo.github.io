@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18330119849"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18330119849');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>プレイヤーランキング（総合）｜日本地図 都市パズル</title>
+<meta name="description" content="『日本地図 都市パズル』の総合プレイヤーランキング。全国・都道府県別、総合／パズル／クイズのポイントで上位プレイヤーを見られます。あなたは全国何位？">
+<link rel="canonical" href="https://japan-map.app/players/">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="プレイヤーランキング（総合）｜日本地図 都市パズル">
+<meta property="og:description" content="総合／パズル／クイズ、全国・都道府県別のポイントランキング。あなたは全国何位？">
+<meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<meta property="og:url" content="https://japan-map.app/players/">
+<style>
+  :root{ color-scheme: light dark;
+    --blue:#2a64c0; --blue-deep:#0a3478; --accent:#ff8a3d; --gold:#e0a400;
+    --ink:#1a1a1a; --muted:#666; --card:#f4f7fc; --line:#dbe4f2; --page:#f4f8ff; }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e8e8; --muted:#9aa4b2; --card:#15233c; --line:#27395a; --gold:#f1c44a; --page:#0b1428; } }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+    background:var(--page); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%; }
+  .top{ background:linear-gradient(160deg,var(--blue),var(--blue-deep)); padding:14px 18px; }
+  .top a{ color:#fff; text-decoration:none; font-weight:800; }
+  .wrap{ max-width:720px; margin:0 auto; padding:22px 18px 44px; }
+  .crumb{ font-size:.85em; color:var(--muted); margin:4px 0 10px; } .crumb a{ color:var(--muted); }
+  h1{ font-size:1.5em; margin:.1em 0 .4em; }
+  .lead{ color:var(--muted); margin:0 0 14px; } .muted{ color:var(--muted); }
+  .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:12px 0 6px; }
+  select{ padding:8px 11px; border-radius:9px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:15px; }
+  .tabs{ display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+  .tabs button{ border:0; background:transparent; color:var(--ink); padding:8px 15px; font-size:14px; font-weight:700; cursor:pointer; }
+  .tabs button.on{ background:var(--blue); color:#fff; }
+  table{ width:100%; border-collapse:collapse; margin:.5em 0; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th,td{ padding:9px 10px; border-bottom:1px solid var(--line); font-size:.95em; text-align:right; white-space:nowrap; }
+  th{ background:rgba(42,100,192,.10); color:var(--muted); }
+  th.l,td.l{ text-align:left; } tr:last-child td{ border-bottom:0; }
+  td.rank{ font-weight:800; width:3.4em; } .name{ font-weight:700; max-width:14em; overflow:hidden; text-overflow:ellipsis; }
+  .upd{ color:var(--muted); font-size:.82em; margin:2px 0 0; }
+  .cta{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin:18px 0; }
+  .btn{ display:inline-block; font-weight:800; text-decoration:none; border-radius:999px; padding:10px 18px; background:var(--blue); color:#fff; margin-top:6px; }
+  footer{ text-align:center; color:var(--muted); font-size:.85em; padding:22px; } footer a{ color:var(--blue); } a{ color:var(--blue); }
+</style>
+</head>
+<body>
+  <div class="top"><a href="/">🗾 日本地図 都市パズル</a></div>
+  <div class="wrap">
+    <nav class="crumb"><a href="/">ホーム</a> › プレイヤーランキング</nav>
+    <h1>🏆 プレイヤーランキング（総合）</h1>
+    <p class="lead">パズルやクイズをクリアするほどたまるポイントの、全国／都道府県別ランキング。あなたは全国何位？</p>
+
+    <div class="controls">
+      <span class="tabs" id="modeTabs">
+        <button data-m="all" class="on">総合</button>
+        <button data-m="puzzle">パズル</button>
+        <button data-m="quiz">クイズ</button>
+      </span>
+      <label>地域：<select id="pref"></select></label>
+    </div>
+    <p class="upd" id="upd"></p>
+
+    <div id="board"><p class="muted">読み込み中…</p></div>
+
+    <div class="cta">
+      <b>🎮 ランキングに参加（無料）</b><br>
+      サインインして遊べば、あなたの記録が全国・都道府県のランキングに反映されます。都道府県対抗の順位はこちら → <a href="/event/">都道府県対抗</a>
+      <br><a class="btn" href="/">アプリを見る</a>
+    </div>
+
+    <p><a href="/event/">🏁 都道府県対抗</a>　｜　<a href="/ranking/">市区町村ランキング</a>　｜　<a href="/">トップへ</a></p>
+  </div>
+  <footer>© 日本地図 都市パズル ／ お問い合わせ：<a href="mailto:limo_game@outlook.jp">limo_game@outlook.jp</a></footer>
+
+<script>
+const SUPABASE="https://djgafiowdldqtearqtdd.supabase.co";
+const ANON="sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
+const PREF={ "01":"北海道","02":"青森県","03":"岩手県","04":"宮城県","05":"秋田県","06":"山形県","07":"福島県",
+ "08":"茨城県","09":"栃木県","10":"群馬県","11":"埼玉県","12":"千葉県","13":"東京都","14":"神奈川県","15":"新潟県",
+ "16":"富山県","17":"石川県","18":"福井県","19":"山梨県","20":"長野県","21":"岐阜県","22":"静岡県","23":"愛知県",
+ "24":"三重県","25":"滋賀県","26":"京都府","27":"大阪府","28":"兵庫県","29":"奈良県","30":"和歌山県","31":"鳥取県",
+ "32":"島根県","33":"岡山県","34":"広島県","35":"山口県","36":"徳島県","37":"香川県","38":"愛媛県","39":"高知県",
+ "40":"福岡県","41":"佐賀県","42":"長崎県","43":"熊本県","44":"大分県","45":"宮崎県","46":"鹿児島県","47":"沖縄県" };
+const MEDAL=["🥇","🥈","🥉"];
+let mode="all";
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+function num(n){ return Number(n||0).toLocaleString("ja-JP"); }
+function jstDate(iso){ if(!iso) return ""; return new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(iso)); }
+
+// 地域プルダウン（全国＋47県）
+(function(){
+  const sel=document.getElementById("pref");
+  let o=['<option value="">全国</option>'];
+  for(let i=1;i<=47;i++){ const k=String(i).padStart(2,"0"); o.push(`<option value="${k}">${PREF[k]}</option>`); }
+  sel.innerHTML=o.join(""); sel.onchange=render;
+})();
+document.querySelectorAll("#modeTabs button").forEach(b=>{
+  b.onclick=()=>{ mode=b.dataset.m; document.querySelectorAll("#modeTabs button").forEach(x=>x.classList.toggle("on",x===b)); render(); };
+});
+
+async function render(){
+  const pref=document.getElementById("pref").value;
+  const board=document.getElementById("board"), upd=document.getElementById("upd");
+  board.innerHTML='<p class="muted">読み込み中…</p>'; upd.textContent="";
+  let d;
+  try{
+    const r=await fetch(`${SUPABASE}/functions/v1/get-ranking`,{method:"POST",
+      headers:{"Content-Type":"application/json","apikey":ANON,"Authorization":"Bearer "+ANON},
+      body:JSON.stringify({scope:pref?"pref":"total", scope_id:pref, mode, limit:100})});
+    d=await r.json();
+  }catch(e){ board.innerHTML='<p class="muted">読み込みに失敗しました。時間をおいてお試しください。</p>'; return; }
+  const rows=d.entries||[];
+  if(d.refreshed_at) upd.textContent="最終更新："+jstDate(d.refreshed_at);
+  if(!rows.length){ board.innerHTML='<p class="muted">まだランキングがありません。</p>'; return; }
+  const head=`<tr><th class="l">順位</th><th class="l">プレイヤー</th><th>ポイント</th><th>コース</th></tr>`;
+  const body=rows.map((r,i)=>`<tr>
+    <td class="rank l">${i<3?MEDAL[i]+" ":""}${r.rank}</td>
+    <td class="name l">${esc(r.name||"（名前なし）")}</td>
+    <td>${num(r.points)}</td>
+    <td>${num(r.boards)}</td>
+  </tr>`).join("");
+  board.innerHTML=`<table>${head}${body}</table>`;
+}
+render();
+</script>
+</body>
+</html>
