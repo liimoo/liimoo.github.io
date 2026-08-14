@@ -66,6 +66,14 @@
 
     <div class="controls">
       <label>シーズン：<select id="season"></select></label>
+      <span class="tabs" id="scopeTabs">
+        <button data-sc="pref" class="on">都道府県</button>
+        <button data-sc="city_all">街</button>
+        <button data-sc="user_all">ユーザー</button>
+      </span>
+    </div>
+    <div class="controls" id="divWrap">
+      <span class="muted" style="font-size:.85em">部門</span>
       <span class="tabs" id="tabs">
         <button data-s="points" class="on">合計</button>
         <button data-s="members">参加人数</button>
@@ -96,8 +104,10 @@ const PREF={ "01":"北海道","02":"青森県","03":"岩手県","04":"宮城県"
  "32":"島根県","33":"岡山県","34":"広島県","35":"山口県","36":"徳島県","37":"香川県","38":"愛媛県","39":"高知県",
  "40":"福岡県","41":"佐賀県","42":"長崎県","43":"熊本県","44":"大分県","45":"宮崎県","46":"鹿児島県","47":"沖縄県" };
 const MEDAL=["🥇","🥈","🥉"];
-let SEASONS=[], RUNNING=null, division="points";
+let SEASONS=[], RUNNING=null, division="points", scope="pref", CITY=null;
 
+async function ensureCity(){ if(CITY) return; try{ CITY=await (await fetch("/assets/japanmap/city_names.json")).json(); }catch(e){ CITY={}; } }
+function cityName(id){ return (CITY&&CITY[id])||String(id); }
 function prefName(id){ const k=String(id).padStart(2,"0"); return PREF[k]||("第"+id); }
 function num(n){ return Number(n||0).toLocaleString("ja-JP"); }
 function jstMD(iso, isEnd){
@@ -144,6 +154,10 @@ async function boot(){
   document.getElementById("tabs").querySelectorAll("button").forEach(b=>{
     b.onclick=()=>{ division=b.dataset.s; document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b)); render(); };
   });
+  document.querySelectorAll("#scopeTabs button").forEach(b=>{
+    b.onclick=()=>{ scope=b.dataset.sc; document.querySelectorAll("#scopeTabs button").forEach(x=>x.classList.toggle("on",x===b));
+      document.getElementById("divWrap").style.display = (scope==="pref") ? "" : "none"; render(); };
+  });
   render();
 }
 
@@ -151,23 +165,32 @@ async function render(){
   const seasonId=Number(document.getElementById("season").value);
   const board=document.getElementById("board");
   board.innerHTML='<p class="muted">読み込み中…</p>';
+  if(scope==="city_all") await ensureCity();
+  const sort = (scope==="pref") ? division : "points";
+  const limit = (scope==="pref") ? 47 : 50;
   let d;
-  try{ d=await api({action:"standings",scope:"pref",sort:division,season_id:seasonId,limit:47}); }
+  try{ d=await api({action:"standings",scope,sort,season_id:seasonId,limit}); }
   catch(e){ board.innerHTML='<p class="muted">読み込みに失敗しました。</p>'; return; }
   const rows=d.rows||[];
   if(!rows.length){ board.innerHTML='<p class="muted">このシーズンの集計はまだありません。</p>'; return; }
-  const act=(k)=>division===k?" act":"";
-  const head=`<tr><th class="l">順位</th><th class="l">都道府県</th><th class="${act('points')}">合計</th><th class="${act('members')}">人数</th><th class="${act('per')}">1人あたり</th></tr>`;
-  const body=rows.map((r,i)=>{
-    const medal=i<3?MEDAL[i]+" ":"";
-    return `<tr>
-      <td class="rank l">${medal}${r.rank}</td>
-      <td class="pref l">${esc(prefName(r.id))}</td>
+  const medal=(i)=> i<3?MEDAL[i]+" ":"";
+  let head, body;
+  if(scope==="user_all"){
+    head=`<tr><th class="l">順位</th><th class="l">プレイヤー</th><th>合計</th></tr>`;
+    body=rows.map((r,i)=>`<tr><td class="rank l">${medal(i)}${r.rank_all}</td><td class="pref l">${esc(r.name||"（名前なし）")}</td><td>${num(r.points)}</td></tr>`).join("");
+  } else {
+    const isCity=(scope==="city_all");
+    const act=(k)=>(!isCity && division===k)?" act":"";
+    const nameOf=(r)=> isCity ? cityName(r.id) : prefName(r.id);
+    head=`<tr><th class="l">順位</th><th class="l">${isCity?"街":"都道府県"}</th><th class="${act('points')}">合計</th><th class="${act('members')}">人数</th><th class="${act('per')}">1人あたり</th></tr>`;
+    body=rows.map((r,i)=>`<tr>
+      <td class="rank l">${medal(i)}${r.rank_all}</td>
+      <td class="pref l">${esc(nameOf(r))}</td>
       <td class="${act('points')}">${num(r.points)}</td>
       <td class="${act('members')}">${num(r.members)}</td>
       <td class="${act('per')}">${num(r.per)}</td>
-    </tr>`;
-  }).join("");
+    </tr>`).join("");
+  }
   board.innerHTML=`<table>${head}${body}</table>`;
 }
 boot();
