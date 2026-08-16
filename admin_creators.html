@@ -199,13 +199,58 @@ function render(rows){
       <div class="body"><b>${esc(c.name)}</b>${c.note ? " — " + esc(c.note) : ""}</div>
       <div class="meta"><a href="${esc(c.channel_url)}" target="_blank" rel="noopener">${esc(c.channel_url)}</a>${video}${email}</div>
       <div class="row" style="margin-top:10px">
+        <button class="b-blue" onclick="toggleEdit(${c.id})">✏️ 編集</button>
         <button class="b-green" onclick="setStatus(${c.id},'approved')">承認（公開）</button>
         <button class="b-orange" onclick="setStatus(${c.id},'rejected')">却下（非公開）</button>
         <button class="b-gray" onclick="setStatus(${c.id},'pending')">承認待ちに</button>
         <button class="b-red" onclick="del(${c.id})">削除</button>
       </div>
+      <div class="form hidden" id="ed-${c.id}" style="margin-top:12px">
+        <label class="full">配信者名<input id="e-name-${c.id}" value="${esc(c.name)}"></label>
+        <label class="full">チャンネルURL<input id="e-channel-${c.id}" value="${esc(c.channel_url)}"></label>
+        <label>プラットフォーム
+          <select id="e-platform-${c.id}">
+            ${["youtube","twitch","tiktok","other"].map(p=>
+              `<option value="${p}"${c.platform===p?" selected":""}>${p}</option>`).join("")}
+          </select>
+        </label>
+        <label>表示順（大きいほど上）<input id="e-sort-${c.id}" type="number" value="${c.sort||0}"></label>
+        <label class="full">紹介動画URL<input id="e-video-${c.id}" value="${esc(c.video_url||"")}"></label>
+        <label class="full">一言紹介<input id="e-note-${c.id}" maxlength="200" value="${esc(c.note||"")}"></label>
+        <label class="full">サムネURL（空にして保存すると動画URLから自動取得）<input id="e-thumb-${c.id}" value="${esc(c.thumbnail_url||"")}"></label>
+        <label class="full">連絡先メール（非公開）<input id="e-email-${c.id}" value="${esc(c.contact_email||"")}"></label>
+        <div class="full"><button class="b-green" onclick="saveEdit(${c.id})">保存する</button>
+          <button class="b-gray" onclick="toggleEdit(${c.id})">やめる</button>
+          <span class="muted" id="em-${c.id}"></span></div>
+      </div>
     </div>`;
   }).join("");
+}
+
+// 各カードの編集フォームを開閉
+function toggleEdit(id){
+  const el = document.getElementById("ed-"+id);
+  if (el) el.classList.toggle("hidden");
+}
+
+// 編集内容を保存（送った項目だけ更新される）
+async function saveEdit(id){
+  const g = k => document.getElementById(`e-${k}-${id}`).value.trim();
+  const msg = document.getElementById("em-"+id);
+  const name = g("name"), channel_url = g("channel");
+  if (!name || !/^https?:\/\//i.test(channel_url)){ msg.textContent = "配信者名と正しいチャンネルURLは必須です"; return; }
+  msg.textContent = "保存中…";
+  try {
+    await api("update_creator", {
+      creator_id: id, name, channel_url,
+      video_url: g("video"), note: g("note"),
+      thumbnail_url: g("thumb"), contact_email: g("email"),
+      platform: document.getElementById(`e-platform-${id}`).value,
+      sort: Number(g("sort")||0),
+    });
+    msg.textContent = "保存しました";
+    await load();
+  } catch(e){ msg.textContent = "保存失敗: " + (e && e.message ? e.message : e); }
 }
 
 async function setStatus(creator_id, status){
