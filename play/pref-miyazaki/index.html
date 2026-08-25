@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18330119849"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18330119849');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宮崎県の市区町村パズル（全26）｜無料・ブラウザで遊べる</title>
+<meta name="description" content="宮崎県の市区町村26（宮崎・都城・延岡…）をドラッグして地図を完成させる無料のブラウザパズル。インストール不要・登録なし。地理学習や中学受験対策にも。">
+<link rel="canonical" href="https://japan-map.app/play/pref-miyazaki/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="宮崎県の市区町村パズル（全26）｜ブラウザで無料であそべる">
+<meta property="og:description" content="宮崎県の市区町村26（宮崎・都城・延岡…）をドラッグして地図を完成させる無料のブラウザパズル。インストール不要・登録なし。地理学習や中学受験対策にも。">
+<meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<meta property="og:url" content="https://japan-map.app/play/pref-miyazaki/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<style>
+  :root{ color-scheme: light dark;
+    --blue:#2a64c0; --blue-deep:#0a3478; --accent:#ff8a3d;
+    --ink:#1a1a1a; --muted:#666; --card:#f4f7fc; --line:#c9d6ea; --slot:#e7eefb;
+    --page:linear-gradient(180deg,#e9f0fb 0%, #fbfdff 24%, #ffffff 100%); }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e8e8; --muted:#9aa4b2; --card:#15233c; --line:#31456a; --slot:#13233e;
+            --page:linear-gradient(180deg,#10254a 0%, #0c1a33 38%, #0a1120 100%); } }
+  *{ box-sizing:border-box; }
+  body{ font-family:-apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+    margin:0; color:var(--ink); background:var(--page); line-height:1.7; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 14px; }
+  .top{ padding:14px 0 2px; } .top a{ color:var(--blue); font-weight:700; text-decoration:none; }
+  header.pg{ text-align:center; padding:6px 0 2px; }
+  header.pg h1{ font-size:1.4em; color:var(--blue); margin:0 0 3px; }
+  header.pg p{ color:var(--muted); margin:0; font-size:.92em; }
+  header.pg .intro{ max-width:600px; margin:4px auto 0; }
+  .wards{ text-align:center; color:var(--muted); font-size:.78em; line-height:1.7; margin:14px 0 0; }
+  .pzlist{ display:flex; gap:6px; overflow-x:auto; padding:8px 2px 4px; align-items:center; font-size:.84em;
+    -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+  .pzlist .lbl{ color:var(--muted); font-weight:700; flex:0 0 auto; }
+  /* 政令市と都道府県のあいだで改行する（flexの行を強制的に折る） */
+  .pzlist .navbr{ flex-basis:100%; height:0; }
+  .pzlist a{ flex:0 0 auto; color:var(--blue); text-decoration:none; background:var(--card);
+    border:1px solid var(--line); border-radius:999px; padding:3px 11px; white-space:nowrap; }
+  .pzlist .cur{ flex:0 0 auto; background:var(--blue); color:#fff; border-radius:999px; padding:3px 11px; white-space:nowrap; }
+  .hud{ display:flex; justify-content:center; gap:14px; align-items:center; margin:8px 0 4px; font-weight:700; flex-wrap:wrap; }
+  .hud .val{ color:var(--blue); }
+  .hud button{ font:inherit; font-weight:700; border:1px solid var(--line); background:var(--card);
+    color:var(--ink); border-radius:999px; padding:4px 12px; cursor:pointer; }
+  .board-wrap{ position:relative; }
+  svg#board{ width:100%; height:auto; max-height:54vh; display:block; touch-action:none; }
+  .slot{ fill:var(--slot); stroke:var(--line); stroke-width:4.196; }
+  #placed .piece use{ stroke:#fff; stroke-width:3.597; }
+  #placed .piece text{ fill:#fff; text-anchor:middle; dominant-baseline:middle; font-weight:800;
+    pointer-events:none; paint-order:stroke; stroke:rgba(0,0,0,.30); stroke-width:3.597px; }
+  #placed .piece .name{ font-size:19.33px; }
+  #placed .piece .ruby{ font-size:10.63px; font-weight:700; }
+  .tray-hint{ text-align:center; color:var(--muted); font-size:.82em; margin:6px 0 2px; }
+  .tray{ display:flex; gap:8px; overflow-x:auto; overflow-y:hidden; padding:6px 2px 10px;
+    -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+  .thumb{ flex:0 0 auto; width:72px; background:var(--card); border:1px solid var(--line); border-radius:11px;
+    padding:6px 4px 4px; cursor:grab; display:flex; flex-direction:column; align-items:center; gap:2px;
+    touch-action:pan-x; -webkit-user-select:none; user-select:none; }
+  .thumb svg{ width:56px; height:46px; display:block; overflow:visible; }
+  .thumb use{ stroke:#fff; stroke-width:3.597; }
+  .thumb span{ font-size:.72em; font-weight:700; color:var(--ink); white-space:nowrap; line-height:1.05; }
+  .thumb rt{ font-size:.58em; font-weight:600; color:var(--muted); }
+  .thumb.gone{ display:none; }
+  .ghost{ position:fixed; pointer-events:none; z-index:60; filter:drop-shadow(0 3px 6px rgba(0,0,0,.45)); }
+  .ghost use{ stroke:#fff; stroke-width:3.597; }
+  .win{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; }
+  .win.show{ display:flex; }
+  .win .card{ background:linear-gradient(160deg,var(--blue),var(--blue-deep)); color:#fff;
+    border-radius:18px; padding:22px 24px; text-align:center; box-shadow:0 16px 40px rgba(8,36,92,.4); max-width:88%; }
+  .win h2{ margin:0 0 6px; color:#fff; } .win p{ margin:0 0 14px; color:rgba(255,255,255,.94); }
+  .win .btns{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .win .btns a, .win .btns button{ font:inherit; font-weight:800; border:0; cursor:pointer;
+    background:#fff; color:var(--blue-deep); padding:9px 16px; border-radius:999px; text-decoration:none; }
+  .cta{ text-align:center; margin:12px 0 6px; }
+  .cta .b{ display:inline-block; font-weight:800; background:var(--blue); color:#fff;
+    padding:11px 22px; border-radius:999px; text-decoration:none; }
+  footer.pg{ text-align:center; color:var(--muted); font-size:.88em; padding:14px 0 30px; }
+  footer.pg a{ color:var(--blue); }
+</style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <path id="p0" d="M429.7 620.4 L433.0 625.7 L430.3 627.1 L431.1 624.3 L427.3 628.1 L429.7 631.9 L429.7 634.8 L427.7 634.7 L425.5 630.7 L408.8 629.3 L402.9 625.8 L399.8 620.1 L393.0 619.3 L392.5 610.6 L386.9 609.3 L384.2 604.7 L381.4 605.5 L380.5 608.9 L373.2 608.9 L362.0 605.4 L361.9 603.3 L348.0 603.6 L346.8 611.6 L336.6 612.8 L325.6 609.9 L324.2 604.0 L319.2 606.1 L311.9 605.0 L311.4 589.9 L302.2 579.7 L308.8 573.3 L312.9 573.3 L314.0 570.0 L313.0 567.5 L310.3 567.4 L310.7 562.9 L316.0 564.7 L319.2 562.7 L316.8 559.6 L319.2 554.3 L316.4 555.1 L315.3 552.9 L317.5 548.7 L313.9 549.7 L311.2 554.2 L300.1 551.7 L294.5 561.4 L288.9 557.8 L286.0 552.3 L286.3 537.1 L291.1 532.7 L296.6 535.9 L301.6 532.1 L298.7 526.3 L294.6 525.8 L295.0 523.2 L287.8 518.8 L287.6 514.8 L291.2 509.2 L294.5 508.0 L295.5 505.0 L293.3 503.2 L296.2 501.4 L291.4 500.2 L289.7 496.4 L298.2 492.6 L304.1 505.2 L318.5 500.3 L321.3 501.8 L331.1 499.0 L339.1 499.9 L349.1 507.8 L356.6 508.3 L359.3 501.6 L367.4 500.1 L369.8 502.4 L374.0 501.4 L379.8 506.9 L384.2 494.5 L382.4 492.0 L383.5 488.6 L388.9 482.6 L387.4 473.2 L393.8 465.8 L391.5 463.7 L396.0 456.4 L404.2 459.0 L407.9 463.4 L417.2 461.0 L439.5 469.0 L449.7 466.4 L432.1 518.2 L432.3 525.7 L430.4 526.4 L432.1 528.4 L429.6 528.3 L430.2 529.7 L432.5 527.9 L433.5 532.2 L430.5 530.2 L425.5 533.9 L422.8 543.0 L426.3 541.7 L427.8 535.2 L432.1 535.9 L439.5 530.0 L430.3 535.7 L428.0 544.2 L424.5 547.7 L425.0 552.6 L427.7 552.3 L426.6 556.0 L423.6 556.2 L422.0 562.3 L422.7 585.4 L431.7 592.3 L430.8 595.1 L433.0 596.0 L431.5 596.3 L433.5 595.5 L436.9 601.0 L440.5 601.5 L434.2 613.3 L434.7 618.2 L434.9 615.8 L432.7 615.0 L431.4 615.9 L433.3 617.0 L430.0 618.4 Z"/>
+    <path id="p1" d="M200.8 662.8 L210.7 669.3 L215.7 680.2 L224.7 667.7 L228.6 666.3 L248.5 682.3 L253.8 683.8 L265.3 681.9 L272.6 677.0 L280.2 683.5 L287.7 687.2 L288.7 685.9 L289.8 680.6 L292.3 679.3 L289.8 674.4 L281.1 671.2 L275.0 662.1 L262.8 662.2 L257.8 658.0 L253.0 657.4 L247.3 646.3 L237.0 640.2 L239.6 632.8 L236.7 631.5 L243.1 630.3 L239.9 629.2 L239.8 624.6 L243.6 619.1 L240.9 614.0 L245.2 608.5 L253.0 607.2 L258.2 613.9 L256.6 614.9 L263.6 619.3 L264.9 625.0 L275.9 627.1 L282.5 617.3 L293.7 614.3 L294.2 609.9 L298.5 608.6 L301.4 602.5 L304.7 603.0 L308.3 595.4 L311.8 595.1 L311.4 589.8 L302.2 579.5 L308.8 573.3 L312.9 573.3 L314.0 570.0 L313.0 567.5 L310.3 567.4 L310.7 562.9 L316.0 564.7 L319.2 562.7 L316.8 559.6 L319.2 554.3 L316.2 554.9 L315.6 551.5 L317.9 549.0 L315.7 548.5 L311.2 554.2 L300.0 551.7 L294.5 561.4 L288.8 557.8 L285.9 552.1 L286.3 537.1 L291.1 532.7 L296.6 535.9 L301.6 532.1 L298.6 526.2 L294.3 525.5 L295.0 523.2 L278.4 519.0 L275.6 522.0 L266.5 522.9 L266.7 520.0 L255.9 519.0 L240.1 526.2 L238.6 522.8 L235.1 522.0 L232.8 526.3 L241.2 531.5 L237.7 536.9 L230.8 537.3 L222.1 533.6 L216.8 533.7 L208.5 526.7 L202.3 526.0 L202.6 528.9 L199.4 532.2 L201.2 534.6 L197.9 534.3 L194.0 538.6 L187.5 550.3 L178.1 552.5 L161.1 547.1 L150.7 550.0 L137.9 549.8 L133.0 553.5 L129.5 562.1 L129.8 568.8 L122.8 571.8 L126.5 577.5 L124.2 579.3 L123.8 585.8 L127.7 591.1 L136.5 593.4 L144.7 591.8 L151.8 601.3 L170.0 603.7 L172.7 601.9 L182.4 605.4 L183.2 608.9 L181.6 611.8 L178.6 610.8 L176.4 619.0 L182.7 619.2 L186.4 621.9 L196.2 621.2 L196.7 632.8 L194.3 638.9 L202.6 647.3 L199.8 650.0 L201.4 655.1 L199.7 658.7 L202.6 659.1 L201.8 662.0 Z"/>
+    <path id="p2" d="M512.4 221.5 L505.9 222.9 L505.0 217.8 L500.7 214.3 L493.9 218.3 L488.6 212.5 L488.8 207.6 L480.5 208.1 L478.9 211.3 L471.5 213.2 L462.1 209.0 L460.9 210.7 L457.3 209.7 L448.9 202.0 L435.2 197.0 L425.6 201.8 L410.3 202.5 L409.5 200.6 L415.4 195.9 L415.7 192.0 L419.2 191.8 L418.4 183.0 L421.7 172.6 L419.8 166.1 L412.7 162.4 L415.7 158.7 L413.7 157.3 L415.6 151.5 L412.2 148.1 L419.4 142.6 L422.0 131.7 L436.1 122.6 L438.6 115.1 L436.7 108.3 L441.4 103.0 L440.5 98.9 L437.0 96.7 L441.0 90.0 L450.7 89.7 L465.3 97.7 L481.7 100.1 L494.2 89.1 L498.7 90.7 L510.8 89.5 L533.8 93.6 L547.6 89.4 L554.6 90.9 L558.1 82.5 L564.9 77.0 L568.4 60.2 L571.3 58.6 L584.5 56.1 L595.0 58.9 L598.5 65.0 L600.7 63.4 L605.1 64.9 L614.3 60.8 L619.5 66.1 L626.5 67.1 L631.8 65.0 L632.7 73.2 L624.5 88.4 L627.2 95.6 L624.5 103.4 L626.0 109.5 L646.0 104.3 L641.6 107.7 L641.6 110.6 L631.7 111.8 L635.3 119.6 L627.6 116.6 L629.4 118.3 L625.9 120.7 L625.4 124.1 L630.8 129.3 L627.8 131.7 L625.9 130.7 L625.5 132.9 L621.6 132.5 L619.3 130.7 L621.6 131.1 L621.2 129.3 L619.8 130.7 L619.2 128.4 L615.0 128.0 L618.0 128.1 L614.6 126.3 L617.1 125.5 L615.8 124.8 L611.7 127.4 L613.2 125.3 L610.4 126.6 L612.3 129.5 L609.3 129.8 L611.0 130.8 L610.0 134.7 L597.6 139.7 L596.3 147.7 L594.0 146.7 L594.4 141.6 L589.8 141.5 L587.2 149.9 L582.2 149.7 L582.4 151.8 L586.7 152.9 L583.3 152.9 L583.7 157.8 L576.1 156.4 L579.1 157.9 L579.7 161.7 L580.5 158.5 L581.8 160.3 L586.2 157.5 L588.0 159.1 L587.7 162.1 L581.5 168.6 L582.6 172.9 L577.5 174.0 L578.5 178.4 L574.5 179.1 L571.8 184.1 L556.1 185.1 L543.3 203.0 L540.7 214.3 L544.5 221.4 L541.3 223.2 L541.9 226.9 L545.9 227.7 L543.5 224.7 L546.0 223.6 L548.6 226.2 L547.5 227.9 L549.4 226.0 L550.4 228.6 L548.7 224.1 L550.1 222.3 L555.6 223.3 L557.3 221.3 L555.1 230.3 L564.4 233.3 L553.8 232.6 L541.5 236.9 L537.6 232.9 L533.6 233.1 L531.2 227.6 L513.6 220.0 Z"/>
+    <path id="p3" d="M386.8 747.8 L386.5 751.8 L382.5 754.2 L375.7 752.4 L368.5 754.6 L358.5 752.0 L356.8 748.1 L351.6 752.4 L346.7 750.7 L343.5 752.6 L340.5 748.6 L341.2 746.1 L336.3 743.2 L338.0 734.9 L331.6 730.5 L333.3 727.9 L332.1 723.2 L325.2 718.9 L329.6 714.0 L327.7 710.1 L322.0 708.7 L319.6 704.6 L318.9 700.3 L321.7 694.3 L320.4 689.9 L311.0 684.1 L303.8 686.2 L300.1 684.6 L298.2 680.1 L281.1 671.2 L275.1 662.1 L270.5 660.9 L275.1 653.1 L282.5 646.6 L292.7 643.6 L298.0 640.3 L296.7 638.0 L306.3 638.4 L311.5 628.4 L322.1 627.1 L326.8 617.0 L327.1 610.2 L336.6 612.8 L346.8 611.7 L348.0 603.6 L361.9 603.3 L362.0 605.4 L373.2 608.9 L380.5 608.9 L381.4 605.5 L384.2 604.7 L386.9 609.3 L392.5 610.6 L393.0 619.3 L399.8 620.1 L402.9 625.8 L410.9 630.1 L425.5 630.7 L429.7 634.8 L425.6 636.2 L424.7 641.6 L427.1 643.8 L423.3 647.3 L428.8 649.6 L430.2 652.8 L420.5 656.6 L423.3 658.5 L421.6 661.5 L426.4 661.4 L427.3 665.9 L424.3 667.2 L429.2 670.1 L430.5 674.3 L424.5 673.4 L421.8 677.5 L426.7 680.7 L423.7 684.9 L404.0 695.3 L399.1 702.9 L401.7 708.6 L397.7 717.3 L398.8 714.7 L397.9 711.9 L396.3 712.5 L399.7 709.9 L395.6 706.7 L397.0 708.5 L394.3 708.5 L394.3 710.3 L396.0 709.4 L394.0 711.2 L395.7 712.3 L389.9 715.8 L393.3 718.7 L388.5 719.7 L388.0 718.0 L384.9 721.0 L385.2 725.9 L387.8 725.2 L385.9 727.0 L389.3 727.0 L389.2 729.0 L387.1 729.4 L386.5 732.8 L384.2 732.2 L384.8 736.0 L387.8 737.2 L385.1 740.2 L385.9 743.5 L383.3 739.0 L380.4 740.1 L383.4 742.7 L380.8 744.2 L381.4 746.4 Z"/>
+    <path id="p4" d="M126.9 534.4 L134.2 548.5 L143.2 549.4 L142.3 537.7 L144.5 533.8 L158.4 527.9 L161.0 524.2 L170.9 525.8 L172.5 523.1 L170.1 513.7 L177.9 503.0 L182.5 509.1 L186.0 509.8 L186.6 514.1 L192.8 519.8 L195.6 518.2 L195.6 514.8 L198.2 516.2 L204.6 513.3 L208.6 515.6 L208.6 512.9 L216.1 511.6 L226.2 516.8 L230.3 522.6 L238.5 522.7 L239.9 526.2 L255.9 519.0 L266.7 520.0 L266.5 522.9 L275.6 522.0 L278.4 519.0 L290.5 521.6 L287.4 515.5 L291.2 509.2 L294.5 508.0 L295.5 505.0 L293.3 503.2 L295.8 500.6 L291.4 500.2 L289.7 496.4 L283.2 494.1 L278.1 493.0 L277.8 495.6 L274.0 493.8 L272.6 486.2 L265.4 477.7 L269.1 476.1 L268.9 467.6 L274.0 463.0 L273.8 457.0 L270.2 452.4 L283.3 446.2 L279.3 440.3 L280.6 434.0 L276.8 424.8 L274.1 423.3 L274.8 420.5 L269.1 419.0 L265.7 422.5 L265.0 419.8 L256.6 419.8 L255.1 414.7 L250.4 415.6 L243.9 407.5 L237.9 411.6 L224.7 407.5 L218.0 410.3 L206.8 402.3 L198.7 402.9 L194.3 400.1 L188.7 402.7 L186.4 407.8 L183.6 408.7 L185.4 409.7 L184.2 413.3 L174.4 419.6 L174.4 427.9 L167.7 428.2 L163.4 430.9 L168.4 445.0 L173.1 448.5 L169.7 448.6 L169.6 451.1 L163.9 453.3 L160.0 458.3 L159.3 464.2 L146.7 472.7 L130.6 470.4 L124.4 477.5 L127.4 481.5 L124.5 494.6 L130.1 495.3 L132.1 503.4 L123.2 509.1 L121.0 517.0 L115.8 524.6 L126.7 531.2 Z"/>
+    <path id="p5" d="M504.7 317.1 L491.8 335.4 L492.0 332.1 L487.7 330.5 L483.6 337.1 L479.3 335.0 L476.1 332.7 L477.4 328.5 L475.7 324.2 L471.8 322.9 L461.1 325.3 L457.4 330.2 L445.3 337.6 L441.9 334.8 L439.2 335.9 L438.2 330.4 L431.7 325.3 L426.7 329.9 L418.6 328.1 L407.9 332.0 L386.0 326.4 L375.3 330.3 L375.8 327.1 L379.2 326.7 L378.9 323.8 L368.3 318.5 L364.3 319.9 L362.7 316.4 L365.7 304.7 L368.4 306.0 L369.3 300.5 L383.5 306.7 L387.3 302.9 L393.0 301.5 L397.7 288.7 L418.5 287.1 L422.0 283.5 L429.1 283.3 L433.9 280.6 L437.8 274.8 L436.0 264.7 L437.5 263.0 L433.3 260.2 L435.8 256.2 L448.7 253.9 L452.0 258.1 L464.3 260.5 L466.0 264.1 L471.6 260.4 L480.9 260.0 L492.6 244.1 L499.6 246.4 L503.0 251.5 L508.5 249.0 L513.7 253.9 L526.4 254.4 L525.3 257.2 L527.4 258.9 L519.8 263.1 L524.5 265.4 L531.5 257.8 L532.6 261.1 L530.3 264.5 L537.5 261.1 L536.8 255.4 L536.3 259.1 L540.9 264.7 L539.5 267.8 L530.2 267.0 L526.6 269.4 L534.5 268.6 L537.6 272.3 L541.7 269.5 L544.8 271.0 L540.6 272.5 L542.6 274.0 L534.3 274.9 L534.2 277.2 L525.4 276.4 L525.6 278.3 L521.2 279.1 L514.8 293.7 L517.2 295.4 L516.9 298.4 L512.9 299.7 L509.8 305.7 L513.2 313.1 L505.8 314.3 L505.7 317.0 Z"/>
+    <path id="p6" d="M312.3 791.2 L314.3 789.9 L313.1 787.0 L307.8 785.2 L305.3 788.6 L301.2 780.3 L294.0 777.8 L296.2 776.1 L293.8 776.2 L294.3 773.6 L291.2 773.1 L291.0 775.8 L290.7 772.7 L281.7 771.6 L277.8 775.2 L274.6 770.5 L270.4 770.1 L272.0 757.5 L276.1 752.3 L275.5 749.3 L289.6 743.2 L291.5 740.0 L289.5 723.6 L285.3 719.5 L290.9 716.0 L293.9 707.8 L283.4 692.1 L285.6 686.0 L287.8 687.2 L292.7 678.1 L298.2 680.1 L299.5 684.1 L303.7 686.2 L311.0 684.1 L321.0 690.8 L319.6 704.6 L322.0 708.7 L327.7 710.1 L329.6 714.0 L325.2 718.9 L332.1 723.2 L333.3 727.9 L331.6 730.5 L338.0 734.9 L336.3 743.2 L341.2 746.1 L340.5 748.6 L343.4 752.5 L346.7 750.7 L351.6 752.4 L356.8 748.1 L358.5 752.0 L368.6 754.6 L375.7 752.4 L383.2 754.1 L387.8 751.4 L386.1 754.1 L388.4 753.6 L389.2 756.9 L386.7 760.0 L375.3 763.8 L375.3 771.0 L380.2 775.3 L380.0 785.4 L376.7 790.3 L365.1 794.9 L364.2 798.6 L366.4 801.6 L359.7 802.9 L362.3 802.7 L359.9 804.1 L360.8 810.8 L369.0 815.5 L367.0 819.9 L361.4 821.3 L354.8 818.9 L351.0 815.2 L350.4 808.3 L347.7 805.9 L341.4 808.6 L338.8 806.3 L333.6 810.7 L319.0 811.0 L313.3 806.3 L309.5 798.3 L310.1 793.1 Z"/>
+    <path id="p7" d="M311.2 404.4 L303.0 401.2 L299.7 403.5 L296.7 412.8 L289.6 412.2 L286.3 414.6 L287.7 422.0 L293.5 427.4 L300.2 426.1 L309.9 437.6 L315.7 439.9 L325.6 439.3 L334.8 452.9 L349.3 459.0 L351.2 457.0 L358.7 469.3 L365.7 475.2 L375.3 476.7 L380.6 481.2 L387.8 480.9 L387.4 473.2 L393.8 465.8 L391.5 463.7 L396.0 456.4 L404.2 459.0 L407.3 463.1 L411.6 462.7 L405.8 458.4 L405.2 454.8 L401.5 453.6 L406.0 447.5 L404.0 443.5 L398.1 450.2 L398.0 447.2 L401.4 444.8 L404.5 437.4 L416.3 427.3 L417.3 421.2 L420.5 417.4 L412.0 415.1 L407.4 411.5 L406.0 407.2 L402.1 405.8 L402.0 399.8 L394.7 393.3 L390.0 380.2 L372.6 364.5 L368.8 356.6 L369.0 354.0 L372.9 353.1 L370.1 348.0 L361.8 345.7 L356.9 347.7 L348.8 342.3 L345.8 336.5 L336.3 330.5 L323.6 326.8 L317.8 320.5 L302.8 322.7 L292.0 315.1 L285.9 314.0 L278.9 322.3 L278.2 330.0 L288.6 331.7 L292.7 336.1 L292.6 339.4 L304.7 348.0 L302.1 356.0 L306.8 360.5 L317.1 379.0 L332.7 381.7 L330.4 385.4 L326.1 386.5 L333.1 396.7 L326.5 397.4 L319.9 404.5 L313.0 403.8 Z"/>
+    <path id="p8" d="M115.7 524.6 L121.0 517.0 L123.2 509.1 L132.1 503.4 L130.1 495.3 L124.5 494.6 L127.4 481.5 L124.4 477.5 L130.6 470.4 L146.7 472.7 L159.3 464.2 L160.0 458.3 L163.9 453.3 L173.6 447.7 L168.4 445.0 L163.5 430.7 L158.7 428.5 L152.9 430.3 L138.9 421.3 L134.3 425.2 L119.8 430.9 L113.8 438.8 L104.0 434.9 L98.3 437.0 L94.8 441.3 L71.4 437.7 L63.0 440.3 L59.0 436.5 L54.0 439.7 L50.5 434.0 L42.9 438.2 L40.5 446.1 L34.1 450.5 L34.1 460.4 L51.5 465.7 L56.2 468.7 L56.5 472.0 L62.6 473.2 L64.3 477.8 L72.3 482.1 L74.7 499.2 L81.2 504.3 L84.7 511.0 L84.1 516.5 L92.3 520.8 L105.6 520.1 L114.9 524.3 Z"/>
+    <path id="p9" d="M261.2 661.2 L269.6 661.6 L282.5 646.6 L292.7 643.6 L298.0 640.3 L296.7 638.0 L306.3 638.4 L311.5 628.4 L322.1 627.1 L326.8 617.0 L325.7 605.0 L312.4 605.3 L310.4 601.8 L312.3 595.6 L308.4 595.3 L304.7 603.0 L301.4 602.5 L298.5 608.6 L294.2 609.9 L293.7 614.3 L282.5 617.3 L275.9 627.1 L264.9 625.0 L263.6 619.3 L256.6 614.9 L258.2 613.9 L253.0 607.2 L245.1 608.6 L240.9 614.0 L243.6 619.1 L239.8 624.6 L239.9 629.2 L243.1 630.3 L236.9 631.0 L239.6 632.8 L237.0 640.2 L247.3 646.3 L253.0 657.4 L260.4 660.4 Z"/>
+    <path id="p10" d="M187.9 549.2 L197.6 534.5 L201.2 534.6 L199.4 532.2 L202.6 528.8 L202.3 526.0 L208.5 526.7 L216.8 533.7 L222.1 533.6 L230.8 537.3 L237.7 536.9 L240.9 529.6 L233.2 526.7 L233.5 522.5 L230.3 522.6 L226.2 516.8 L216.7 511.6 L208.6 512.9 L208.4 515.6 L204.6 513.3 L198.2 516.2 L195.6 514.8 L195.6 518.2 L192.8 519.8 L186.6 514.1 L186.0 509.8 L182.5 509.1 L177.9 503.0 L170.1 513.7 L172.5 523.1 L170.9 525.8 L161.0 524.2 L158.5 527.9 L146.8 531.4 L144.4 534.0 L142.3 537.7 L142.9 549.4 L150.7 550.0 L161.6 547.1 L178.1 552.5 L187.8 549.9 Z"/>
+    <path id="p11" d="M327.1 500.0 L339.1 499.9 L349.1 507.8 L355.5 508.4 L359.3 501.6 L367.7 500.1 L369.8 502.4 L374.0 501.4 L379.8 506.9 L384.2 494.5 L382.4 492.0 L383.5 488.6 L388.9 482.5 L363.3 473.9 L353.4 462.4 L351.6 457.3 L349.3 459.0 L334.8 452.9 L325.6 439.3 L315.7 439.9 L309.9 437.6 L300.2 426.1 L293.5 427.4 L289.7 422.7 L285.3 422.4 L286.8 437.8 L293.7 443.8 L294.2 448.9 L300.9 461.8 L313.8 472.8 L316.2 473.9 L318.5 472.0 L320.3 474.8 L322.6 474.5 L331.0 485.0 L331.5 491.1 L329.9 491.5 L331.7 493.5 L327.2 499.5 Z"/>
+    <path id="p12" d="M289.7 496.4 L298.2 492.6 L304.1 505.2 L318.6 500.3 L321.6 501.7 L330.2 496.6 L331.3 485.8 L322.6 474.5 L320.3 474.8 L318.5 472.0 L316.2 473.9 L313.8 472.8 L300.9 461.8 L294.2 448.9 L293.7 443.8 L286.8 437.8 L285.5 422.6 L276.1 423.3 L280.6 434.1 L279.3 440.3 L283.3 446.2 L270.2 452.4 L273.8 457.0 L274.0 463.0 L268.9 467.6 L269.1 476.1 L265.4 477.7 L272.6 486.2 L274.0 493.8 L277.9 495.6 L278.2 493.0 L289.0 496.3 Z"/>
+    <path id="p13" d="M446.5 407.0 L442.5 406.5 L439.1 411.1 L434.6 409.9 L433.5 414.0 L426.0 418.4 L424.4 421.9 L417.7 420.6 L416.9 424.2 L425.5 426.4 L427.9 431.4 L433.6 435.2 L446.6 434.5 L449.7 440.8 L456.7 445.2 L467.1 422.0 L468.8 408.9 L465.7 409.4 L456.1 401.6 L453.0 409.9 L447.1 407.3 Z"/>
+    <path id="p14" d="M411.2 461.6 L417.2 461.0 L439.5 469.0 L446.5 467.7 L450.8 465.1 L456.7 445.2 L449.7 440.8 L446.6 434.5 L433.6 435.2 L427.9 431.4 L425.5 426.4 L416.9 424.2 L416.3 427.3 L404.5 437.4 L401.4 444.8 L398.0 447.2 L398.1 450.2 L404.0 443.5 L406.0 447.5 L401.5 453.6 L411.1 461.6 Z"/>
+    <path id="p15" d="M286.7 419.8 L286.3 414.6 L289.6 412.2 L296.7 412.8 L298.7 404.7 L302.6 401.3 L311.2 404.4 L314.5 402.7 L319.8 404.5 L326.5 397.4 L333.6 396.0 L326.1 386.5 L331.0 384.9 L332.0 380.4 L323.6 381.2 L315.9 377.6 L306.8 360.5 L302.1 356.0 L304.7 348.0 L292.6 339.4 L292.7 336.1 L286.7 330.8 L278.2 330.0 L274.4 334.8 L268.4 328.7 L254.0 331.5 L248.7 326.3 L239.2 329.4 L228.2 344.8 L213.7 342.5 L215.6 352.2 L210.0 355.2 L209.7 362.0 L211.8 364.0 L217.1 363.1 L224.6 367.8 L223.2 373.6 L227.6 375.9 L231.1 383.7 L239.6 386.1 L241.6 391.2 L240.1 401.1 L246.7 412.2 L250.4 415.6 L255.0 414.6 L256.6 419.8 L265.1 419.8 L265.7 422.5 L270.3 418.8 L274.7 420.3 L274.4 423.7 L280.1 424.2 L287.7 422.0 L287.0 420.0 Z"/>
+    <path id="p16" d="M417.7 420.6 L424.4 421.9 L426.0 418.4 L433.5 414.0 L434.6 409.9 L439.1 411.1 L442.7 406.9 L437.7 402.8 L436.3 403.8 L433.9 396.6 L427.7 390.5 L419.5 388.9 L417.1 383.4 L416.9 367.3 L409.8 360.5 L412.8 357.3 L407.7 341.7 L407.7 332.0 L386.0 326.4 L375.3 330.3 L375.8 327.1 L379.2 326.7 L379.0 323.9 L368.3 318.5 L354.7 323.7 L347.7 323.9 L345.7 327.2 L336.3 330.5 L345.8 336.5 L348.8 342.3 L356.9 347.7 L361.8 345.7 L370.1 348.0 L372.9 353.1 L369.0 354.0 L368.8 356.6 L372.7 364.6 L390.0 380.2 L394.7 393.3 L402.0 399.8 L402.1 405.8 L406.0 407.2 L407.4 411.5 L412.0 415.1 L420.5 417.4 L419.9 419.1 Z"/>
+    <path id="p17" d="M450.3 408.8 L441.7 406.4 L437.7 402.8 L436.4 403.9 L433.9 396.6 L427.7 390.5 L419.5 388.9 L416.3 376.1 L417.6 370.6 L414.4 364.9 L428.0 362.2 L429.2 357.3 L425.3 353.5 L431.7 354.7 L432.3 358.1 L434.9 357.5 L437.3 360.8 L466.4 364.4 L469.2 368.2 L468.2 369.6 L464.8 368.1 L463.5 370.0 L466.7 372.1 L471.4 369.0 L472.0 366.0 L481.9 367.7 L481.3 370.4 L484.1 367.2 L473.8 392.7 L472.6 399.9 L474.2 402.5 L472.6 400.0 L473.4 402.0 L471.3 403.1 L474.8 403.1 L471.5 403.3 L468.8 408.9 L466.3 409.5 L456.1 401.6 L453.0 409.9 L451.0 409.2 Z"/>
+    <path id="p18" d="M484.5 361.0 L485.7 360.1 L485.4 365.6 L482.6 367.7 L483.2 370.0 L480.7 370.2 L481.9 367.7 L472.0 366.0 L471.4 369.0 L466.7 372.1 L463.5 370.0 L464.8 368.1 L468.2 369.6 L469.2 368.2 L466.4 364.4 L437.3 360.8 L434.9 357.5 L432.3 358.1 L431.7 354.7 L425.4 353.5 L429.2 357.3 L428.0 362.2 L414.4 364.9 L409.8 360.5 L412.8 357.3 L407.7 341.7 L407.7 332.0 L418.6 328.1 L426.7 329.9 L431.9 325.3 L438.2 330.4 L439.2 335.9 L441.9 334.8 L445.6 337.5 L457.4 330.2 L461.1 325.3 L475.1 323.4 L477.4 328.5 L476.1 332.7 L483.0 336.9 L487.7 330.5 L492.1 332.2 L491.3 335.3 L494.0 332.0 L484.2 360.6 Z"/>
+    <path id="p19" d="M450.7 253.3 L452.7 252.5 L451.1 248.3 L453.0 246.0 L450.9 238.6 L461.7 234.7 L458.4 227.7 L462.6 223.9 L463.0 219.6 L458.1 213.6 L461.9 209.0 L471.5 213.2 L478.9 211.3 L480.5 208.1 L488.8 207.6 L488.6 212.5 L493.9 218.3 L500.5 214.2 L504.3 216.6 L506.3 223.1 L513.6 220.0 L520.0 221.6 L531.2 227.6 L533.6 233.1 L537.6 232.9 L541.4 236.8 L555.5 232.3 L564.4 233.3 L564.9 235.4 L562.5 235.4 L560.6 238.7 L557.1 237.3 L558.5 240.8 L554.7 240.6 L554.8 243.0 L547.9 244.7 L549.5 245.9 L547.5 247.6 L538.3 245.5 L539.0 240.1 L534.7 243.7 L534.6 241.6 L532.6 242.6 L533.3 240.2 L529.1 240.1 L527.2 244.2 L529.7 246.6 L529.4 244.6 L527.1 245.4 L529.9 247.1 L525.0 248.7 L523.1 254.0 L513.7 253.9 L508.5 249.0 L503.0 251.5 L499.6 246.4 L492.5 244.1 L480.9 260.0 L471.6 260.4 L465.9 264.1 L464.3 260.5 L451.9 258.0 L449.6 254.3 Z"/>
+    <path id="p20" d="M381.5 244.1 L382.2 250.3 L385.2 250.5 L387.3 246.2 L397.5 242.6 L401.6 235.4 L394.7 228.2 L392.5 216.9 L385.1 211.3 L378.5 210.3 L378.0 200.9 L381.1 198.4 L377.7 192.1 L374.9 191.4 L376.1 188.1 L371.9 182.3 L372.4 175.2 L363.9 173.1 L358.1 175.0 L351.0 164.7 L320.0 158.0 L321.0 164.2 L318.7 174.3 L313.4 181.9 L307.9 184.6 L303.9 182.6 L294.2 187.1 L295.0 191.4 L300.7 197.2 L298.1 206.8 L301.1 218.0 L307.6 216.7 L314.9 220.8 L329.1 218.8 L332.3 222.9 L332.3 228.1 L339.1 229.7 L342.0 227.6 L345.4 232.1 L350.8 232.2 L355.3 236.3 L356.9 234.9 L353.6 230.4 L356.8 226.1 L364.9 227.3 L365.0 230.5 L372.2 229.4 L380.0 234.4 L379.3 237.4 L383.5 235.9 L386.6 237.3 L381.7 243.8 Z"/>
+    <path id="p21" d="M253.8 331.3 L268.4 328.7 L275.0 334.3 L278.1 330.1 L278.9 322.3 L285.8 314.1 L289.6 315.6 L293.0 310.3 L288.3 305.4 L288.8 297.0 L299.6 298.4 L302.7 293.6 L311.1 292.2 L321.3 283.7 L322.5 280.9 L318.2 277.3 L316.1 267.0 L317.5 260.0 L342.0 252.5 L339.9 243.1 L329.5 228.9 L329.2 226.6 L332.3 228.1 L332.7 224.8 L329.1 218.8 L314.9 220.8 L307.6 216.7 L301.1 218.0 L298.1 206.8 L300.7 197.2 L295.0 191.4 L295.4 185.8 L290.3 179.5 L279.2 179.9 L276.3 194.1 L271.5 198.2 L257.6 198.9 L254.1 201.8 L245.2 199.3 L241.9 190.4 L234.7 190.9 L214.4 186.2 L209.1 190.3 L207.7 203.4 L199.9 204.0 L196.9 207.3 L200.7 220.8 L192.4 223.6 L191.1 236.8 L196.0 245.3 L194.9 250.7 L197.8 263.3 L210.1 279.1 L222.8 279.5 L225.5 287.8 L223.4 291.5 L228.9 296.7 L226.0 303.6 L227.9 306.6 L237.5 309.2 L238.9 313.6 L241.2 313.6 L245.5 319.6 L239.9 329.1 L248.7 326.3 L253.2 330.5 Z"/>
+    <path id="p22" d="M364.3 319.9 L362.7 316.4 L364.5 308.7 L365.7 304.7 L368.4 306.0 L369.3 300.5 L383.5 306.7 L387.3 302.9 L393.0 301.5 L397.7 288.7 L418.5 287.1 L422.0 283.5 L429.1 283.3 L434.1 280.4 L437.8 274.8 L436.0 264.7 L437.5 263.0 L433.6 260.9 L433.9 257.7 L452.6 252.6 L450.9 238.6 L461.7 234.7 L458.4 227.8 L463.3 221.0 L458.1 213.6 L460.1 210.6 L448.9 202.0 L435.1 197.0 L426.1 201.7 L417.6 201.0 L414.8 202.8 L410.4 202.7 L405.4 198.6 L399.1 200.1 L392.6 196.0 L384.5 199.3 L381.1 198.4 L378.0 200.9 L378.5 210.3 L385.1 211.3 L392.5 216.9 L394.7 228.2 L401.6 235.4 L397.5 242.6 L387.3 246.2 L385.2 250.5 L382.2 250.3 L381.5 244.1 L386.6 237.3 L383.5 235.9 L379.3 237.4 L380.0 234.4 L372.2 229.4 L365.0 230.5 L364.9 227.3 L356.8 226.1 L353.6 230.4 L356.9 234.9 L355.3 236.3 L350.8 232.2 L345.4 232.1 L342.0 227.6 L339.0 229.7 L329.2 226.6 L340.8 245.0 L341.9 252.7 L317.5 260.0 L316.1 267.0 L318.2 277.3 L322.5 280.9 L321.3 283.7 L311.1 292.2 L302.7 293.6 L299.6 298.4 L288.8 297.0 L288.3 305.4 L293.0 310.2 L290.4 314.5 L302.6 322.6 L316.5 320.2 L323.6 326.8 L335.7 330.6 L345.7 327.2 L347.9 323.9 L354.6 323.7 L362.7 320.1 Z"/>
+    <path id="p23" d="M327.9 159.2 L348.0 164.6 L352.2 148.4 L357.6 140.1 L352.1 131.1 L354.0 125.5 L356.1 124.4 L360.6 129.2 L372.4 129.3 L378.1 120.6 L384.3 119.9 L394.8 108.0 L395.1 99.1 L399.5 85.2 L405.0 77.3 L405.6 70.2 L394.7 69.3 L372.7 74.0 L368.0 70.8 L368.6 63.6 L363.5 59.0 L348.9 61.8 L338.3 61.9 L335.5 60.1 L328.7 63.8 L324.8 62.6 L323.5 67.1 L319.8 67.8 L319.7 73.9 L315.2 76.8 L314.5 83.3 L308.9 86.2 L315.1 92.2 L308.6 103.5 L321.1 110.0 L317.4 119.3 L307.2 125.0 L315.4 130.3 L304.6 135.7 L309.5 138.4 L311.4 142.3 L318.4 140.1 L320.9 143.3 L326.1 144.6 L325.6 158.1 L327.6 159.3 Z"/>
+    <path id="p24" d="M383.7 199.1 L392.6 196.0 L399.1 200.1 L404.9 198.5 L409.5 200.6 L415.4 195.9 L415.7 191.9 L419.2 191.8 L418.4 183.0 L421.7 172.5 L419.8 166.1 L412.7 162.4 L415.7 158.7 L413.7 157.3 L415.6 151.5 L412.2 148.1 L419.4 142.6 L422.0 131.7 L434.8 124.9 L438.6 115.1 L436.7 108.3 L441.4 103.0 L437.4 95.2 L440.4 93.4 L441.0 90.0 L450.7 89.7 L451.0 84.0 L455.4 76.2 L447.3 70.8 L447.6 68.7 L439.1 65.1 L433.5 57.0 L428.0 60.3 L413.7 61.5 L410.8 66.8 L405.6 70.2 L405.0 77.3 L399.5 85.2 L395.1 99.1 L394.8 108.0 L384.3 119.9 L378.1 120.6 L372.4 129.3 L360.6 129.2 L356.0 124.4 L352.8 128.0 L352.1 131.1 L357.6 140.1 L352.2 148.4 L348.0 164.6 L351.0 164.7 L357.9 174.9 L363.9 173.1 L372.4 175.2 L371.9 182.3 L376.1 188.1 L374.9 191.4 L383.2 198.9 Z"/>
+    <path id="p25" d="M254.2 201.8 L257.6 198.9 L270.6 198.6 L275.7 194.8 L279.4 179.7 L290.8 179.7 L295.4 185.8 L303.9 182.6 L308.5 184.5 L317.7 176.6 L321.0 164.2 L320.0 158.0 L326.0 158.9 L326.1 144.6 L320.9 143.3 L318.4 140.1 L311.4 142.3 L309.5 138.4 L304.6 135.7 L315.4 130.3 L307.2 125.0 L319.2 116.7 L321.1 109.7 L315.7 105.6 L307.5 105.2 L298.4 112.7 L294.2 112.5 L285.9 116.7 L280.3 122.7 L280.9 128.0 L276.8 136.0 L278.2 142.6 L271.9 142.7 L265.9 138.4 L261.8 140.4 L260.1 146.4 L253.3 151.8 L251.5 156.8 L247.3 158.0 L249.6 164.5 L247.6 169.0 L249.5 180.2 L242.4 185.5 L243.6 188.8 L241.9 190.4 L245.2 199.3 L253.5 201.7 Z"/>
+  </defs></svg>
+  <div class="wrap">
+    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></div>
+    <header class="pg">
+      <h1>宮崎県の市区町村パズル（全26）</h1>
+      <p class="intro">「宮崎県の市区町村パズル」は、宮崎県の全26市区町村をドラッグで正しい位置に並べる無料のブラウザゲームです。宮崎・都城・延岡…など、遊びながら市区町村の位置と名前が身につきます。</p>
+    </header>
+    <nav class="pzlist" aria-label="ほかのパズル"><span class="lbl">全国・政令市：</span><a href="/play/">東京23区</a><a href="/play/japan/">全国47都道府県</a><a href="/play/osaka/">大阪</a><a href="/play/yokohama/">横浜</a><a href="/play/nagoya/">名古屋</a><a href="/play/sapporo/">札幌</a><a href="/play/kobe/">神戸</a><a href="/play/kyoto/">京都</a><a href="/play/fukuoka/">福岡</a><a href="/play/kawasaki/">川崎</a><a href="/play/saitama/">さいたま</a><a href="/play/hiroshima/">広島</a><a href="/play/sendai/">仙台</a><a href="/play/chiba/">千葉</a><a href="/play/kitakyushu/">北九州</a><a href="/play/niigata/">新潟</a><a href="/play/sakai/">堺</a><a href="/play/okayama/">岡山</a><a href="/play/kumamoto/">熊本</a><a href="/play/shizuoka/">静岡</a><a href="/play/hamamatsu/">浜松</a><a href="/play/sagamihara/">相模原</a><span class="navbr"></span><span class="lbl">都道府県の市区町村：</span><a href="/play/pref-hokkaido/">北海道</a><a href="/play/pref-aomori/">青森県</a><a href="/play/pref-iwate/">岩手県</a><a href="/play/pref-miyagi/">宮城県</a><a href="/play/pref-akita/">秋田県</a><a href="/play/pref-yamagata/">山形県</a><a href="/play/pref-fukushima/">福島県</a><a href="/play/pref-ibaraki/">茨城県</a><a href="/play/pref-tochigi/">栃木県</a><a href="/play/pref-gunma/">群馬県</a><a href="/play/pref-saitama/">埼玉県</a><a href="/play/pref-chiba/">千葉県</a><a href="/play/pref-tokyo/">東京都</a><a href="/play/pref-kanagawa/">神奈川県</a><a href="/play/pref-niigata/">新潟県</a><a href="/play/pref-toyama/">富山県</a><a href="/play/pref-ishikawa/">石川県</a><a href="/play/pref-fukui/">福井県</a><a href="/play/pref-yamanashi/">山梨県</a><a href="/play/pref-nagano/">長野県</a><a href="/play/pref-gifu/">岐阜県</a><a href="/play/pref-shizuoka/">静岡県</a><a href="/play/pref-aichi/">愛知県</a><a href="/play/pref-mie/">三重県</a><a href="/play/pref-shiga/">滋賀県</a><a href="/play/pref-kyoto/">京都府</a><a href="/play/pref-osaka/">大阪府</a><a href="/play/pref-hyogo/">兵庫県</a><a href="/play/pref-nara/">奈良県</a><a href="/play/pref-wakayama/">和歌山県</a><a href="/play/pref-tottori/">鳥取県</a><a href="/play/pref-shimane/">島根県</a><a href="/play/pref-okayama/">岡山県</a><a href="/play/pref-hiroshima/">広島県</a><a href="/play/pref-yamaguchi/">山口県</a><a href="/play/pref-tokushima/">徳島県</a><a href="/play/pref-kagawa/">香川県</a><a href="/play/pref-ehime/">愛媛県</a><a href="/play/pref-kochi/">高知県</a><a href="/play/pref-fukuoka/">福岡県</a><a href="/play/pref-saga/">佐賀県</a><a href="/play/pref-nagasaki/">長崎県</a><a href="/play/pref-kumamoto/">熊本県</a><a href="/play/pref-oita/">大分県</a><b class="cur">宮崎県</b><a href="/play/pref-kagoshima/">鹿児島県</a><a href="/play/pref-okinawa/">沖縄県</a></nav>
+    <div class="hud">
+      <div>そろった：<span class="val" id="prog">0 / 26</span></div>
+      <div>タイム：<span class="val" id="time">0.0</span>秒</div>
+      <button id="mute" aria-label="音のオン/オフ">🔊</button>
+      <button id="reset">やりなおす</button>
+    </div>
+    <div class="board-wrap">
+      <svg id="board" viewBox="10.0 32.2 660.0 813.1" role="img" aria-label="宮崎県のパズル盤">
+        <g id="slots">
+      <use href="#p0" class="slot"/>
+      <use href="#p1" class="slot"/>
+      <use href="#p2" class="slot"/>
+      <use href="#p3" class="slot"/>
+      <use href="#p4" class="slot"/>
+      <use href="#p5" class="slot"/>
+      <use href="#p6" class="slot"/>
+      <use href="#p7" class="slot"/>
+      <use href="#p8" class="slot"/>
+      <use href="#p9" class="slot"/>
+      <use href="#p10" class="slot"/>
+      <use href="#p11" class="slot"/>
+      <use href="#p12" class="slot"/>
+      <use href="#p13" class="slot"/>
+      <use href="#p14" class="slot"/>
+      <use href="#p15" class="slot"/>
+      <use href="#p16" class="slot"/>
+      <use href="#p17" class="slot"/>
+      <use href="#p18" class="slot"/>
+      <use href="#p19" class="slot"/>
+      <use href="#p20" class="slot"/>
+      <use href="#p21" class="slot"/>
+      <use href="#p22" class="slot"/>
+      <use href="#p23" class="slot"/>
+      <use href="#p24" class="slot"/>
+      <use href="#p25" class="slot"/>
+        </g>
+        <g id="placed"></g>
+      </svg>
+      <div class="win" id="win">
+        <div class="card">
+          <h2>クリア！🎉</h2>
+          <p id="wintime"></p>
+          <p>全国47都道府県・市区町村まで（全1,746）はアプリで遊べます。</p>
+          <div class="btns">
+            <a href="https://apps.apple.com/jp/app/id6777826991">App Store</a>
+            <a href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap">Google Play</a>
+            <button id="again">もう一度</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="tray-hint">↓ トレイは横スクロール。ピースを地図の上へドラッグ</p>
+    <div class="tray" id="tray">
+    <button class="thumb" data-pid="p0" data-color="#4dabf7" data-label="宮崎" data-reading="みやざき" data-cx="367.6" data-cy="545.6" data-vb="285.5 456.4 164.2 178.4"><svg viewBox="285.5 456.4 164.2 178.4"><use href="#p0" fill="#4dabf7"/></svg><span><ruby>宮崎<rt>みやざき</rt></ruby></span></button>
+    <button class="thumb" data-pid="p1" data-color="#ff6b6b" data-label="都城" data-reading="みやこのじょう" data-cx="221.0" data-cy="603.1" data-vb="122.8 519.0 196.4 168.2"><svg viewBox="122.8 519.0 196.4 168.2"><use href="#p1" fill="#ff6b6b"/></svg><span><ruby>都城<rt>みやこのじょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p2" data-color="#20c997" data-label="延岡" data-reading="のべおか" data-cx="527.7" data-cy="146.5" data-vb="409.5 56.1 236.5 180.7"><svg viewBox="409.5 56.1 236.5 180.7"><use href="#p2" fill="#20c997"/></svg><span><ruby>延岡<rt>のべおか</rt></ruby></span></button>
+    <button class="thumb" data-pid="p3" data-color="#f6a821" data-label="日南" data-reading="にちなん" data-cx="350.5" data-cy="678.9" data-vb="270.5 603.1 160.0 151.7"><svg viewBox="270.5 603.1 160.0 151.7"><use href="#p3" fill="#f6a821"/></svg><span><ruby>日南<rt>にちなん</rt></ruby></span></button>
+    <button class="thumb" data-pid="p4" data-color="#845ef7" data-label="小林" data-reading="こばやし" data-cx="206.0" data-cy="474.9" data-vb="115.8 400.1 180.4 149.4"><svg viewBox="115.8 400.1 180.4 149.4"><use href="#p4" fill="#845ef7"/></svg><span><ruby>小林<rt>こばやし</rt></ruby></span></button>
+    <button class="thumb" data-pid="p5" data-color="#ff922b" data-label="日向" data-reading="ひゅうが" data-cx="453.7" data-cy="290.8" data-vb="362.7 244.1 182.2 93.5"><svg viewBox="362.7 244.1 182.2 93.5"><use href="#p5" fill="#ff922b"/></svg><span><ruby>日向<rt>ひゅうが</rt></ruby></span></button>
+    <button class="thumb" data-pid="p6" data-color="#f06595" data-label="串間" data-reading="くしま" data-cx="329.8" data-cy="749.7" data-vb="270.4 678.1 118.9 143.1"><svg viewBox="270.4 678.1 118.9 143.1"><use href="#p6" fill="#f06595"/></svg><span><ruby>串間<rt>くしま</rt></ruby></span></button>
+    <button class="thumb" data-pid="p7" data-color="#38d9a9" data-label="西都" data-reading="さいと" data-cx="349.3" data-cy="397.6" data-vb="278.1 314.0 142.4 167.1"><svg viewBox="278.1 314.0 142.4 167.1"><use href="#p7" fill="#38d9a9"/></svg><span><ruby>西都<rt>さいと</rt></ruby></span></button>
+    <button class="thumb" data-pid="p8" data-color="#ff8787" data-label="えびの" data-reading="えびの" data-cx="103.8" data-cy="472.9" data-vb="34.0 421.3 139.7 103.3"><svg viewBox="34.0 421.3 139.7 103.3"><use href="#p8" fill="#ff8787"/></svg><span><ruby>えびの<rt>えびの</rt></ruby></span></button>
+    <button class="thumb" data-pid="p9" data-color="#74c0fc" data-label="三股町" data-reading="みまたちょう" data-cx="281.9" data-cy="628.7" data-vb="236.7 595.1 90.4 67.1"><svg viewBox="236.7 595.1 90.4 67.1"><use href="#p9" fill="#74c0fc"/></svg><span><ruby>三股町<rt>みまたちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p10" data-color="#ffa94d" data-label="高原町" data-reading="たかはるちょう" data-cx="191.6" data-cy="527.7" data-vb="142.0 503.0 99.2 49.6"><svg viewBox="142.0 503.0 99.2 49.6"><use href="#p10" fill="#ffa94d"/></svg><span><ruby>高原町<rt>たかはるちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p11" data-color="#b197fc" data-label="国富町" data-reading="くにとみちょう" data-cx="337.1" data-cy="465.2" data-vb="285.3 422.0 103.6 86.4"><svg viewBox="285.3 422.0 103.6 86.4"><use href="#p11" fill="#b197fc"/></svg><span><ruby>国富町<rt>くにとみちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p12" data-color="#63e6be" data-label="綾町" data-reading="あやちょう" data-cx="298.5" data-cy="463.8" data-vb="265.4 422.3 66.3 82.9"><svg viewBox="265.4 422.3 66.3 82.9"><use href="#p12" fill="#63e6be"/></svg><span><ruby>綾町<rt>あやちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p13" data-color="#ffd43b" data-label="高鍋町" data-reading="たかなべちょう" data-cx="442.9" data-cy="423.4" data-vb="416.9 401.6 52.0 43.6"><svg viewBox="416.9 401.6 52.0 43.6"><use href="#p13" fill="#ffd43b"/></svg><span><ruby>高鍋町<rt>たかなべちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p14" data-color="#4dabf7" data-label="新富町" data-reading="しんとみちょう" data-cx="427.2" data-cy="446.6" data-vb="397.8 424.2 58.9 44.8"><svg viewBox="397.8 424.2 58.9 44.8"><use href="#p14" fill="#4dabf7"/></svg><span><ruby>新富町<rt>しんとみちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p15" data-color="#ff6b6b" data-label="西米良村" data-reading="にしめらそん" data-cx="271.3" data-cy="375.2" data-vb="209.1 326.3 124.5 97.9"><svg viewBox="209.1 326.3 124.5 97.9"><use href="#p15" fill="#ff6b6b"/></svg><span><ruby>西米良村<rt>にしめらそん</rt></ruby></span></button>
+    <button class="thumb" data-pid="p16" data-color="#20c997" data-label="木城町" data-reading="きじょうちょう" data-cx="389.5" data-cy="370.2" data-vb="336.3 318.5 106.4 103.5"><svg viewBox="336.3 318.5 106.4 103.5"><use href="#p16" fill="#20c997"/></svg><span><ruby>木城町<rt>きじょうちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p17" data-color="#f6a821" data-label="川南町" data-reading="かわみなみちょう" data-cx="449.3" data-cy="381.8" data-vb="414.4 353.5 69.8 56.5"><svg viewBox="414.4 353.5 69.8 56.5"><use href="#p17" fill="#f6a821"/></svg><span><ruby>川南町<rt>かわみなみちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p18" data-color="#845ef7" data-label="都農町" data-reading="つのちょう" data-cx="450.4" data-cy="347.5" data-vb="406.9 322.9 87.1 49.1"><svg viewBox="406.9 322.9 87.1 49.1"><use href="#p18" fill="#845ef7"/></svg><span><ruby>都農町<rt>つのちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p19" data-color="#ff922b" data-label="門川町" data-reading="かどがわちょう" data-cx="507.2" data-cy="235.5" data-vb="449.6 206.9 115.3 57.3"><svg viewBox="449.6 206.9 115.3 57.3"><use href="#p19" fill="#ff922b"/></svg><span><ruby>門川町<rt>かどがわちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p20" data-color="#f06595" data-label="諸塚村" data-reading="もろつかそん" data-cx="347.9" data-cy="204.3" data-vb="294.2 158.0 107.4 92.7"><svg viewBox="294.2 158.0 107.4 92.7"><use href="#p20" fill="#f06595"/></svg><span><ruby>諸塚村<rt>もろつかそん</rt></ruby></span></button>
+    <button class="thumb" data-pid="p21" data-color="#38d9a9" data-label="椎葉村" data-reading="しいばそん" data-cx="266.5" data-cy="256.6" data-vb="191.1 178.5 150.8 156.3"><svg viewBox="191.1 178.5 150.8 156.3"><use href="#p21" fill="#38d9a9"/></svg><span><ruby>椎葉村<rt>しいばそん</rt></ruby></span></button>
+    <button class="thumb" data-pid="p22" data-color="#ff8787" data-label="美郷町" data-reading="みさとちょう" data-cx="375.6" data-cy="263.3" data-vb="288.0 196.0 175.3 134.6"><svg viewBox="288.0 196.0 175.3 134.6"><use href="#p22" fill="#ff8787"/></svg><span><ruby>美郷町<rt>みさとちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p23" data-color="#74c0fc" data-label="高千穂町" data-reading="たかちほちょう" data-cx="355.2" data-cy="111.9" data-vb="304.6 58.9 101.2 106.0"><svg viewBox="304.6 58.9 101.2 106.0"><use href="#p23" fill="#74c0fc"/></svg><span><ruby>高千穂町<rt>たかちほちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p24" data-color="#ffa94d" data-label="日之影町" data-reading="ひのかげちょう" data-cx="401.7" data-cy="128.8" data-vb="348.0 57.0 107.4 143.6"><svg viewBox="348.0 57.0 107.4 143.6"><use href="#p24" fill="#ffa94d"/></svg><span><ruby>日之影町<rt>ひのかげちょう</rt></ruby></span></button>
+    <button class="thumb" data-pid="p25" data-color="#b197fc" data-label="五ヶ瀬町" data-reading="ごかせちょう" data-cx="284.3" data-cy="153.5" data-vb="241.9 105.1 84.9 96.7"><svg viewBox="241.9 105.1 84.9 96.7"><use href="#p25" fill="#b197fc"/></svg><span><ruby>五ヶ瀬町<rt>ごかせちょう</rt></ruby></span></button>
+    </div>
+    <div class="cta"><a class="b" href="/">▶ 全国47都道府県・市区町村をアプリで（無料）</a></div>
+    <p class="wards">収録エリア（全26市区町村）：宮崎市、都城市、延岡市、日南市、小林市、日向市、串間市、西都市、えびの市、三股町、高原町、国富町、綾町、高鍋町、新富町、西米良村、木城町、川南町、都農町、門川町、諸塚村、椎葉村、美郷町、高千穂町、日之影町、五ヶ瀬町</p>
+    <footer class="pg">地図データ：国土交通省 国土数値情報（CC BY 4.0）／ <a href="/">japan-map.app</a></footer>
+  </div>
+
+<script>
+(function(){
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var SNAP = 53.95, NP = 26, FONT = 31.17, PNAME = 19.33;
+  var board = document.getElementById('board');
+  var placed = document.getElementById('placed');
+  var tray = document.getElementById('tray');
+  var progEl = document.getElementById('prog'), timeEl = document.getElementById('time');
+  var winEl = document.getElementById('win');
+  var solved = 0, started = false, t0 = 0, done = false, raf = 0;
+
+  var AC = null, muted = false;
+  function ac(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+    if(AC && AC.state === 'suspended'){ AC.resume(); } return AC; }
+  function beep(freq, dur, type, vol, delay){
+    if(muted) return; var c = ac(); if(!c) return;
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = type||'sine'; o.frequency.value = freq; o.connect(g); g.connect(c.destination);
+    var t = c.currentTime + (delay||0);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol||0.2, t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.start(t); o.stop(t+dur+0.03);
+  }
+  function sePick(){ beep(300, 0.06, 'triangle', 0.12); }
+  function seSnap(){ beep(620, 0.08, 'sine', 0.2); beep(880, 0.12, 'sine', 0.2, 0.06); }
+  function seClear(){ [523,659,784,1047].forEach(function(f,i){ beep(f, 0.2, 'sine', 0.22, i*0.11); }); }
+
+  function tick(){ if(done) return; timeEl.textContent = ((Date.now()-t0)/1000).toFixed(1); raf = requestAnimationFrame(tick); }
+  function startTimer(){ if(!started){ started = true; t0 = Date.now(); tick(); } }
+
+  function toBoard(cx, cy){ var p = board.createSVGPoint(); p.x = cx; p.y = cy; return p.matrixTransform(board.getScreenCTM().inverse()); }
+  function boardScale(){ var m = board.getScreenCTM(); return m ? m.a : (board.getBoundingClientRect().width / board.viewBox.baseVal.width); }
+
+  var pend = null, drag = null;
+  function makeGhost(th){
+    var vb = th.dataset.vb.split(' ').map(parseFloat);
+    var s = boardScale();
+    var g = document.createElementNS(SVGNS, 'svg');
+    g.setAttribute('class', 'ghost'); g.setAttribute('viewBox', th.dataset.vb);
+    g.style.width = (vb[2]*s)+'px'; g.style.height = (vb[3]*s)+'px'; g.style.overflow = 'visible';
+    var u = document.createElementNS(SVGNS, 'use');
+    u.setAttribute('href', '#'+th.dataset.pid); u.setAttribute('fill', th.dataset.color);
+    g.appendChild(u); document.body.appendChild(g);
+    var cx = parseFloat(th.dataset.cx), cy = parseFloat(th.dataset.cy);
+    return { el:g, offx:(cx-vb[0])*s, offy:(cy-vb[1])*s };
+  }
+  function moveGhost(cx, cy){ if(!drag) return; drag.el.style.left=(cx-drag.offx)+'px'; drag.el.style.top=(cy-drag.offy)+'px'; }
+  function startDrag(th, cx, cy){ drag = makeGhost(th); drag.th = th; th.style.visibility = 'hidden'; moveGhost(cx, cy); startTimer(); sePick(); }
+  function endDrag(cx, cy){
+    if(!drag) return;
+    var th = drag.th; drag.el.remove();
+    var b = toBoard(cx, cy), hx = parseFloat(th.dataset.cx), hy = parseFloat(th.dataset.cy);
+    if(Math.hypot(b.x-hx, b.y-hy) < SNAP){
+      var g = document.createElementNS(SVGNS, 'g'); g.setAttribute('class','piece');
+      var u = document.createElementNS(SVGNS, 'use'); u.setAttribute('href','#'+th.dataset.pid); u.setAttribute('fill', th.dataset.color);
+      g.appendChild(u);
+      var lcx = th.dataset.cx, lcy = parseFloat(th.dataset.cy), rd = th.dataset.reading;
+      function mkT(cls, yy, s){ var t=document.createElementNS(SVGNS,'text'); t.setAttribute('class',cls); t.setAttribute('x',lcx); t.setAttribute('y',yy); t.textContent=s; return t; }
+      if(rd){ g.appendChild(mkT('ruby', lcy - PNAME*0.6, rd)); g.appendChild(mkT('name', lcy + PNAME*0.34, th.dataset.label)); }
+      else { g.appendChild(mkT('name', lcy, th.dataset.label)); }
+      placed.appendChild(g);
+      th.classList.add('gone'); solved++; progEl.textContent = solved + ' / ' + NP; seSnap();
+      if(solved === NP){ done = true; cancelAnimationFrame(raf);
+        document.getElementById('wintime').textContent = 'タイム ' + ((Date.now()-t0)/1000).toFixed(1) + '秒';
+        winEl.classList.add('show'); seClear(); }
+    } else { th.style.visibility = ''; }
+    drag = null;
+  }
+
+  tray.querySelectorAll('.thumb').forEach(function(th){
+    th.addEventListener('pointerdown', function(e){
+      if(done || th.classList.contains('gone')) return;
+      pend = { th:th, id:e.pointerId, sx:e.clientX, sy:e.clientY, mouse:(e.pointerType==='mouse') };
+    });
+  });
+  document.addEventListener('pointermove', function(e){
+    if(drag && (!pend || e.pointerId===pend.id)){ moveGhost(e.clientX, e.clientY); return; }
+    if(!pend || e.pointerId!==pend.id) return;
+    var dx = e.clientX-pend.sx, dy = e.clientY-pend.sy;
+    if(pend.mouse){ if(Math.abs(dx)+Math.abs(dy) > 3){ startDrag(pend.th, e.clientX, e.clientY); } return; }
+    if(Math.abs(dy) > 8 && Math.abs(dy) >= Math.abs(dx)){ startDrag(pend.th, e.clientX, e.clientY); }
+    else if(Math.abs(dx) > 10){ pend = null; }
+  });
+  function pUp(e){ if(drag){ endDrag(e.clientX, e.clientY); } pend = null; }
+  document.addEventListener('pointerup', pUp);
+  document.addEventListener('pointercancel', pUp);
+
+  function shuffleTray(){ var ths = Array.prototype.slice.call(tray.querySelectorAll('.thumb'));
+    for(var i=ths.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); tray.insertBefore(ths[j], ths[i].nextSibling); var tmp=ths[i]; ths[i]=ths[j]; ths[j]=tmp; } }
+  function reset(){
+    cancelAnimationFrame(raf); solved = 0; started = false; done = false;
+    progEl.textContent = '0 / '+NP; timeEl.textContent = '0.0'; winEl.classList.remove('show');
+    while(placed.firstChild) placed.removeChild(placed.firstChild);
+    shuffleTray();
+    tray.querySelectorAll('.thumb').forEach(function(t){ t.classList.remove('gone'); t.style.visibility=''; });
+    tray.scrollLeft = 0;
+  }
+  document.getElementById('reset').addEventListener('click', reset);
+  document.getElementById('again').addEventListener('click', reset);
+  document.getElementById('mute').addEventListener('click', function(){ muted = !muted; this.textContent = muted ? '🔇' : '🔊'; if(!muted) ac(); });
+  shuffleTray();
+})();
+</script>
+</body>
+</html>

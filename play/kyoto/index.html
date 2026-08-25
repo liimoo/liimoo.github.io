@@ -41,6 +41,8 @@
   .pzlist{ display:flex; gap:6px; overflow-x:auto; padding:8px 2px 4px; align-items:center; font-size:.84em;
     -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
   .pzlist .lbl{ color:var(--muted); font-weight:700; flex:0 0 auto; }
+  /* 政令市と都道府県のあいだで改行する（flexの行を強制的に折る） */
+  .pzlist .navbr{ flex-basis:100%; height:0; }
   .pzlist a{ flex:0 0 auto; color:var(--blue); text-decoration:none; background:var(--card);
     border:1px solid var(--line); border-radius:999px; padding:3px 11px; white-space:nowrap; }
   .pzlist .cur{ flex:0 0 auto; background:var(--blue); color:#fff; border-radius:999px; padding:3px 11px; white-space:nowrap; }
@@ -82,7 +84,6 @@
     padding:11px 22px; border-radius:999px; text-decoration:none; }
   footer.pg{ text-align:center; color:var(--muted); font-size:.88em; padding:14px 0 30px; }
   footer.pg a{ color:var(--blue); }
-.nb{display:none}@media(max-width:560px){.nb{display:inline}}
 </style>
 </head>
 <body>
@@ -100,12 +101,12 @@
     <path id="p10" d="M169.2 659.5 L152.9 665.2 L153.8 672.0 L156.7 674.0 L157.1 680.0 L162.5 688.3 L158.7 689.3 L159.7 692.6 L156.3 696.2 L157.9 697.8 L155.6 698.6 L151.7 708.6 L154.1 709.9 L149.8 713.6 L152.7 717.5 L148.8 716.6 L148.5 721.0 L144.4 721.2 L140.3 729.3 L135.4 727.5 L128.4 741.5 L156.3 742.5 L171.7 729.4 L178.3 731.9 L181.1 729.3 L186.8 729.7 L194.2 736.4 L197.6 734.5 L211.1 739.1 L215.2 733.8 L224.8 731.0 L234.5 733.0 L235.2 728.6 L242.7 727.2 L243.9 721.8 L253.9 718.4 L261.7 710.4 L271.1 712.5 L300.4 708.6 L287.8 695.0 L284.7 686.2 L277.0 677.8 L277.1 668.8 L285.2 673.0 L306.2 669.7 L306.5 674.9 L310.9 675.2 L310.9 679.0 L315.9 678.9 L315.5 669.8 L345.9 669.6 L345.7 661.5 L330.8 645.2 L320.2 618.3 L308.3 615.6 L291.7 617.3 L288.8 613.9 L288.1 601.1 L281.9 592.9 L276.0 591.0 L266.5 593.7 L254.7 590.1 L246.8 584.1 L232.6 582.0 L224.2 567.3 L224.0 561.8 L219.8 559.7 L200.1 572.4 L198.5 578.4 L193.9 580.2 L205.6 590.9 L212.3 600.8 L211.1 611.7 L203.8 613.3 L198.4 618.0 L195.9 645.6 L202.5 657.6 L183.6 659.1 L177.8 662.7 L171.9 659.5 Z"/>
   </defs></svg>
   <div class="wrap">
-    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/ranking/">豆知識</a></div>
+    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></div>
     <header class="pg">
       <h1>京都市の地図パズル（11区）</h1>
       <p class="intro">「京都市の地図パズル」は、京都市の全11区をドラッグで正しい位置に並べる無料のブラウザゲームです。上京・下京・中京…など、遊びながら区の位置と名前が身につきます。</p>
     </header>
-    <nav class="pzlist" aria-label="ほかのパズル"><span class="lbl">パズル一覧：</span><a href="/play/">東京23区</a><a href="/play/japan/">全国</a><a href="/play/osaka/">大阪</a><a href="/play/yokohama/">横浜</a><a href="/play/nagoya/">名古屋</a><a href="/play/sapporo/">札幌</a><a href="/play/kobe/">神戸</a><b class="cur">京都</b><a href="/play/fukuoka/">福岡</a><a href="/play/kawasaki/">川崎</a><a href="/play/saitama/">さいたま</a><a href="/play/hiroshima/">広島</a><a href="/play/sendai/">仙台</a><a href="/play/chiba/">千葉</a><a href="/play/kitakyushu/">北九州</a><a href="/play/niigata/">新潟</a><a href="/play/sakai/">堺</a><a href="/play/okayama/">岡山</a><a href="/play/kumamoto/">熊本</a><a href="/play/shizuoka/">静岡</a><a href="/play/hamamatsu/">浜松</a><a href="/play/sagamihara/">相模原</a></nav>
+    <nav class="pzlist" aria-label="ほかのパズル"><span class="lbl">全国・政令市：</span><a href="/play/">東京23区</a><a href="/play/japan/">全国47都道府県</a><a href="/play/osaka/">大阪</a><a href="/play/yokohama/">横浜</a><a href="/play/nagoya/">名古屋</a><a href="/play/sapporo/">札幌</a><a href="/play/kobe/">神戸</a><b class="cur">京都</b><a href="/play/fukuoka/">福岡</a><a href="/play/kawasaki/">川崎</a><a href="/play/saitama/">さいたま</a><a href="/play/hiroshima/">広島</a><a href="/play/sendai/">仙台</a><a href="/play/chiba/">千葉</a><a href="/play/kitakyushu/">北九州</a><a href="/play/niigata/">新潟</a><a href="/play/sakai/">堺</a><a href="/play/okayama/">岡山</a><a href="/play/kumamoto/">熊本</a><a href="/play/shizuoka/">静岡</a><a href="/play/hamamatsu/">浜松</a><a href="/play/sagamihara/">相模原</a><span class="navbr"></span><span class="lbl">都道府県の市区町村：</span><a href="/play/pref-hokkaido/">北海道</a><a href="/play/pref-aomori/">青森県</a><a href="/play/pref-iwate/">岩手県</a><a href="/play/pref-miyagi/">宮城県</a><a href="/play/pref-akita/">秋田県</a><a href="/play/pref-yamagata/">山形県</a><a href="/play/pref-fukushima/">福島県</a><a href="/play/pref-ibaraki/">茨城県</a><a href="/play/pref-tochigi/">栃木県</a><a href="/play/pref-gunma/">群馬県</a><a href="/play/pref-saitama/">埼玉県</a><a href="/play/pref-chiba/">千葉県</a><a href="/play/pref-tokyo/">東京都</a><a href="/play/pref-kanagawa/">神奈川県</a><a href="/play/pref-niigata/">新潟県</a><a href="/play/pref-toyama/">富山県</a><a href="/play/pref-ishikawa/">石川県</a><a href="/play/pref-fukui/">福井県</a><a href="/play/pref-yamanashi/">山梨県</a><a href="/play/pref-nagano/">長野県</a><a href="/play/pref-gifu/">岐阜県</a><a href="/play/pref-shizuoka/">静岡県</a><a href="/play/pref-aichi/">愛知県</a><a href="/play/pref-mie/">三重県</a><a href="/play/pref-shiga/">滋賀県</a><a href="/play/pref-kyoto/">京都府</a><a href="/play/pref-osaka/">大阪府</a><a href="/play/pref-hyogo/">兵庫県</a><a href="/play/pref-nara/">奈良県</a><a href="/play/pref-wakayama/">和歌山県</a><a href="/play/pref-tottori/">鳥取県</a><a href="/play/pref-shimane/">島根県</a><a href="/play/pref-okayama/">岡山県</a><a href="/play/pref-hiroshima/">広島県</a><a href="/play/pref-yamaguchi/">山口県</a><a href="/play/pref-tokushima/">徳島県</a><a href="/play/pref-kagawa/">香川県</a><a href="/play/pref-ehime/">愛媛県</a><a href="/play/pref-kochi/">高知県</a><a href="/play/pref-fukuoka/">福岡県</a><a href="/play/pref-saga/">佐賀県</a><a href="/play/pref-nagasaki/">長崎県</a><a href="/play/pref-kumamoto/">熊本県</a><a href="/play/pref-oita/">大分県</a><a href="/play/pref-miyazaki/">宮崎県</a><a href="/play/pref-kagoshima/">鹿児島県</a><a href="/play/pref-okinawa/">沖縄県</a></nav>
     <div class="hud">
       <div>そろった：<span class="val" id="prog">0 / 11</span></div>
       <div>タイム：<span class="val" id="time">0.0</span>秒</div>

@@ -41,6 +41,8 @@
   .pzlist{ display:flex; gap:6px; overflow-x:auto; padding:8px 2px 4px; align-items:center; font-size:.84em;
     -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
   .pzlist .lbl{ color:var(--muted); font-weight:700; flex:0 0 auto; }
+  /* 政令市と都道府県のあいだで改行する（flexの行を強制的に折る） */
+  .pzlist .navbr{ flex-basis:100%; height:0; }
   .pzlist a{ flex:0 0 auto; color:var(--blue); text-decoration:none; background:var(--card);
     border:1px solid var(--line); border-radius:999px; padding:3px 11px; white-space:nowrap; }
   .pzlist .cur{ flex:0 0 auto; background:var(--blue); color:#fff; border-radius:999px; padding:3px 11px; white-space:nowrap; }
@@ -82,7 +84,6 @@
     padding:11px 22px; border-radius:999px; text-decoration:none; }
   footer.pg{ text-align:center; color:var(--muted); font-size:.88em; padding:14px 0 30px; }
   footer.pg a{ color:var(--blue); }
-.nb{display:none}@media(max-width:560px){.nb{display:inline}}
 </style>
 </head>
 <body>
@@ -99,12 +100,12 @@
     <path id="p9" d="M477.6 491.8 L476.9 496.8 L483.3 500.9 L481.4 508.9 L484.7 505.4 L504.7 501.2 L508.1 477.7 L515.1 470.9 L515.8 466.0 L535.0 453.6 L547.2 452.1 L528.8 445.0 L541.9 433.1 L540.0 428.9 L554.0 414.2 L548.4 410.8 L554.1 405.7 L556.5 394.5 L561.2 391.3 L514.4 372.8 L480.8 353.4 L476.4 358.4 L464.2 395.3 L464.8 407.9 L471.6 406.0 L473.8 398.3 L485.8 399.7 L487.5 404.6 L494.6 405.2 L488.9 431.5 L482.6 436.0 L484.5 447.3 L483.1 463.2 L478.7 470.3 L478.1 490.9 Z"/>
   </defs></svg>
   <div class="wrap">
-    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/ranking/">豆知識</a></div>
+    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></div>
     <header class="pg">
       <h1>札幌市の地図パズル（10区）</h1>
       <p class="intro">「札幌市の地図パズル」は、札幌市の全10区をドラッグで正しい位置に並べる無料のブラウザゲームです。中央・北区・南区…など、遊びながら区の位置と名前が身につきます。</p>
     </header>
-    <nav class="pzlist" aria-label="ほかのパズル"><span class="lbl">パズル一覧：</span><a href="/play/">東京23区</a><a href="/play/japan/">全国</a><a href="/play/osaka/">大阪</a><a href="/play/yokohama/">横浜</a><a href="/play/nagoya/">名古屋</a><b class="cur">札幌</b><a href="/play/kobe/">神戸</a><a href="/play/kyoto/">京都</a><a href="/play/fukuoka/">福岡</a><a href="/play/kawasaki/">川崎</a><a href="/play/saitama/">さいたま</a><a href="/play/hiroshima/">広島</a><a href="/play/sendai/">仙台</a><a href="/play/chiba/">千葉</a><a href="/play/kitakyushu/">北九州</a><a href="/play/niigata/">新潟</a><a href="/play/sakai/">堺</a><a href="/play/okayama/">岡山</a><a href="/play/kumamoto/">熊本</a><a href="/play/shizuoka/">静岡</a><a href="/play/hamamatsu/">浜松</a><a href="/play/sagamihara/">相模原</a></nav>
+    <nav class="pzlist" aria-label="ほかのパズル"><span class="lbl">全国・政令市：</span><a href="/play/">東京23区</a><a href="/play/japan/">全国47都道府県</a><a href="/play/osaka/">大阪</a><a href="/play/yokohama/">横浜</a><a href="/play/nagoya/">名古屋</a><b class="cur">札幌</b><a href="/play/kobe/">神戸</a><a href="/play/kyoto/">京都</a><a href="/play/fukuoka/">福岡</a><a href="/play/kawasaki/">川崎</a><a href="/play/saitama/">さいたま</a><a href="/play/hiroshima/">広島</a><a href="/play/sendai/">仙台</a><a href="/play/chiba/">千葉</a><a href="/play/kitakyushu/">北九州</a><a href="/play/niigata/">新潟</a><a href="/play/sakai/">堺</a><a href="/play/okayama/">岡山</a><a href="/play/kumamoto/">熊本</a><a href="/play/shizuoka/">静岡</a><a href="/play/hamamatsu/">浜松</a><a href="/play/sagamihara/">相模原</a><span class="navbr"></span><span class="lbl">都道府県の市区町村：</span><a href="/play/pref-hokkaido/">北海道</a><a href="/play/pref-aomori/">青森県</a><a href="/play/pref-iwate/">岩手県</a><a href="/play/pref-miyagi/">宮城県</a><a href="/play/pref-akita/">秋田県</a><a href="/play/pref-yamagata/">山形県</a><a href="/play/pref-fukushima/">福島県</a><a href="/play/pref-ibaraki/">茨城県</a><a href="/play/pref-tochigi/">栃木県</a><a href="/play/pref-gunma/">群馬県</a><a href="/play/pref-saitama/">埼玉県</a><a href="/play/pref-chiba/">千葉県</a><a href="/play/pref-tokyo/">東京都</a><a href="/play/pref-kanagawa/">神奈川県</a><a href="/play/pref-niigata/">新潟県</a><a href="/play/pref-toyama/">富山県</a><a href="/play/pref-ishikawa/">石川県</a><a href="/play/pref-fukui/">福井県</a><a href="/play/pref-yamanashi/">山梨県</a><a href="/play/pref-nagano/">長野県</a><a href="/play/pref-gifu/">岐阜県</a><a href="/play/pref-shizuoka/">静岡県</a><a href="/play/pref-aichi/">愛知県</a><a href="/play/pref-mie/">三重県</a><a href="/play/pref-shiga/">滋賀県</a><a href="/play/pref-kyoto/">京都府</a><a href="/play/pref-osaka/">大阪府</a><a href="/play/pref-hyogo/">兵庫県</a><a href="/play/pref-nara/">奈良県</a><a href="/play/pref-wakayama/">和歌山県</a><a href="/play/pref-tottori/">鳥取県</a><a href="/play/pref-shimane/">島根県</a><a href="/play/pref-okayama/">岡山県</a><a href="/play/pref-hiroshima/">広島県</a><a href="/play/pref-yamaguchi/">山口県</a><a href="/play/pref-tokushima/">徳島県</a><a href="/play/pref-kagawa/">香川県</a><a href="/play/pref-ehime/">愛媛県</a><a href="/play/pref-kochi/">高知県</a><a href="/play/pref-fukuoka/">福岡県</a><a href="/play/pref-saga/">佐賀県</a><a href="/play/pref-nagasaki/">長崎県</a><a href="/play/pref-kumamoto/">熊本県</a><a href="/play/pref-oita/">大分県</a><a href="/play/pref-miyazaki/">宮崎県</a><a href="/play/pref-kagoshima/">鹿児島県</a><a href="/play/pref-okinawa/">沖縄県</a></nav>
     <div class="hud">
       <div>そろった：<span class="val" id="prog">0 / 10</span></div>
       <div>タイム：<span class="val" id="time">0.0</span>秒</div>
