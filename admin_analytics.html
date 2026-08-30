@@ -37,6 +37,12 @@
   .bar { width: 70%; min-width: 8px; background: linear-gradient(#5fa0ff, #2a64c0);
          border-radius: 3px 3px 0 0; }
   .bar.uniq { background: linear-gradient(#7fe0a3, #1f9d57); }
+  /* OS別 積み上げ棒 */
+  .sbar { width: 70%; min-width: 8px; display: flex; flex-direction: column-reverse;
+          border-radius: 3px 3px 0 0; overflow: hidden; }
+  .sbar > i { display: block; width: 100%; }
+  .os-ios { background: #5fa0ff; } .os-android { background: #7fe0a3; }
+  .os-steam { background: #d9a55f; } .os-other { background: #9aa6bb; }
   .bar-lbl { font-size: 9px; color: #7f90ac; margin-top: 3px; transform: rotate(-60deg);
              transform-origin: top left; white-space: nowrap; height: 26px; }
   .legend { font-size: 12px; color: #9fb0cc; }
@@ -76,9 +82,11 @@
     <button class="b-gray" onclick="logout()">ログアウト</button>
   </header>
   <div class="wrap">
+    <div id="app_users"></div>
+    <div class="sec-title" style="margin-top:22px">🌐 サイト（japan-map.app）のアクセス</div>
     <div class="card meta">
-      japan-map.app のアクセス（Cloudflare）。<b>ページビュー</b>＝トップページの表示回数が目安。
-      <b>リクエスト</b>は画像・CSS等も含む総数。<b>ユニーク</b>は日別IPの合計で、複数日の来訪は重複します。
+      Cloudflare 経由の数字。<b>ページビュー</b>＝トップページの表示回数が目安。<b>リクエスト</b>は
+      画像・CSS等も含む総数。<b>ユニーク</b>は日別IPの合計で、複数日の来訪は重複します。
       Cloudflareを通り始めた日以降のみ記録されます。
     </div>
     <div id="summary"></div>
@@ -134,11 +142,105 @@ async function api(action, params){
 async function load(){
   const days = Number(document.getElementById("days").value);
   setMsg("読み込み中…");
-  try {
-    const d = await api("cf_analytics", { days });
-    render(d);
-    setMsg("");
-  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+  // アプリとサイトは別々に読む。Cloudflare が落ちてもアプリの数字は出したい。
+  const a = api("app_users", { days }).then(renderApp).catch(e => {
+    document.getElementById("app_users").innerHTML =
+      '<div class="sec-title">📱 アプリの利用者</div><div class="card muted">読み込み失敗: '
+      + esc(e && e.message ? e.message : e) + '</div>';
+  });
+  const b = api("cf_analytics", { days }).then(render).catch(e => {
+    document.getElementById("summary").innerHTML =
+      '<div class="card muted">読み込み失敗: ' + esc(e && e.message ? e.message : e) + '</div>';
+  });
+  await Promise.all([a, b]);
+  setMsg("");
+}
+
+// ── アプリの利用者（OS別）──────────────────────────────────────────────
+const OS_NAME  = { ios: "iOS", android: "Android", steam: "Steam" };
+const OS_COLOR = { ios: "#5fa0ff", android: "#7fe0a3", steam: "#d9a55f" };
+const OS_ORDER = ["ios", "android", "steam"];
+function osList(rows){
+  // 実データに出てくる OS を既定順で。editor/official は自分用なので出さない。
+  const seen = new Set(rows.map(r => r.platform));
+  return OS_ORDER.filter(k => seen.has(k));
+}
+
+function renderApp(d){
+  const now  = (d.now || []).filter(r => OS_ORDER.includes(r.platform));
+  const hist = (d.history || []).filter(r => OS_ORDER.includes(r.platform));
+  const oss  = osList(now.length ? now : hist);
+  const S = k => now.reduce((a, r) => a + (r[k] || 0), 0);
+
+  // ① 現在の数字
+  const cards = oss.map(os => {
+    const r = now.find(x => x.platform === os) || {};
+    return `<div class="stat">
+      <div class="meta"><b style="display:inline-block;width:9px;height:9px;border-radius:2px;
+        background:${OS_COLOR[os]};vertical-align:middle"></b> ${esc(OS_NAME[os])}</div>
+      <div class="n" style="color:${OS_COLOR[os]}">${fmt(r.mau)}</div>
+      <div class="meta">今日 ${fmt(r.dau)} ／ 7日 ${fmt(r.wau)} ／ 累計 ${fmt(r.total)}</div>
+    </div>`;
+  }).join("");
+
+  // ② 日別（OS積み上げ）。dau は cron が焼いた日ぶんしか無いので、値のある日から描く。
+  const days = [...new Set(hist.map(r => r.d))].sort();
+  const at = (day, os, k) => (hist.find(r => r.d === day && r.platform === os) || {})[k] || 0;
+  const firstDau = days.find(day => oss.some(os => at(day, os, "dau") > 0));
+  const dauDays  = firstDau ? days.slice(days.indexOf(firstDau)) : [];
+  const chart = (list, key, h) => {
+    const max = Math.max(1, ...list.map(day => oss.reduce((a, os) => a + at(day, os, key), 0)));
+    return list.map(day => {
+      const tot = oss.reduce((a, os) => a + at(day, os, key), 0);
+      const seg = oss.map(os => {
+        const v = at(day, os, key);
+        return v ? `<i class="os-${os}" style="height:${Math.round(v / max * h)}px;background:${OS_COLOR[os]}"></i>` : "";
+      }).join("");
+      const tip = oss.map(os => `${OS_NAME[os]} ${at(day, os, key)}`).join(" / ");
+      return `<div class="bar-wrap" title="${esc(day)}: ${esc(tip)}（計 ${tot}）">
+          <div style="display:flex;align-items:flex-end;height:${h}px"><div class="sbar">${seg}</div></div>
+          <div class="bar-lbl">${esc(String(day).slice(5))}</div>
+        </div>`;
+    }).join("");
+  };
+  const legend = oss.map(os =>
+    `<b style="background:${OS_COLOR[os]}"></b> ${esc(OS_NAME[os])}`).join(" ");
+
+  const dauBlock = dauDays.length ? `
+    <div class="sec-title" style="margin-top:14px">日別の利用者（DAU・OS別）</div>
+    <div class="card">
+      <div class="legend">${legend}</div>
+      <div class="chart">${chart(dauDays, "dau", 180)}</div>
+      <div class="meta" style="margin-top:6px">毎晩0:05に前日ぶんを記録します。記録を始めた ${esc(dauDays[0])} 以降が出ます。</div>
+    </div>` : `
+    <div class="sec-title" style="margin-top:14px">日別の利用者（DAU・OS別）</div>
+    <div class="card muted">まだ記録がありません（毎晩0:05に前日ぶんが1日ずつ積まれます）。</div>`;
+
+  // ③ 新規（＝はじめてサインインした人）。過去ぶんは created_at から復元済み。
+  const newBlock = days.length ? `
+    <div class="sec-title" style="margin-top:14px">新しく増えた人（OS別）</div>
+    <div class="card">
+      <div class="legend">${legend}</div>
+      <div class="chart">${chart(days, "installs", 180)}</div>
+      <div class="meta" style="margin-top:6px">はじめてサインインした日で数えています（＝実質の新規インストール）。</div>
+    </div>` : "";
+
+  document.getElementById("app_users").innerHTML = `
+    <div class="sec-title">📱 アプリの利用者<span class="meta">　大きい数字＝この30日に起動した人（MAU）</span></div>
+    <div class="card">
+      <div class="grid">${cards || '<span class="muted">データなし</span>'}</div>
+      <div class="grid" style="margin-top:10px">
+        <div class="stat"><div class="meta">合計 MAU</div><div class="n">${fmt(S("mau"))}</div></div>
+        <div class="stat"><div class="meta">合計 DAU（今日）</div><div class="n">${fmt(S("dau"))}</div></div>
+        <div class="stat"><div class="meta">累計ユーザー</div><div class="n">${fmt(S("total"))}</div></div>
+      </div>
+      <div class="meta" style="margin-top:8px">※ サインインした人だけの数です。iOS(Game Center)・Android(Play Games)・Steam は
+        起動時に自動サインインするので、ほぼ「起動した人」と読めます。ただし
+        サインインを断った人・圏外で起動した人は入りません（ストアの実数より少なめに出ます）。
+        今日ぶんの DAU はまだ増えます。</div>
+    </div>
+    ${dauBlock}
+    ${newBlock}`;
 }
 
 function render(d){
