@@ -69,7 +69,15 @@
     background:rgba(8,22,55,.56);
   }
   @media (prefers-color-scheme: light){
-    body::before{ background:rgba(244,248,255,.74); }
+    /* ライトは「白いスクショを白い紙に置く」形になり、暗幕を濃くすると背景が消えてしまう。
+       ダークは暗幕が濃くても、明るいスクショとの明度差でむしろ形が見える（.56 で足りる）。
+       そこでライトだけは暗幕を薄くしたうえで、明度ではなく彩度と影で背景を立たせる。
+       この値で本文(#333)とのコントラストは最悪 6.04:1（WCAG AA 4.5 / AAA 7.0）。 */
+    body::before{ background:rgba(244,248,255,.54); }
+    .leaves .leaf{
+      filter:saturate(1.5) contrast(1.12) brightness(.93);
+      box-shadow:0 10px 26px rgba(16,42,92,.32), 0 0 0 1px rgba(16,42,92,.10);
+    }
   }
   .wrap{ max-width:960px; margin:0 auto; padding:0 20px; }
   a{ color:var(--blue); }
