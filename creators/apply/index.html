@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18330119849"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18330119849');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>コード申請フォーム｜日本地図 都市パズル</title>
+<meta name="description" content="『日本地図 都市パズル』を配信・レビューしてくださる方へ、フル版の無料コードを申請できるフォームです。">
+<link rel="canonical" href="https://japan-map.app/creators/apply/">
+<meta name="robots" content="noindex,follow">
+<style>
+  :root{ color-scheme: light dark;
+    --blue:#2a64c0; --blue-deep:#0a3478; --accent:#ff8a3d;
+    --ink:#1a1a1a; --muted:#666; --card:#f4f7fc; --line:#dbe4f2; --page:#f4f8ff; }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e8e8; --muted:#9aa4b2; --card:#15233c; --line:#27395a; --page:#0b1428; } }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+    background:var(--page); color:var(--ink); line-height:1.85; -webkit-text-size-adjust:100%; }
+  .top{ background:linear-gradient(160deg,var(--blue),var(--blue-deep)); padding:14px 18px; }
+  .top a{ color:#fff; text-decoration:none; font-weight:800; }
+  .wrap{ max-width:640px; margin:0 auto; padding:22px 18px 44px; }
+  .crumb{ font-size:.85em; color:var(--muted); margin:4px 0 10px; } .crumb a{ color:var(--muted); }
+  h1{ font-size:1.5em; margin:.1em 0 .4em; }
+  .lead{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:18px; }
+  form{ display:flex; flex-direction:column; gap:16px; }
+  label{ display:flex; flex-direction:column; gap:6px; font-weight:700; font-size:.96em; }
+  .req{ color:var(--accent); font-size:.85em; }
+  .hint{ font-weight:400; color:var(--muted); font-size:.82em; }
+  input, select, textarea{ font: inherit; padding:11px 12px; border:1px solid var(--line); border-radius:10px;
+    background:var(--page); color:var(--ink); width:100%; }
+  textarea{ min-height:84px; resize:vertical; }
+  .hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+  button{ font: inherit; font-weight:800; color:#fff; background:var(--blue); border:0; border-radius:999px;
+    padding:13px 20px; cursor:pointer; }
+  button:disabled{ opacity:.6; cursor:default; }
+  .msg{ border-radius:12px; padding:12px 14px; font-weight:700; display:none; }
+  .msg.ok{ background:rgba(22,163,74,.12); border:1px solid rgba(22,163,74,.4); color:#16a34a; display:block; }
+  .msg.err{ background:rgba(220,38,38,.10); border:1px solid rgba(220,38,38,.4); color:#dc2626; display:block; }
+  .terms{ color:var(--muted); font-size:.86em; margin-top:6px; }
+  footer{ text-align:center; color:var(--muted); font-size:.85em; padding:22px; }
+  footer a{ color:var(--blue); }
+  a{ color:var(--blue); }
+</style>
+</head>
+<body>
+  <div class="top"><a href="/">🗾 日本地図 都市パズル</a></div>
+  <div class="wrap">
+    <nav class="crumb"><a href="/">ホーム</a> › <a href="/creators/">配信・レビュー用コード</a> › 申請フォーム</nav>
+    <h1>コード申請フォーム</h1>
+
+    <div class="lead">
+      <p>『日本地図 都市パズル』を<b>配信・レビュー</b>してくださる方へ、フル版（広告なし・全機能）の<b>無料コード</b>をお渡しします。
+      下記をご記入ください。<b>チャンネル／レビュー先のURL</b>を確認のうえ、折り返しコードをメールでお送りします（承認制・数日いただく場合があります）。</p>
+    </div>
+
+    <form id="f">
+      <label>お名前 / チャンネル名 <span class="req">必須</span>
+        <input name="name" type="text" maxlength="80" required autocomplete="name">
+      </label>
+
+      <label>チャンネル / レビュー先の URL <span class="req">必須</span>
+        <span class="hint">YouTube・Twitch・TikTok・ブログ・Webメディアなど。あなたの活動が分かるページを1つ。</span>
+        <input name="url" type="url" maxlength="300" required placeholder="https://" inputmode="url">
+      </label>
+
+      <label>希望プラットフォーム <span class="req">必須</span>
+        <select name="platform" required>
+          <option value="" disabled selected>選んでください</option>
+          <option value="ios">iOS（iPhone / iPad）</option>
+          <option value="android">Android</option>
+          <option value="steam">PC（Steam）</option>
+        </select>
+      </label>
+
+      <label>連絡先メールアドレス <span class="req">必須</span>
+        <span class="hint">このアドレスにコードをお送りします。</span>
+        <input name="email" type="email" maxlength="120" required autocomplete="email" placeholder="you@example.com">
+      </label>
+
+      <label>一言（任意）
+        <textarea name="note" maxlength="500" placeholder="配信・レビューのご予定、応援メッセージなど（任意）"></textarea>
+      </label>
+
+      <!-- ハニーポット: 人間は空のまま。bot 除け（画面外に隠す）。 -->
+      <div class="hp" aria-hidden="true"><label>ここは空のままにしてください<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+
+      <div id="msg" class="msg"></div>
+      <button id="btn" type="submit">この内容で申請する</button>
+
+      <p class="terms">コードはお一人1つ・転売/再配布は禁止です。紹介・レビューは任意です。
+        いただいた情報はコードのお渡しとご連絡にのみ使用します。</p>
+    </form>
+
+    <p style="margin-top:20px"><a href="/creators/">← 配布についての説明へ戻る</a></p>
+  </div>
+  <footer>© 日本地図 都市パズル ／ お問い合わせ：<a href="mailto:limo_game@outlook.jp">limo_game@outlook.jp</a></footer>
+
+<script>
+const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
+const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
+const f = document.getElementById("f");
+const btn = document.getElementById("btn");
+const msg = document.getElementById("msg");
+function show(kind, text){ msg.className = "msg " + kind; msg.textContent = text; }
+f.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(f).entries());
+  msg.className = "msg"; msg.textContent = "";
+  btn.disabled = true; btn.textContent = "送信中…";
+  try {
+    const r = await fetch(`${SUPABASE}/functions/v1/submit-code-request`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "apikey": ANON },
+      body: JSON.stringify(d),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.ok) {
+      f.style.display = "none";
+      show("ok", "申請を受け付けました。ありがとうございます！確認のうえ、ご記入のメールアドレスにコードをお送りします。");
+    } else {
+      const map = { name_required:"お名前をご記入ください。", url_required:"URL を正しくご記入ください（http:// または https:// で始まる形）。", platform_invalid:"プラットフォームを選んでください。", email_invalid:"メールアドレスの形式をご確認ください。", rate_limited:"送信が多すぎます。しばらくおいてからお試しください。" };
+      show("err", map[j.error] || "送信に失敗しました。時間をおいて再度お試しください。");
+      btn.disabled = false; btn.textContent = "この内容で申請する";
+    }
+  } catch (_) {
+    show("err", "通信に失敗しました。電波の良い場所で再度お試しください。");
+    btn.disabled = false; btn.textContent = "この内容で申請する";
+  }
+});
+</script>
+</body>
+</html>
