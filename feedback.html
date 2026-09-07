@@ -30,6 +30,7 @@
   .s-new { background: #6b5a16; } .s-read { background: #2a4a6a; } .s-done { background: #1c5e38; }
   .s-noaction { background: #4a3a6a; }
   .muted { color: #9fb0cc; }
+  .ulink { color: #8fc0ff; text-decoration: underline; cursor: pointer; }
   #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
   #msg { color: #ffd27a; min-height: 1.2em; font-size: 13px; }
   .hidden { display: none !important; }
@@ -153,7 +154,10 @@ function render(rows){
   const list = document.getElementById("list");
   if (!rows.length){ list.innerHTML = '<p class="muted">該当するフィードバックはありません。</p>'; return; }
   list.innerHTML = rows.map(f => {
-    const who = f.user_id ? `<span class="meta" style="word-break:break-all">user_id: ${esc(f.user_id)}</span>` : '<span class="meta">匿名</span>';
+    // user_id は admin.html のように「名前＋その人のリンク」で出す（名前が無ければ user_id を表示）。
+    const who = f.user_id
+      ? `<span class="meta" style="word-break:break-all">from: <a class="ulink" href="./admin.html?clears=${encodeURIComponent(f.user_id)}" target="_blank" rel="noopener" title="このユーザーを見る">${esc(f.display_name || f.user_id)}</a></span>`
+      : '<span class="meta">匿名</span>';
     const ver = f.app_version ? ` ・ v${esc(f.app_version)}` : "";
     return `<div class="card">
       <div>${typePill(f.type)}${statusPill(f.status)}<span class="meta">${esc(f.platform||"unknown")}${ver} ・ ${esc(jst(f.created_at))} ・ #${f.id}</span></div>
