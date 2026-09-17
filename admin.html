@@ -406,6 +406,7 @@ function renderClears(d){
       <td style="text-align:right">${c.points}</td>
       <td style="text-align:right;white-space:nowrap">${c.best_score!=null?esc(fmtClearTime(c.best_score)):'<span class="muted">-</span>'}</td>
       <td style="text-align:right;${susFast?'color:#ff9b8f;font-weight:700':''}">${cspp!=null?cspp.toFixed(2):'<span class="muted">-</span>'}</td>
+      <td style="text-align:right">${(c.hint_count!=null && c.hint_count>=0)?(c.hint_count+"回"):'<span class="muted">-</span>'}</td>
       <td style="text-align:right;${fast?'color:#ff9b8f;font-weight:700':''}">${esc(fmtGap(c.gap))}</td>
       <td class="muted">#${c.season_id}</td>
     </tr>`;
@@ -414,7 +415,7 @@ function renderClears(d){
     <div class="card" style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:13px">
         <thead><tr style="text-align:left;color:#9fb0cc">
-          <th>時刻（JST）</th><th>コース</th><th style="text-align:right">点</th><th style="text-align:right">クリア時間</th><th style="text-align:right">秒/ピース</th><th style="text-align:right">前から</th><th>季節</th>
+          <th>時刻（JST）</th><th>コース</th><th style="text-align:right">点</th><th style="text-align:right">クリア時間</th><th style="text-align:right">秒/ピース</th><th style="text-align:right">ヒント</th><th style="text-align:right">前から</th><th>季節</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
