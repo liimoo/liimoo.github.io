@@ -286,6 +286,7 @@ async function loadScores(){
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
 }
 function fmtScore(cs){ return (cs/100).toFixed(2) + "秒"; }
+function fmtClearTime(cs){ const s=cs/100; if(s>=60){const m=Math.floor(s/60); return m+"分"+Math.round(s-m*60)+"秒";} return s.toFixed(1)+"秒"; }
 function renderScores(board, rows){
   const el = document.getElementById("scorelist");
   if (!el) return;
@@ -397,10 +398,14 @@ function renderClears(d){
 
   const rows = withGap.map(c=>{
     const fast = c.gap != null && c.gap < 20;   // 20秒未満で連続=要注意
+    const cspp = (c.best_score!=null && c.piece_count) ? (c.best_score/100)/c.piece_count : null; // 秒/ピース
+    const susFast = cspp!=null && c.piece_count>=100 && cspp<1.0; // 100P以上で1秒/ピース未満=要注意(正規最速は約1.4秒)
     return `<tr${fast?' style="background:#3a1a1a"':''}>
       <td style="white-space:nowrap">${esc(jstTime(c.cleared_at))}</td>
       <td>${esc(boardName(c.board_id))} <span class="muted">[${esc(c.board_id)}${c.mode?("・"+esc(c.mode)):""}${c.piece_count?("・"+c.piece_count+"P"):""}]</span></td>
       <td style="text-align:right">${c.points}</td>
+      <td style="text-align:right;white-space:nowrap">${c.best_score!=null?esc(fmtClearTime(c.best_score)):'<span class="muted">-</span>'}</td>
+      <td style="text-align:right;${susFast?'color:#ff9b8f;font-weight:700':''}">${cspp!=null?cspp.toFixed(2):'<span class="muted">-</span>'}</td>
       <td style="text-align:right;${fast?'color:#ff9b8f;font-weight:700':''}">${esc(fmtGap(c.gap))}</td>
       <td class="muted">#${c.season_id}</td>
     </tr>`;
@@ -409,7 +414,7 @@ function renderClears(d){
     <div class="card" style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:13px">
         <thead><tr style="text-align:left;color:#9fb0cc">
-          <th>時刻（JST）</th><th>コース</th><th style="text-align:right">点</th><th style="text-align:right">前から</th><th>季節</th>
+          <th>時刻（JST）</th><th>コース</th><th style="text-align:right">点</th><th style="text-align:right">クリア時間</th><th style="text-align:right">秒/ピース</th><th style="text-align:right">前から</th><th>季節</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
