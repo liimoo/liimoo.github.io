@@ -71,10 +71,11 @@
   </div>
 </div>
 
+<script src="admin_auth.js"></script>
 <script>
 const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
 const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
-let token = sessionStorage.getItem("jm_admin_token") || "";
+let token = jmAdmin.token();   // 共通: admin_auth.js が更新も面倒を見る
 let CITY = null;
 
 function esc(s){ return String(s??"").replace(/[&<>"']/g, c => (
@@ -100,17 +101,12 @@ async function login(){
   const password = document.getElementById("password").value;
   document.getElementById("loginmsg").textContent = "ログイン中…";
   try {
-    const r = await fetch(`${SUPABASE}/auth/v1/token?grant_type=password`, {
-      method: "POST", headers: { "Content-Type": "application/json", "apikey": ANON },
-      body: JSON.stringify({ email, password }),
-    });
-    const d = await r.json();
-    if (!r.ok || !d.access_token) { document.getElementById("loginmsg").textContent = "ログイン失敗: " + (d.error_description||d.msg||r.status); return; }
-    token = d.access_token; sessionStorage.setItem("jm_admin_token", token);
+    await jmAdmin.login(email, password);
+    token = jmAdmin.token();
     showApp();
-  } catch(e){ document.getElementById("loginmsg").textContent = "通信エラー: " + e; }
+  } catch(e){ document.getElementById("loginmsg").textContent = "ログイン失敗: " + e.message; }
 }
-function logout(){ token=""; sessionStorage.removeItem("jm_admin_token");
+function logout(){ token=""; jmAdmin.logout();
   document.getElementById("app").classList.add("hidden");
   document.getElementById("login").classList.remove("hidden"); }
 async function showApp(){ document.getElementById("loginmsg").textContent="";
@@ -119,12 +115,11 @@ async function showApp(){ document.getElementById("loginmsg").textContent="";
   await fetchCities(); reloadAll(); }
 
 async function api(action, params){
-  const r = await fetch(`${SUPABASE}/functions/v1/admin`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "apikey": ANON, "Authorization": "Bearer " + token },
-    body: JSON.stringify(Object.assign({ action }, params||{})),
-  });
-  const d = await r.json().catch(()=>({}));
+  // 共通の request が 401/403 のときだけトークンを更新して1回やり直す
+  const res = await jmAdmin.request(action, params);
+  const r = { ok: res.ok, status: res.status };
+  const d = res.data;
+  token = jmAdmin.token();
   if (r.status === 401 || r.status === 403) { setMsg("権限がありません（再ログインしてください）"); throw new Error("auth"); }
   if (!r.ok) { setMsg("エラー: " + (d.error||r.status)); throw new Error(d.error||r.status); }
   return d;
