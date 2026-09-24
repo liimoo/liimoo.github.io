@@ -83,6 +83,7 @@
   </header>
   <div class="wrap">
     <div id="app_users"></div>
+    <div id="retention"></div>
     <div class="sec-title" style="margin-top:22px">🌐 サイト（japan-map.app）のアクセス</div>
     <div class="card meta">
       Cloudflare 経由の数字。<b>ページビュー</b>＝トップページの表示回数が目安。<b>リクエスト</b>は
@@ -150,8 +151,73 @@ async function load(){
     document.getElementById("summary").innerHTML =
       '<div class="card muted">読み込み失敗: ' + esc(e && e.message ? e.message : e) + '</div>';
   });
-  await Promise.all([a, b]);
+  // 継続率。落ちても他の数字は出す（3つとも独立）。
+  const c = api("retention", { weeks: 10 }).then(renderRetention).catch(e => {
+    failed = true;
+    document.getElementById("retention").innerHTML =
+      '<div class="sec-title" style="margin-top:22px">🔁 継続率</div>'
+      + '<div class="card muted">読み込み失敗: ' + esc(e && e.message ? e.message : e) + '</div>';
+  });
+  await Promise.all([a, b, c]);
   if (!failed) setMsg("");   // 失敗メッセージ(api()が入れた詳細)を消さない
+}
+
+// ── 継続率（登録週ごと）────────────────────────────────────────────────
+// ⚠ 「まだ N 日たっていない週」は 0% ではなく「—」で出す。0%（＝全員離脱）と
+//    「まだ分からない」は意味がまったく違うので、混ぜると読み違える。
+const RET_COLS = [
+  { key: "d1",  days: 1,  label: "1日後"  },
+  { key: "d7",  days: 7,  label: "7日後"  },
+  { key: "d14", days: 14, label: "14日後" },
+  { key: "d30", days: 30, label: "30日後" },
+];
+
+function retColor(pct){
+  if (pct >= 30) return "#2e7d32";      // よい
+  if (pct >= 15) return "#8a6d00";      // ふつう
+  return "#9a3a3a";                      // 低い
+}
+
+function renderRetention(res){
+  const rows = (res && res.rows) || [];
+  const el = document.getElementById("retention");
+  if (!rows.length){
+    el.innerHTML = '<div class="sec-title" style="margin-top:22px">🔁 継続率</div>'
+      + '<div class="card muted">まだデータがありません。</div>';
+    return;
+  }
+  const today = new Date();
+  // その週の登録者が「最後に登録した日」= 週の最終日。そこから N 日たっていないと判定できない。
+  const matured = (cohort, days) => {
+    const end = new Date(cohort + "T00:00:00+09:00");
+    end.setDate(end.getDate() + 6 + days);
+    return end <= today;
+  };
+  const head = RET_COLS.map(c => `<th class="r">${esc(c.label)}</th>`).join("");
+  const body = rows.slice().reverse().map(r => {
+    const n = Number(r.users) || 0;
+    const tds = RET_COLS.map(c => {
+      if (!matured(r.cohort, c.days)) return '<td class="r meta">—</td>';
+      const pct = n ? (Number(r[c.key]) / n * 100) : 0;
+      return `<td class="r" style="color:${retColor(pct)}"><b>${pct.toFixed(1)}%</b>`
+           + `<span class="meta"> ${Number(r[c.key])}</span></td>`;
+    }).join("");
+    return `<tr><td>${esc(r.cohort)}〜</td><td class="r">${n}</td>${tds}</tr>`;
+  }).join("");
+  el.innerHTML = `
+    <div class="sec-title" style="margin-top:22px">🔁 継続率
+      <span class="meta">　登録した週ごとに「その後も遊んでいた人」の割合</span></div>
+    <div class="card meta">
+      「登録から◯日後<b>以降</b>に活動があったか」で数えます。<b>—</b> はまだその日数が
+      たっていない週（0%ではありません）。<br>
+      活動は <b>profiles.updated_at</b>（起動・クリア送信など）で判定します。
+      サインインし直した時しか動かない last_sign_in_at より実態に近い数字です。
+      ⚠ オフラインで遊んだぶんは通信しないので数えられません。実際の継続率はこれ以上です。
+    </div>
+    <div class="card scroll"><table>
+      <thead><tr><th>登録した週</th><th class="r">人数</th>${head}</tr></thead>
+      <tbody>${body}</tbody>
+    </table></div>`;
 }
 
 // ── アプリの利用者（OS別）──────────────────────────────────────────────
