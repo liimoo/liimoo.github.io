@@ -200,16 +200,26 @@ function renderStore(res){
     const acq = last7.reduce((a, d) => a + at(d, st, "acquisitions"), 0);
     const cv = vis ? `<br><span class="meta">転換率 <b>${(acq / vis * 100).toFixed(1)}%</b>`
                    + ` （${acq}/${vis}人）</span>` : "";
+    // フルバージョンの購入。期間を揃えるため、表に出ている全日ぶんで数える。
+    const buy = days.reduce((a, d) => a + at(d, st, "purchases"), 0);
+    const inst = days.reduce((a, d) => a + at(d, st, "first"), 0);
+    const bl = `<br><span class="meta">フル版の購入 <b>${buy}</b>件`
+             + (inst ? ` （新規の ${(buy / inst * 100).toFixed(2)}%）` : "") + `</span>`;
     return `<div class="card"><b>${esc(STORE_NAME[st] || st)}</b><br>`
          + `<span style="font-size:1.6em"><b>${(sum / Math.max(last7.length,1)).toFixed(1)}</b></span>`
-         + ` <span class="meta">新規/日（直近${last7.length}日）</span>${cv}</div>`;
+         + ` <span class="meta">新規/日（直近${last7.length}日）</span>${cv}${bl}</div>`;
   }).join("");
   const th = stores.map(st => `<th class="r">${esc(STORE_NAME[st] || st)}</th>`).join("")
-           + stores.map(st => `<th class="r meta">再DL</th>`).join("");
+           + stores.map(st => `<th class="r meta">再DL</th>`).join("")
+           + stores.map(st => `<th class="r">💎購入</th>`).join("");
   const body = days.slice().reverse().map(d => {
     const f = stores.map(st => `<td class="r"><b>${at(d, st, "first")}</b></td>`).join("");
     const rd = stores.map(st => `<td class="r meta">${at(d, st, "redownload")}</td>`).join("");
-    return `<tr><td>${esc(d)}</td>${f}${rd}</tr>`;
+    const bu = stores.map(st => {
+      const n = at(d, st, "purchases");
+      return `<td class="r">${n ? `<b style="color:#2e7d32">${n}</b>` : '<span class="meta">0</span>'}</td>`;
+    }).join("");
+    return `<tr><td>${esc(d)}</td>${f}${rd}${bu}</tr>`;
   }).join("");
   el.innerHTML = `
     <div class="sec-title" style="margin-top:22px">🏬 ストアのインストール
@@ -218,6 +228,8 @@ function renderStore(res){
       <b>新規</b>＝はじめて入れた人。<b>再DL</b>＝同じアカウントで入れ直した人
       （機種変・アプリ更新の直後に跳ねます）。<b>足さないでください</b> ―― 合計を
       インストール数と呼ぶと実態より大幅に多く見えます。<br>
+      <b>フル版の購入</b>＝買い切りの「フルバージョン＋広告削除」を買った件数。
+      ⚠ 返金は差し引いていません。<br>
       <b>転換率</b>＝ストアページを見た人のうち実際に入れた人の割合。ここが低ければ
       ストアページ（スクショ・説明文）の改善が効きます。
       ⚠ いまは <b>Google Play のみ</b>。Apple はアナリティクスの生成待ちです。<br>
