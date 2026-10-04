@@ -287,7 +287,9 @@ function renderScores(board, rows){
   el.innerHTML = rows.map(s => `
     <div class="card">
       <div><span class="pill p-approved">${s.rank}位</span>
-        <span class="meta">${esc(s.display_name||"（名前なし）")} ・ ${esc(s.platform||"")} ・ ${esc(jst(s.updated_at))}</span></div>
+        <a href="#" onclick="openClears('${esc(s.user_id)}');return false" title="この人のプレイヤー取得履歴を見る"
+           style="color:#7db7ff;text-decoration:underline;cursor:pointer">${esc(s.display_name||"（名前なし）")}</a>
+        <span class="meta"> ・ ${esc(s.platform||"")} ・ ${esc(jst(s.updated_at))}</span></div>
       <div class="body">${fmtScore(s.best_score)}　<span class="muted">(${s.best_score}cs)</span></div>
       <div class="meta" style="word-break:break-all">user_id: ${esc(s.user_id)}</div>
       <div class="row">
@@ -306,6 +308,12 @@ async function delScore(board, user_id, rank, cs){
 
 // ── 🕵️ プレイヤー取得履歴（対抗戦・怪しいプレイヤーの調査）─────────────────────
 let CLEARS_UID = "";
+// ランキング記録などから、その user_id の「プレイヤー取得履歴」へ切り替えて開く。
+function openClears(uid){
+  CLEARS_UID = uid;
+  document.getElementById("filter").value = "player_clears";
+  load();   // player_clears 分岐が renderClearsForm → CLEARS_UID があれば自動で loadClears
+}
 // board_id → 読みやすいコース名（規約: 2桁=県 / 5桁=市町村 / S…=政令市 / quiz:…=クイズ / GEO_…=山川）。
 function boardName(b){
   if (!b) return b;
