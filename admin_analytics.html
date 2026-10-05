@@ -195,7 +195,9 @@ function renderStore(res){
   const last7 = days.slice(-7);
   const cards = stores.map(st => {
     const sum = last7.reduce((a, d) => a + at(d, st, "first"), 0);
-    // 転換率＝ストアページを見た人のうち入れた人。Play のレポートにだけ入っている。
+    // 転換率＝ストアページを見た人のうち入れた人。Play はレポートに入っている。
+    // iOS は売上レポートに無いので Analytics から別途入れている
+    // （tools/appstore_stats.py --analytics --push）。
     const vis = last7.reduce((a, d) => a + at(d, st, "visitors"), 0);
     const acq = last7.reduce((a, d) => a + at(d, st, "acquisitions"), 0);
     const cv = vis ? `<br><span class="meta">転換率 <b>${(acq / vis * 100).toFixed(1)}%</b>`
