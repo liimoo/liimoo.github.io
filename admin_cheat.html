@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>チート検知ログ 管理</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+         margin: 0; background: #0e1626; color: #e8edf6; line-height: 1.6; }
+  header { background: #142036; padding: 14px 18px; position: sticky; top: 0; display: flex;
+           align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #24344f; z-index: 5; }
+  header h1 { font-size: 1.1em; margin: 0; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 16px; }
+  input, select, button, textarea { font-size: 15px; font-family: inherit; }
+  input, select, textarea { padding: 9px 11px; border-radius: 9px; border: 1px solid #2c3e5d;
+                  background: #0b1322; color: #e8edf6; width: 100%; }
+  button { padding: 9px 14px; border-radius: 9px; border: 0; cursor: pointer; font-weight: 700; color: #fff; width: auto; }
+  .b-blue { background: #2a64c0; } .b-green { background: #1f9d57; } .b-gray { background: #5a6b86; }
+  .b-orange { background: #d9742a; } .b-red { background: #c0392b; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card { background: #16233c; border: 1px solid #26385a; border-radius: 14px; padding: 14px; margin: 12px 0; }
+  .body { font-size: 15px; white-space: pre-wrap; word-break: break-word; margin: 6px 0 10px; }
+  .meta { font-size: 12px; color: #9fb0cc; word-break: break-all; }
+  .meta a { color: #7fb0ff; }
+  .ulink { color: #7fb0ff; cursor: pointer; text-decoration: none; font-weight: 700; }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
+  .p-score { background: #7a3a3a; } .p-clear { background: #6b5a16; }
+  .muted { color: #9fb0cc; }
+  #login { max-width: 360px; margin: 8vh auto; display: grid; gap: 12px; }
+  #msg { color: #ffd27a; min-height: 1.2em; font-size: 13px; }
+  .hidden { display: none !important; }
+  h2 { font-size: 1em; margin: 4px 0; }
+  a.navlink { text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div id="login" class="wrap">
+  <h1>チート検知ログ 管理ログイン</h1>
+  <input id="email" type="email" placeholder="管理者メール" autocomplete="username">
+  <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
+  <button class="b-blue" onclick="login()">ログイン</button>
+  <div id="loginmsg" class="muted" style="font-size:13px"></div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>🚨 チート検知ログ</h1>
+    <input id="uid" placeholder="user_id で絞り込み（空＝全件）" style="max-width:280px" onkeydown="if(event.key==='Enter')load()">
+    <button class="b-gray" onclick="load()">更新</button>
+    <span id="msg"></span>
+    <a class="navlink b-gray" href="./admin.html" style="padding:9px 14px;border-radius:9px">💬 みんなの声</a>
+    <a class="navlink b-gray" href="./admin_event.html" style="padding:9px 14px;border-radius:9px">🚩 対抗戦</a>
+    <button class="b-gray" onclick="logout()">ログアウト</button>
+  </header>
+  <div class="wrap"><div id="list"></div></div>
+</div>
+
+<script src="admin_auth.js"></script>
+<script>
+let token = jmAdmin.token();
+
+function esc(s){ return String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+function val(id){ return document.getElementById(id).value.trim(); }
+
+function jst(s){
+  if(!s) return "";
+  const d = new Date(s);
+  if(isNaN(d.getTime())) return String(s).replace("T"," ").slice(0,16);
+  const p = new Intl.DateTimeFormat("ja-JP", {timeZone:"Asia/Tokyo", year:"numeric",
+    month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hour12:false})
+    .formatToParts(d).reduce((a,x)=>(a[x.type]=x.value,a),{});
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
+}
+
+function setMsg(t){ document.getElementById("msg").textContent = t||""; }
+
+async function login(){
+  const email = val("email");
+  const password = document.getElementById("password").value;
+  document.getElementById("loginmsg").textContent = "ログイン中…";
+  try {
+    await jmAdmin.login(email, password);
+    token = jmAdmin.token();
+    showApp();
+  } catch(e){ document.getElementById("loginmsg").textContent = "ログイン失敗: " + e.message; }
+}
+
+function logout(){ token=""; jmAdmin.logout(); document.getElementById("app").classList.add("hidden"); document.getElementById("login").classList.remove("hidden"); }
+function showApp(){ document.getElementById("loginmsg").textContent=""; document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); load(); }
+
+async function api(action, params){
+  const res = await jmAdmin.request(action, params);
+  const r = { ok: res.ok, status: res.status };
+  const d = res.data;
+  token = jmAdmin.token();
+  if (r.status === 401 || r.status === 403) { setMsg("権限がありません（再ログインしてください）"); throw new Error("auth"); }
+  if (!r.ok) { setMsg("エラー: " + (d.error||r.status)); throw new Error(d.error||r.status); }
+  return d;
+}
+
+const RLABEL = { bad_score_pass: "スコア署名が不一致", bad_clear_pass: "対抗戦クリア署名が不一致" };
+function rlabel(r){ return RLABEL[r] || r; }
+function rpill(r){ return `<span class="pill ${r==='bad_clear_pass'?'p-clear':'p-score'}">${esc(rlabel(r))}</span>`; }
+
+async function load(){
+  setMsg("読み込み中…");
+  try {
+    const uid = val("uid");
+    const d = await api("cheat_log", uid ? { user_id: uid, limit: 300 } : { limit: 300 });
+    render(d);
+    setMsg(`${(d.log||[]).length} 件`);
+  } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
+}
+
+function openClears(uid){ location.href = "./admin.html?clears=" + encodeURIComponent(uid); }
+
+async function banUser(uid){
+  if (!confirm("このユーザーを BAN しますか？\n（スコア送信・対抗戦書き込みを拒否します）\n" + uid)) return;
+  try { await api("ban", { user_id: uid, reason: "チート: pass署名の不一致（cheat_log）" }); alert("BAN しました。"); await load(); }
+  catch(e){}
+}
+
+function render(d){
+  const list = document.getElementById("list");
+  const log = d.log||[], byReason = d.by_reason||[], topUsers = d.top_users||[];
+  if (!log.length){
+    list.innerHTML = '<p class="muted">チート検知（署名の不一致）は まだありません。👍<br>'
+      + '（pass 署名を送るのは v2.4.2 以降のクライアントだけ。配信・プレイが始まると、不正な直API送信がここに溜まります）</p>';
+    return;
+  }
+  const sum = `<div class="card"><div class="meta">集計（取得した ${log.length} 件内）</div>
+    <div class="body">${byReason.map(x=>`${rpill(x.reason)}<b>${x.count}</b>`).join("　") || "—"}</div></div>`;
+  const offenders = topUsers.length ? `<div class="card"><div class="meta">ユーザー別（多い順）</div>
+    ${topUsers.map(u=>`<div class="row" style="justify-content:space-between;align-items:center;margin:6px 0">
+      <a class="ulink" onclick="openClears('${esc(u.user_id)}');return false" href="#">${esc(u.display_name||u.user_id)}</a>
+      <span class="row"><span class="meta">${u.count} 件</span>
+      <button class="b-blue" onclick="openClears('${esc(u.user_id)}')">取得履歴</button>
+      <button class="b-red" onclick="banUser('${esc(u.user_id)}')">BAN</button></span>
+    </div>`).join("")}</div>` : "";
+  const rows = log.map(r=>`<div class="card">
+    <div class="meta">${esc(jst(r.created_at))} ・ v${esc(r.client_version||"?")} ${rpill(r.reason)}</div>
+    <div class="body"><a class="ulink" onclick="openClears('${esc(r.user_id)}');return false" href="#">${esc(r.display_name||r.user_id)}</a>
+      <span class="meta"> ／ ${esc(r.board_id)}${r.score!=null?("　"+(r.score/100).toFixed(2)+"秒"):""}</span></div>
+    <div class="row">
+      <button class="b-blue" onclick="openClears('${esc(r.user_id)}')">取得履歴を見る</button>
+      <button class="b-red" onclick="banUser('${esc(r.user_id)}')">このユーザーを BAN</button>
+    </div>
+  </div>`).join("");
+  list.innerHTML = sum + offenders + '<hr style="border:none;border-top:1px solid #0003;margin:14px 0">' + rows;
+}
+
+if (token) showApp();
+</script>
+</body>
+</html>
