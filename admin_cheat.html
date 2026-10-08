@@ -67,6 +67,43 @@ let token = jmAdmin.token();
 function esc(s){ return String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 function val(id){ return document.getElementById(id).value.trim(); }
 
+// コース名の解決（admin.html と同じ admin-cities.json を使う）。
+let CITY = null;   // {prefs:{"01":"北海道"...}, codes:{code:"都道府県 市区町村"...}}
+async function fetchCities(){
+  if (CITY) return;
+  try { const r = await fetch("./admin-cities.json"); CITY = await r.json(); } catch(e){ CITY = null; }
+}
+function cityName(code){
+  if (!CITY || !code) return code;
+  if (CITY.codes[code]) return CITY.codes[code];
+  if (code.indexOf("|") >= 0){ const a = code.split("|"); return (CITY.prefs[a[0]]||"") + " " + a[1]; }
+  return code;
+}
+// board_id → 読みやすいコース名（2桁=県 / 5桁=市町村 / S…=政令市 / quiz:…=クイズ / GEO…=山川）。
+function boardName(b){
+  if (!b) return b;
+  if (b === "00") return "全国（パズル）";
+  if (b === "quiz:00") return "全国（クイズ）";
+  if (/^\d{2}$/.test(b)) return ((CITY&&CITY.prefs[b])||b) + "（県・パズル）";
+  if (/^quiz:\d{2}$/.test(b)){ const p=b.slice(5); return ((CITY&&CITY.prefs[p])||p) + "（県・クイズ）"; }
+  if (/^\d{5}$/.test(b)) return cityName(b) + "（市町村）";
+  if (/^quiz:\d{5}$/.test(b)) return cityName(b.slice(5)) + "（市町村クイズ）";
+  if (b[0] === "S") return cityName(b) + "（政令市）";
+  if (b.indexOf("GEO") >= 0) return b + "（山・川）";
+  return b;
+}
+// クリアタイム（センチ秒→読みやすく）。60秒以上は 分秒 を併記。
+function fmtTime(cs){
+  if (cs == null) return "";
+  const t = cs/100;
+  const base = t.toFixed(2) + "秒";
+  if (t < 60) return base;
+  const m = Math.floor(t/60), s = Math.round(t%60);
+  if (t < 3600) return base + "（" + m + "分" + s + "秒）";
+  const h = Math.floor(t/3600), mm = Math.floor((t%3600)/60);
+  return base + "（" + h + "時間" + mm + "分）";
+}
+
 function jst(s){
   if(!s) return "";
   const d = new Date(s);
@@ -110,6 +147,7 @@ function rpill(r){ return `<span class="pill ${r==='bad_clear_pass'?'p-clear':'p
 async function load(){
   setMsg("読み込み中…");
   try {
+    await fetchCities();
     const uid = val("uid");
     const d = await api("cheat_log", uid ? { user_id: uid, limit: 300 } : { limit: 300 });
     render(d);
@@ -144,9 +182,10 @@ function render(d){
     </div>`).join("")}</div>` : "";
   const rows = log.map(r=>`<div class="card">
     <div class="meta">${esc(jst(r.created_at))} ・ v${esc(r.client_version||"?")} ${rpill(r.reason)}</div>
-    <div class="body"><a class="ulink" onclick="openClears('${esc(r.user_id)}');return false" href="#">${esc(r.display_name||r.user_id)}</a>
-      <span class="meta"> ／ ${esc(r.board_id)}${r.score!=null?("　"+(r.score/100).toFixed(2)+"秒"):""}</span></div>
-    <div class="row">
+    <div class="body"><a class="ulink" onclick="openClears('${esc(r.user_id)}');return false" href="#">${esc(r.display_name||r.user_id)}</a></div>
+    <div class="meta">コース：<b style="color:#e8edf6">${esc(boardName(r.board_id))}</b>　<span style="opacity:.7">[${esc(r.board_id)}]</span></div>
+    ${r.score!=null ? `<div class="meta">クリアタイム：<b style="color:#e8edf6">${esc(fmtTime(r.score))}</b></div>` : `<div class="meta">（対抗戦クリア・タイムなし）</div>`}
+    <div class="row" style="margin-top:8px">
       <button class="b-blue" onclick="openClears('${esc(r.user_id)}')">取得履歴を見る</button>
       <button class="b-red" onclick="banUser('${esc(r.user_id)}')">このユーザーを BAN</button>
     </div>
