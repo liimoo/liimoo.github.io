@@ -64,6 +64,7 @@
       <option value="live_fortune">🔮 占いの今日のひとこと</option>
       <option value="scores">🏆 ランキング記録</option>
       <option value="player_clears">🕵️ プレイヤー取得履歴（対抗戦）</option>
+      <option value="cheat_log">🚨 チート検知ログ</option>
     </select>
     <select id="kindfilter" onchange="load()">
       <option value="">種類：すべて</option>
@@ -193,6 +194,12 @@ async function load(){
     if (status === "player_clears") {
       renderClearsForm();
       setMsg("");
+      return;
+    }
+    if (status === "cheat_log") {
+      const d = await api("cheat_log", { limit: 300 });
+      renderCheatLog(d);
+      setMsg(`${(d.log||[]).length} 件`);
       return;
     }
     const kind = document.getElementById("kindfilter").value;
@@ -512,6 +519,28 @@ function renderReporters(rows){
       </div>
     </div>`;
   }).join("");
+}
+
+function renderCheatLog(d){
+  const list = document.getElementById("list");
+  const log = d.log||[], byReason = d.by_reason||[], topUsers = d.top_users||[];
+  if (!log.length){ list.innerHTML = '<p class="muted">チート検知（署名の不一致）は まだありません。👍</p>'; return; }
+  const rlabel = r => ({bad_score_pass:"スコア署名が不一致", bad_clear_pass:"対抗戦クリア署名が不一致"}[r]||r);
+  const sum = `<div class="card"><div class="meta">集計（取得した ${log.length} 件内）</div>
+    <div class="body">${byReason.map(x=>`${esc(rlabel(x.reason))}: <b>${x.count}</b>`).join(" ／ ")||"—"}</div></div>`;
+  const offenders = topUsers.length ? `<div class="card"><div class="meta">ユーザー別（多い順）</div>
+    ${topUsers.map(u=>`<div class="row" style="justify-content:space-between;align-items:center">
+      <a class="ulink" onclick="openClears('${esc(u.user_id)}');return false" href="#">${esc(u.display_name||u.user_id)}</a>
+      <span><span class="meta">${u.count} 件</span>
+      <button class="b-red" onclick="banUser('${esc(u.user_id)}')">BAN</button></span>
+    </div>`).join("")}</div>` : "";
+  const rows = log.map(r=>`<div class="card">
+    <div class="meta">${esc(r.created_at)} ・ ${esc(rlabel(r.reason))} ・ v${esc(r.client_version||"?")}</div>
+    <div class="body"><a class="ulink" onclick="openClears('${esc(r.user_id)}');return false" href="#">${esc(r.display_name||r.user_id)}</a>
+      <span class="meta"> ／ ${esc(r.board_id)}${r.score!=null?(" ／ "+(r.score/100).toFixed(2)+"秒"):""}</span></div>
+    <div class="row"><button class="b-red" onclick="banUser('${esc(r.user_id)}')">このユーザーをBAN</button></div>
+  </div>`).join("");
+  list.innerHTML = sum + offenders + '<hr style="border:none;border-top:1px solid #0001;margin:10px 0">' + rows;
 }
 
 const PROFILE_ICONS = ["🐱","🐶","🐰","🦊","🐻","🐼","🐨","🦁","🐯","🐸","🐵","🐔","🐧","🦉","🦄","🐴","🐮","🐷","🐹","🐢","🐙","🦀","🐠","🐳","🐝","🦋","🌸","🌻","🌈","🍀","🍎","🍓","🍰","🎈","🎁","⭐","🌟","⛰","🌊","🗾"];
