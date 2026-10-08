@@ -174,15 +174,17 @@ function render(d){
   const sum = `<div class="card"><div class="meta">集計（取得した ${log.length} 件内）</div>
     <div class="body">${byReason.map(x=>`${rpill(x.reason)}<b>${x.count}</b>`).join("　") || "—"}</div></div>`;
   const offenders = topUsers.length ? `<div class="card"><div class="meta">ユーザー別（多い順）</div>
-    ${topUsers.map(u=>`<div class="row" style="justify-content:space-between;align-items:center;margin:6px 0">
-      <a class="ulink" onclick="openClears('${esc(u.user_id)}');return false" href="#">${esc(u.display_name||u.user_id)}</a>
+    ${topUsers.map(u=>`<div class="row" style="justify-content:space-between;align-items:center;margin:8px 0">
+      <span><a class="ulink" onclick="openClears('${esc(u.user_id)}');return false" href="#">${esc(u.display_name||"（名前なし）")}</a>
+        <div class="meta">ID: ${esc(u.user_id)}</div></span>
       <span class="row"><span class="meta">${u.count} 件</span>
       <button class="b-blue" onclick="openClears('${esc(u.user_id)}')">取得履歴</button>
       <button class="b-red" onclick="banUser('${esc(u.user_id)}')">BAN</button></span>
     </div>`).join("")}</div>` : "";
   const rows = log.map(r=>`<div class="card">
     <div class="meta">${esc(jst(r.created_at))} ・ v${esc(r.client_version||"?")} ${rpill(r.reason)}</div>
-    <div class="body"><a class="ulink" onclick="openClears('${esc(r.user_id)}');return false" href="#">${esc(r.display_name||r.user_id)}</a></div>
+    <div class="body"><a class="ulink" onclick="openClears('${esc(r.user_id)}');return false" href="#">${esc(r.display_name||"（名前なし）")}</a></div>
+    <div class="meta">ID: ${esc(r.user_id)}</div>
     <div class="meta">コース：<b style="color:#e8edf6">${esc(boardName(r.board_id))}</b>　<span style="opacity:.7">[${esc(r.board_id)}]</span></div>
     ${r.score!=null ? `<div class="meta">クリアタイム：<b style="color:#e8edf6">${esc(fmtTime(r.score))}</b></div>` : `<div class="meta">（対抗戦クリア・タイムなし）</div>`}
     <div class="row" style="margin-top:8px">
