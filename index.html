@@ -9,16 +9,38 @@
   gtag('js', new Date());
   gtag('config', 'AW-18330119849');
   gtag('config', 'G-DP16PC4C8J');
+
+  // ストアへ出ていくクリックを数える。
+  // ⚠ これが無いと「LP → ストア」の歩留まりが一切分からない。着地ページごとの
+  //   良し悪しを比べられず、SNSの誘導先を勘で決めることになる（実際そうなっていた）。
+  // ⚠ GA4 の拡張計測(outbound click)任せにしない。イベント名が page ごとに
+  //   混ざって比較しづらいので、store_click として明示的に送る。
+  // ⚠ キャプチャ段階(true)で拾う。途中で伝播を止める実装があっても取りこぼさない。
+  // ⚠ 同じタブで遷移するが、gtag は sendBeacon で送るので離脱しても届く。
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(!t || !t.closest) return;
+    var a = t.closest('a[href]');
+    if(!a) return;
+    var h = a.hostname || '';
+    var s = h.indexOf('apps.apple.com') >= 0 ? 'ios'
+          : h.indexOf('play.google.com') >= 0 ? 'android'
+          : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
+    if(!s) return;
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
+  }, true);
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preload" as="image" href="assets/japanmap/logo.webp" type="image/webp" fetchpriority="high">
-<title>日本地図 都市パズル｜市区町村も完璧！全国1,746市区町村ぜんぶ遊べる地理パズル</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="description" content="『日本地図 都市パズル』は、日本全国1,746の市区町村すべてが遊べる地理パズル。市区町村も完璧！推しの街の今日の運勢を占う『街占い』、全国のプレイヤーと応援・お祝いを送り合える『みんなの声』も。親子で・受験対策にも。">
+<title>日本地図 都市パズル｜市区町村も完璧！全国1,746市区町村ぜんぶ遊べる地理パズル</title>
+<meta name="description" content="『日本地図 都市パズル』は、日本全国1,746の市区町村すべてが遊べる地理パズル。市区町村まで完璧！推しの街の今日の運勢を占う『街占い』、全国のプレイヤーと応援・お祝いを送り合える『みんなの声』も。親子で・受験対策にも。">
+
+<link rel="canonical" href="https://japan-map.app/">
 
 <!-- OGP / Twitter Card -->
 <meta property="og:type" content="website">
@@ -72,7 +94,32 @@
     background:rgba(8,22,55,.56);
   }
   @media (prefers-color-scheme: light){
-    body::before{ background:rgba(244,248,255,.74); }
+    /* ライトは「白いスクショを白い紙に置く」形になり、暗幕を濃くすると背景が消えてしまう。
+       ダークは暗幕が濃くても、明るいスクショとの明度差でむしろ形が見える（.56 で足りる）。
+       そこでライトだけは暗幕を薄くしたうえで、明度ではなく彩度と影で背景を立たせる。
+       この値で本文(#333)とのコントラストは最悪 6.04:1（WCAG AA 4.5 / AAA 7.0）。 */
+    body::before{ background:rgba(244,248,255,.54); }
+    .leaves .leaf{
+      filter:saturate(1.5) contrast(1.12) brightness(.93);
+      box-shadow:0 10px 26px rgba(16,42,92,.32), 0 0 0 1px rgba(16,42,92,.10);
+    }
+  }
+  /* 広い画面では、本文は中央960pxに収まり、地図が見えるのは左右の余白だけ。
+     そこで幕を一様にかけるのをやめ、中央だけ濃く・左右は透明にする。
+     余白の地図がはっきり出るうえ、本文の下は逆に .54→.92 と厚くなるので
+     読みやすさも上がる（実測: 余白の濃淡 8.9→17.5、本文コントラスト下位5% 3.17→4.25）。
+     1200px 未満では余白が細く効果が出ないので、一様のままにする。 */
+  @media (prefers-color-scheme: light) and (min-width: 1200px){
+    body::before{
+      background:linear-gradient(90deg,
+        rgba(244,248,255,0)   0%,  rgba(244,248,255,0)   4%,
+        rgba(244,248,255,.92) 24%, rgba(244,248,255,.92) 76%,
+        rgba(244,248,255,0)   96%, rgba(244,248,255,0)  100%);
+    }
+    .leaves .leaf{
+      filter:saturate(1.55) contrast(1.15) brightness(.94);
+      opacity:.95 !important;   /* 各画像の opacity は style 属性で入っているので !important が要る */
+    }
   }
   .wrap{ max-width:960px; margin:0 auto; padding:0 20px; }
   a{ color:var(--blue); }
@@ -122,6 +169,17 @@
   .badge-link{ display:inline-block; transition:transform .12s ease; line-height:0; }
   .badge-link:hover{ transform:translateY(-2px); }
   .badge-img{ display:block; height:54px; width:auto; border-radius:9px; }
+  /* Steam版バッジ。ストアページ（近日登場＋ウィッシュリスト）へリンク。
+     公式ロゴだけを Steam カラーの箱に載せ、Apple/Google バッジと高さ・角丸を揃える。 */
+  .badge-steam{
+    display:flex; align-items:center; justify-content:center; height:54px; box-sizing:border-box;
+    padding:0 22px; border-radius:9px; background:#171a21;
+    border:1px solid rgba(255,255,255,.9);   /* App Store/Google Play に合わせた白枠 */
+  }
+  .badge-steam .steam{ height:22px; width:auto; flex:none; }
+  @media (prefers-color-scheme: light){
+    .badge-steam{ background:#1b2838; }       /* 枠は白のまま（ライト背景では自然に控えめになる） */
+  }
 
   /* ---- sections ---- */
   section{ padding:50px 0; }
@@ -134,11 +192,41 @@
   .feat li{ list-style:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
   .feat b{ color:var(--blue); }
 
+  /* ---- 更新情報（トップの抜粋・詳細は /news/） ---- */
+  .home-news{ margin-top:8px; }
+  .home-news .rel{ background:var(--card); border:1px solid var(--line); border-radius:12px;
+        padding:14px 16px; margin:0 0 12px; text-align:left; }
+  .home-news .rel-head{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:2px; }
+  .home-news .ver{ background:var(--blue); color:#fff; font-weight:700; font-size:.8em; padding:2px 9px; border-radius:999px; }
+  .home-news .date{ color:var(--muted); font-size:.85em; }
+  .home-news h3{ font-size:1.02em; margin:4px 0 6px; }
+  .home-news .changes{ margin:0; padding-left:1.15em; }
+  .home-news .changes li{ margin:3px 0; }
+
+  /* ---- 都道府県対抗戦（トップの告知バナー） ---- */
+  .event{ background:linear-gradient(160deg,var(--blue) 0%,var(--blue-deep) 100%);
+    border-radius:22px; overflow:hidden; box-shadow:0 14px 34px rgba(8,36,92,.35);
+    display:grid; grid-template-columns:1fr; }
+  .event .ev-img{ display:block; width:100%; height:auto; }
+  .event .ev-body{ padding:22px 24px 26px; color:#fff; text-align:center; }
+  .event .ev-badge{ display:inline-block; background:var(--accent); color:#fff; font-weight:700;
+    font-size:.82em; padding:3px 12px; border-radius:999px; margin-bottom:10px; }
+  .event .ev-body h2{ color:#fff; margin:0 0 8px; }
+  .event .ev-body p{ margin:0 0 8px; color:rgba(255,255,255,.94); }
+  .event .ev-lead{ font-size:1.15em; font-weight:800; color:#fff; margin:0 0 8px; }
+  .event .ev-date{ font-weight:700; }
+  .event .ev-beta{ font-size:.85em; color:rgba(255,255,255,.82); margin:10px 0 0; }
+  @media (min-width:720px){
+    .event{ grid-template-columns:1.05fr .95fr; align-items:center; }
+    .event .ev-body{ text-align:left; padding:26px 30px; }
+  }
+
   /* ---- map wall (全国すべての街) ---- */
   .wall{
     display:grid; grid-template-columns:repeat(auto-fill,minmax(108px,1fr));
     gap:8px; margin-top:8px;
   }
+  .wall a{ display:block; }   /* グリッドの子はリンク。img と同じ枠を占めるように */
   .wall img{
     width:100%; aspect-ratio:260/280; object-fit:cover; object-position:top center;
     border-radius:10px; background:#dfe7f2;
@@ -146,6 +234,13 @@
     transition:transform .12s ease, box-shadow .12s ease;
   }
   .wall img:hover{ transform:translateY(-3px) scale(1.03); box-shadow:0 8px 18px rgba(0,0,0,.22); }
+  .guide-intro{ max-width:760px; margin:0 auto; color:var(--muted); line-height:1.9; }
+  .guide-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
+    list-style:none; padding:0; margin:20px 0 0; }
+  .guide-links a{ display:inline-block; padding:6px 13px; border-radius:999px;
+    background:#eef3fb; border:1px solid #d6e2f3; color:#1c4e9c;
+    text-decoration:none; font-size:.92em; }
+  .guide-links a:hover{ background:#dce8fa; }
   .wall-note{ text-align:center; color:var(--muted); font-size:.85em; margin-top:16px; }
 
   /* ---- 目玉機能（街占い / みんなの声）を大きく ---- */
@@ -198,9 +293,11 @@
     .shots-land img{ height:200px; }
     .wall{ grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:6px; }
   }
+.nb{display:none}@media(max-width:560px){.nb{display:inline}}
 </style>
 </head>
 <body>
+<div style="background:linear-gradient(160deg,#2a64c0,#0a3478);padding:11px 18px;text-align:center;font-size:.9em"><a href="/" style="color:#fff;font-weight:800;text-decoration:none">🗾 日本地図 都市パズル</a>　<span style="opacity:.92">｜ <a href="/play/" style="color:#fff;text-decoration:none">遊ぶ</a>・<a href="/event/" style="color:#fff;text-decoration:none">対抗戦</a>・<a href="/players/" style="color:#fff;text-decoration:none">ランキング</a>・<a href="/videos/" style="color:#fff;text-decoration:none">プレイ動画</a>・<a href="/news/" style="color:#fff;text-decoration:none">お知らせ</a><br class="nb"><a href="/pref/" style="color:#fff;text-decoration:none">都道府県</a>・<a href="/city/" style="color:#fff;text-decoration:none">主要都市</a>・<a href="/guide/" style="color:#fff;text-decoration:none">観光ガイド</a>・<a href="/ranking/" style="color:#fff;text-decoration:none">豆知識</a></span></div>
 
 <div class="leaves" aria-hidden="true">
     <img class="leaf" src="assets/japanmap/scatter/p1.jpg" alt="" loading="lazy" decoding="async" style="left:3%;top:2%;width:300px;opacity:0.7;--r:-28deg;--amp:7px;--rd:-3deg;--dur:7.5s;--delay:-0.0s">
@@ -245,24 +342,65 @@
         <source srcset="assets/japanmap/logo.webp" type="image/webp">
         <img class="logo" src="assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" fetchpriority="high">
       </picture>
+      <p class="sub">都道府県から市区町村まで遊べる、日本地図パズルの決定版。1,746市区町村を収録。</p>
       <img class="stamp" src="assets/japanmap/stamp.png" alt="市区町村も完璧！" width="418" height="149">
     </h1>
     <p class="tag">市区町村も完璧！ 日本全国すべての街が、<br>一生遊べる地理パズル。</p>
-    <p class="sub">都道府県から市区町村まで遊べる、日本地図パズルの決定版。1,746市区町村を収録。</p>
+    <p class="sub">1,746の市区町村を、まるごと収録。</p>
     <div class="badges">
       <a class="badge-link" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeでダウンロード">
         <img class="badge-img" src="assets/japanmap/appstore_badge.svg" alt="App Storeで手に入れよう" width="162" height="54">
       </a>
       <a class="badge-link" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playでダウンロード">
-        <img class="badge-img" src="assets/japanmap/googleplay_badge.png" alt="Google Playで手に入れよう" height="54">
+        <!-- 公式PNGは上下に29pxの透明余白があり、height:54だと黒枠が42pxに縮んでApp Storeと不揃いになる。
+             余白を切った _hero 版を使い、黒枠を実寸54pxに揃える（県ページは元PNGのまま）。 -->
+        <img class="badge-img" src="assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" height="54">
+      </a>
+      <!-- PC（Steam）版。ストアページ（近日登場＋ウィッシュリスト）が公開されたのでリンク化した。
+           ページ側が既に「Coming Soon」表示なので、LP側の「近日登場」テキストは外し、
+           公式ロゴだけでウィッシュリストへ飛ばす。誤解防止は aria-label で担保。
+           発売後もURL・体裁はそのままでよい（発売後はストアの購入ボタンに変わるだけ）。
+           ロゴ assets/japanmap/steam_logo.svg は Steam ストア本体の公式ヘッダーロゴ
+           (store.steampowered.com の logo_steam.svg / #C5C3C0)。壊れていた viewBox のみ正規化済み。 -->
+      <a class="badge-link badge-steam" href="https://store.steampowered.com/app/4966740/"
+         aria-label="Steamでウィッシュリストに追加（PC版・近日登場）" target="_blank" rel="noopener">
+        <img class="steam" src="assets/japanmap/steam_logo.svg" alt="Steam" width="66" height="20">
       </a>
     </div>
+    <p style="margin:18px 0 0"><a href="/play/" style="display:inline-block;font-weight:800;background:var(--accent);color:#fff;padding:12px 26px;border-radius:999px;text-decoration:none;box-shadow:0 8px 20px rgba(255,138,61,.35)">🧩 ブラウザで無料であそぶ（全国47都道府県・政令市）</a></p>
   </div>
 </header>
 
 <main>
 
 <!-- 公式PV（YouTube埋め込み。mp4直置きより軽く、再生数もチャンネルに積まれる） -->
+<!-- 配信者・レビュアー募集（相互宣伝＋無料コード） -->
+<section class="wrap" style="padding-top:10px;padding-bottom:30px">
+  <div style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center">
+    <h2 style="margin:0 0 8px">🎥 配信者・レビュアーの方へ</h2>
+    <p class="lead" style="margin:0 auto 16px;max-width:640px">
+      <b>フル版（広告なし・全機能）が無料で遊べるコード</b>を配布中。さらに、<b>あなたの配信・動画をアプリ内の「プレイ動画」でプレイヤーに紹介</b>します（相互宣伝・無料・任意・承認制）。</p>
+    <a href="/creators/" style="display:inline-block;background:var(--blue);color:#fff;font-weight:700;padding:13px 24px;border-radius:12px;text-decoration:none">フル版コードをもらう・くわしく見る →</a>
+  </div>
+</section>
+<section class="wrap" style="padding-top:8px">
+  <div class="event">
+    <picture>
+      <source srcset="assets/japanmap/event.webp" type="image/webp">
+      <img class="ev-img" src="assets/japanmap/event.jpg" width="1280" height="720" loading="lazy"
+           alt="都道府県対抗戦のイメージ。47都道府県が陣営に分かれて競う日本地図。">
+    </picture>
+    <div class="ev-body">
+      <span class="ev-badge">🚩 オンラインイベント</span>
+      <h2>都道府県対抗戦</h2>
+      <p class="ev-lead">お気に入りの県を、みんなで優勝させよう！</p>
+      <p>住んでいる県などのチームに分かれて、全国のプレイヤーとクリア数を競うイベント。約2週間・毎月くり返し開催予定です。</p>
+      <p class="ev-date">第1回：2026年8月15日〜8月31日（毎月15日〜月末に開催）</p>
+      <p style="margin:12px 0 0"><a href="/event/" style="display:inline-block;font-weight:800;background:var(--blue);color:#fff;padding:11px 22px;border-radius:999px;text-decoration:none;box-shadow:0 8px 18px rgba(42,100,192,.32)">🏆 結果・順位を見る（あなたの県は今、何位？）→</a></p>
+    </div>
+  </div>
+</section>
+
 <section class="wrap" style="padding-top:14px">
   <h2>公式PV</h2>
   <div class="pv">
@@ -286,16 +424,6 @@
     <video autoplay muted loop playsinline preload="metadata" poster="assets/japanmap/clips/lp_clear.jpg" aria-label="クリア時にお祝いコメントが流れる様子">
       <source src="assets/japanmap/clips/lp_clear.mp4" type="video/mp4">
     </video>
-  </div>
-</section>
-
-<!-- 配信者・レビュアー募集（相互宣伝＋無料コード） -->
-<section class="wrap" style="padding-top:10px;padding-bottom:30px">
-  <div style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center">
-    <h2 style="margin:0 0 8px">🎥 配信者・レビュアーの方へ</h2>
-    <p class="lead" style="margin:0 auto 16px;max-width:640px">
-      <b>フル版（広告なし・全機能）が無料で遊べるコード</b>を配布中。さらに、<b>あなたの配信・動画をアプリ内の「プレイ動画」でプレイヤーに紹介</b>します（相互宣伝・無料・任意・承認制）。</p>
-    <a href="/creators/" style="display:inline-block;background:var(--blue);color:#fff;font-weight:700;padding:13px 24px;border-radius:12px;text-decoration:none">フル版コードをもらう・くわしく見る →</a>
   </div>
 </section>
 
@@ -342,72 +470,188 @@
     <h2>日本全国、すべての街が遊べる。</h2>
     <p class="lead">47都道府県も、1,746の市区町村も。<br>あなたの街が、まるごとパズルになる。</p>
     <div class="wall">
-    <img src="assets/japanmap/wall/zenkoku.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_01.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_02.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_03.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_04.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_05.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_06.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_07.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_08.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_09.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_10.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_11.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_12.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_13.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_14.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_15.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_16.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_17.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_18.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_19.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_20.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_21.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_22.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_23.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_24.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_25.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_26.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_27.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_28.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_29.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_30.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_31.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_32.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_33.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_34.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_35.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_36.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_37.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_38.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_39.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_40.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_41.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_42.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_43.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_44.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_45.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_46.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/pref_47.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S01100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S11100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S13100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S14100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S14130.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S15100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S23100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S26100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S27100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S27140.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S28100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S34100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S40100.jpg" alt="" loading="lazy" decoding="async">
-    <img src="assets/japanmap/wall/sp_S40130.jpg" alt="" loading="lazy" decoding="async">
+    <a href="/play/japan/" title="全国の都道府県パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/zenkoku.jpg" alt="全国47都道府県のパズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/hokkaido.html" title="北海道の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_01.jpg" alt="北海道の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/aomori.html" title="青森県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_02.jpg" alt="青森県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/iwate.html" title="岩手県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_03.jpg" alt="岩手県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/miyagi.html" title="宮城県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_04.jpg" alt="宮城県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/akita.html" title="秋田県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_05.jpg" alt="秋田県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/yamagata.html" title="山形県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_06.jpg" alt="山形県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/fukushima.html" title="福島県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_07.jpg" alt="福島県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/ibaraki.html" title="茨城県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_08.jpg" alt="茨城県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/tochigi.html" title="栃木県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_09.jpg" alt="栃木県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/gunma.html" title="群馬県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_10.jpg" alt="群馬県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/saitama.html" title="埼玉県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_11.jpg" alt="埼玉県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/chiba.html" title="千葉県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_12.jpg" alt="千葉県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/tokyo.html" title="東京都の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_13.jpg" alt="東京都の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/kanagawa.html" title="神奈川県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_14.jpg" alt="神奈川県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/niigata.html" title="新潟県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_15.jpg" alt="新潟県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/toyama.html" title="富山県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_16.jpg" alt="富山県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/ishikawa.html" title="石川県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_17.jpg" alt="石川県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/fukui.html" title="福井県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_18.jpg" alt="福井県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/yamanashi.html" title="山梨県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_19.jpg" alt="山梨県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/nagano.html" title="長野県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_20.jpg" alt="長野県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/gifu.html" title="岐阜県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_21.jpg" alt="岐阜県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/shizuoka.html" title="静岡県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_22.jpg" alt="静岡県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/aichi.html" title="愛知県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_23.jpg" alt="愛知県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/mie.html" title="三重県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_24.jpg" alt="三重県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/shiga.html" title="滋賀県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_25.jpg" alt="滋賀県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/kyoto.html" title="京都府の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_26.jpg" alt="京都府の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/osaka.html" title="大阪府の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_27.jpg" alt="大阪府の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/hyogo.html" title="兵庫県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_28.jpg" alt="兵庫県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/nara.html" title="奈良県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_29.jpg" alt="奈良県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/wakayama.html" title="和歌山県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_30.jpg" alt="和歌山県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/tottori.html" title="鳥取県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_31.jpg" alt="鳥取県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/shimane.html" title="島根県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_32.jpg" alt="島根県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/okayama.html" title="岡山県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_33.jpg" alt="岡山県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/hiroshima.html" title="広島県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_34.jpg" alt="広島県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/yamaguchi.html" title="山口県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_35.jpg" alt="山口県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/tokushima.html" title="徳島県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_36.jpg" alt="徳島県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/kagawa.html" title="香川県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_37.jpg" alt="香川県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/ehime.html" title="愛媛県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_38.jpg" alt="愛媛県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/kochi.html" title="高知県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_39.jpg" alt="高知県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/fukuoka.html" title="福岡県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_40.jpg" alt="福岡県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/saga.html" title="佐賀県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_41.jpg" alt="佐賀県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/nagasaki.html" title="長崎県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_42.jpg" alt="長崎県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/kumamoto.html" title="熊本県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_43.jpg" alt="熊本県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/oita.html" title="大分県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_44.jpg" alt="大分県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/miyazaki.html" title="宮崎県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_45.jpg" alt="宮崎県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/kagoshima.html" title="鹿児島県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_46.jpg" alt="鹿児島県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/okinawa.html" title="沖縄県の市区町村一覧を見る"><img src="assets/japanmap/wall/pref_47.jpg" alt="沖縄県の市区町村パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/sapporo/" title="札幌市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S01100.jpg" alt="札幌市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/saitama/" title="さいたま市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S11100.jpg" alt="さいたま市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/pref/tokyo.html" title="東京都の市区町村一覧を見る"><img src="assets/japanmap/wall/sp_S13100.jpg" alt="東京23区の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/yokohama/" title="横浜市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S14100.jpg" alt="横浜市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/kawasaki/" title="川崎市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S14130.jpg" alt="川崎市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/niigata/" title="新潟市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S15100.jpg" alt="新潟市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/nagoya/" title="名古屋市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S23100.jpg" alt="名古屋市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/kyoto/" title="京都市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S26100.jpg" alt="京都市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/osaka/" title="大阪市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S27100.jpg" alt="大阪市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/sakai/" title="堺市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S27140.jpg" alt="堺市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/kobe/" title="神戸市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S28100.jpg" alt="神戸市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/hiroshima/" title="広島市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S34100.jpg" alt="広島市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/kitakyushu/" title="北九州市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S40100.jpg" alt="北九州市の区パズル" loading="lazy" decoding="async"></a>
+    <a href="/play/fukuoka/" title="福岡市の区パズルをブラウザで遊ぶ"><img src="assets/japanmap/wall/sp_S40130.jpg" alt="福岡市の区パズル" loading="lazy" decoding="async"></a>
     </div>
-    <p class="wall-note">↑ 全国＋47都道府県＋政令市の区。さらに市区町村それぞれも1つずつ遊べます（山・川モードも別途収録）。</p>
+    <p class="wall-note" style="margin-top:22px"><b>ブラウザですぐ遊べる：都道府県ごとの市区町村パズル</b></p>
+    <ul class="guide-links">
+      <li><a href="/play/pref-hokkaido/">北海道</a></li>
+      <li><a href="/play/pref-aomori/">青森県</a></li>
+      <li><a href="/play/pref-iwate/">岩手県</a></li>
+      <li><a href="/play/pref-miyagi/">宮城県</a></li>
+      <li><a href="/play/pref-akita/">秋田県</a></li>
+      <li><a href="/play/pref-yamagata/">山形県</a></li>
+      <li><a href="/play/pref-fukushima/">福島県</a></li>
+      <li><a href="/play/pref-ibaraki/">茨城県</a></li>
+      <li><a href="/play/pref-tochigi/">栃木県</a></li>
+      <li><a href="/play/pref-gunma/">群馬県</a></li>
+      <li><a href="/play/pref-saitama/">埼玉県</a></li>
+      <li><a href="/play/pref-chiba/">千葉県</a></li>
+      <li><a href="/play/pref-tokyo/">東京都</a></li>
+      <li><a href="/play/pref-kanagawa/">神奈川県</a></li>
+      <li><a href="/play/pref-niigata/">新潟県</a></li>
+      <li><a href="/play/pref-toyama/">富山県</a></li>
+      <li><a href="/play/pref-ishikawa/">石川県</a></li>
+      <li><a href="/play/pref-fukui/">福井県</a></li>
+      <li><a href="/play/pref-yamanashi/">山梨県</a></li>
+      <li><a href="/play/pref-nagano/">長野県</a></li>
+      <li><a href="/play/pref-gifu/">岐阜県</a></li>
+      <li><a href="/play/pref-shizuoka/">静岡県</a></li>
+      <li><a href="/play/pref-aichi/">愛知県</a></li>
+      <li><a href="/play/pref-mie/">三重県</a></li>
+      <li><a href="/play/pref-shiga/">滋賀県</a></li>
+      <li><a href="/play/pref-kyoto/">京都府</a></li>
+      <li><a href="/play/pref-osaka/">大阪府</a></li>
+      <li><a href="/play/pref-hyogo/">兵庫県</a></li>
+      <li><a href="/play/pref-nara/">奈良県</a></li>
+      <li><a href="/play/pref-wakayama/">和歌山県</a></li>
+      <li><a href="/play/pref-tottori/">鳥取県</a></li>
+      <li><a href="/play/pref-shimane/">島根県</a></li>
+      <li><a href="/play/pref-okayama/">岡山県</a></li>
+      <li><a href="/play/pref-hiroshima/">広島県</a></li>
+      <li><a href="/play/pref-yamaguchi/">山口県</a></li>
+      <li><a href="/play/pref-tokushima/">徳島県</a></li>
+      <li><a href="/play/pref-kagawa/">香川県</a></li>
+      <li><a href="/play/pref-ehime/">愛媛県</a></li>
+      <li><a href="/play/pref-kochi/">高知県</a></li>
+      <li><a href="/play/pref-fukuoka/">福岡県</a></li>
+      <li><a href="/play/pref-saga/">佐賀県</a></li>
+      <li><a href="/play/pref-nagasaki/">長崎県</a></li>
+      <li><a href="/play/pref-kumamoto/">熊本県</a></li>
+      <li><a href="/play/pref-oita/">大分県</a></li>
+      <li><a href="/play/pref-miyazaki/">宮崎県</a></li>
+      <li><a href="/play/pref-kagoshima/">鹿児島県</a></li>
+      <li><a href="/play/pref-okinawa/">沖縄県</a></li>
+    </ul>
+    <p class="wall-note">↑ タイルをタップすると、その都道府県の市区町村一覧（名産・見どころつき）へ。全国＋47都道府県＋政令市の区、さらに市区町村それぞれも1つずつ遊べます（山・川モードも別途収録）。</p>
     <p style="text-align:center;margin-top:16px"><a href="/pref/" style="font-weight:700">▶ 都道府県別に市区町村を見る（47都道府県ガイド）</a></p>
   </div>
+</section>
+
+<!-- 観光ガイド（アプリの「まち紹介」と同じ読み物） -->
+<section class="wrap">
+  <h2>まちを知ってから、遊ぶ。</h2>
+  <p class="lead">47都道府県と52市の観光ガイド。れきし・見どころ・おみやげを写真つきで。</p>
+  <p class="guide-intro">パズルで形をおぼえたら、そのまちのことも読んでみてください。
+  観光ガイドでは、47都道府県と52市について、まちの<b>れきし</b>・<b>見どころ5か所</b>・<b>おみやげ</b>を
+  写真つきで紹介しています。写真はすべて出典と作者を明記した、自由に使える画像です。
+  アプリの「<b>まち紹介</b>」では、同じ内容を読み上げつきで楽しめます。</p>
+  <ul class="guide-links">
+      <li><a href="/guide/sapporo/">札幌市</a></li>
+      <li><a href="/guide/aomori/">青森市</a></li>
+      <li><a href="/guide/morioka/">盛岡市</a></li>
+      <li><a href="/guide/sendai/">仙台市</a></li>
+      <li><a href="/guide/akita/">秋田市</a></li>
+      <li><a href="/guide/yamagata/">山形市</a></li>
+      <li><a href="/guide/fukushima/">福島市</a></li>
+      <li><a href="/guide/mito/">水戸市</a></li>
+      <li><a href="/guide/utsunomiya/">宇都宮市</a></li>
+      <li><a href="/guide/maebashi/">前橋市</a></li>
+      <li><a href="/guide/saitama/">さいたま市</a></li>
+      <li><a href="/guide/chiba/">千葉市</a></li>
+      <li><a href="/guide/shinjuku/">新宿区</a></li>
+      <li><a href="/guide/kawasaki/">川崎市</a></li>
+      <li><a href="/guide/yokohama/">横浜市</a></li>
+      <li><a href="/guide/sagamihara/">相模原市</a></li>
+      <li><a href="/guide/niigata/">新潟市</a></li>
+      <li><a href="/guide/toyama/">富山市</a></li>
+      <li><a href="/guide/kanazawa/">金沢市</a></li>
+      <li><a href="/guide/fukui/">福井市</a></li>
+      <li><a href="/guide/kofu/">甲府市</a></li>
+      <li><a href="/guide/nagano/">長野市</a></li>
+      <li><a href="/guide/gifu/">岐阜市</a></li>
+      <li><a href="/guide/hamamatsu/">浜松市</a></li>
+      <li><a href="/guide/shizuoka/">静岡市</a></li>
+      <li><a href="/guide/nagoya/">名古屋市</a></li>
+      <li><a href="/guide/tsu/">津市</a></li>
+      <li><a href="/guide/otsu/">大津市</a></li>
+      <li><a href="/guide/kyoto/">京都市</a></li>
+      <li><a href="/guide/sakai/">堺市</a></li>
+      <li><a href="/guide/osaka/">大阪市</a></li>
+      <li><a href="/guide/kobe/">神戸市</a></li>
+      <li><a href="/guide/nara/">奈良市</a></li>
+      <li><a href="/guide/wakayama/">和歌山市</a></li>
+      <li><a href="/guide/tottori/">鳥取市</a></li>
+      <li><a href="/guide/matsue/">松江市</a></li>
+      <li><a href="/guide/okayama/">岡山市</a></li>
+      <li><a href="/guide/hiroshima/">広島市</a></li>
+      <li><a href="/guide/yamaguchi/">山口市</a></li>
+      <li><a href="/guide/tokushima/">徳島市</a></li>
+      <li><a href="/guide/takamatsu/">高松市</a></li>
+      <li><a href="/guide/matsuyama/">松山市</a></li>
+      <li><a href="/guide/kochi/">高知市</a></li>
+      <li><a href="/guide/kitakyushu/">北九州市</a></li>
+      <li><a href="/guide/fukuoka/">福岡市</a></li>
+      <li><a href="/guide/saga/">佐賀市</a></li>
+      <li><a href="/guide/nagasaki/">長崎市</a></li>
+      <li><a href="/guide/kumamoto/">熊本市</a></li>
+      <li><a href="/guide/oita/">大分市</a></li>
+      <li><a href="/guide/miyazaki/">宮崎市</a></li>
+      <li><a href="/guide/kagoshima/">鹿児島市</a></li>
+      <li><a href="/guide/naha/">那覇市</a></li>
+  </ul>
+  <p class="wall-note"><a href="/guide/pref/" style="font-weight:700">🗾 都道府県の観光ガイド（47件）</a>
+  ／ <a href="/guide/">観光ガイド一覧</a></p>
 </section>
 
 <section class="wrap">
@@ -471,8 +715,34 @@
 </section>
 
 <section class="wrap">
+  <h2>更新情報</h2>
+  <p class="lead">最近のアップデート。くわしくは<a href="/news/">更新情報ページ</a>へ。</p>
+  <div class="home-news">
+    <!-- NEWS:START -->
+    <article class="rel">
+      <div class="rel-head"><span class="ver">v2.4.2</span><time class="date">2026年10月8日</time></div>
+      <h3>対抗戦の 不具合を 直したよ</h3>
+      <ul class="changes"><li>不具合ほうこくより、地名の 読みを 直したよ。上峰町「前牟田字下米多＝しもめた」などを 正しく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、対抗戦トップで「勢力図を 見る」が ひらけなかったり、自分の県の 順位が おくれて 出て メニューが ずれたりするのを 直したよ。かこの 対抗戦の 結果発表も、いちらんから えらんで 見やすく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li></ul>
+    </article>
+    <article class="rel">
+      <div class="rel-head"><span class="ver">v2.4.1</span><time class="date">2026年10月5日</time></div>
+      <h3>山・川パズルの つづきが できるように</h3>
+      <ul class="changes"><li>ご要望から、「かこの 対抗戦」で、その回の 結果発表を もう一度 見られるように したよ。自分が 県内で 何位だったかも 分かるよ。大切な ごいけんを ありがとうございました。</li><li>ご要望から、山・川パズルも 途中で やめても、つぎに 入ったとき「つづきから」で 続けられるように したよ。大切な ごいけんを ありがとうございました。</li><li>ご要望から、対抗戦トップの 勢力図を、「勢力図を 見る」ボタンから ひらくように かえたよ。大切な ごいけんを ありがとうございました。</li><li>不具合ほうこくより、地名の 読みを たくさん 直したよ。平川市（大光寺・小国・広船 など 16か所）、蒲郡市「三谷町東」、松浦市（調川町・志佐町）、鹿児島市「七ッ島＝ななつじま」、帯広市「西18条南」、釧路市「阿寒町雄別＝あかんちょうゆうべつ」などの 読みを 正しく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、地名の 読みを たくさん 直したよ。芸西村「和食＝わじき」、諏訪市・下諏訪町・安曇野市（高家＝たきべ など）、高岡市（蓮花寺＝れんげじ・石瀬＝いしぜ など）、日出町「日出＝ひじ」などを 正しく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、大仙市の 地名の 読みを 直したよ。花館（はなだて）、内小友（うちおとも）の 読みと、間倉（まぐら）、笑ノ口（えみのくち）、中沢（なかざわ）などの 字（あざ）の 読みを 正しく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、山・川パズルで「やりなおす」が きかない・何回か くりかえすと とまることが あったのを 直したよ。「コミュニティガイドライン」が スクロールできず 読めなかったのも 直したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、あそびかたの 対抗戦の ページで、かいさいの 日づけと クイズの 点の せつめいが まちがって いたのを 直したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li></ul>
+    </article>
+    <article class="rel">
+      <div class="rel-head"><span class="ver">v2.4.0</span><time class="date">2026年9月28日</time></div>
+      <h3>クイズの ランキングと 地名の 読みを 直したよ</h3>
+      <ul class="changes"><li>不具合ほうこくより、クイズを おえた 直後は サインインが まだ おわって いない ことが あり、ランキングに 自分の きろくが のらない ことが あったのを 直したよ。あとから サインインが おわれば、おくれて のるように したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、静岡市など くいずの ランキングに 自分の きろくが のらない ことが あるのを 直したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、地名の 読みを 直したよ。向日市「上植野」の 町名、上峰町「前牟田字上米多」「坊所字下坊所」、郡山市「久保田字上野」、松本市「波田」の 区の 名前などを 正しく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、富山市など ピースが とても 多い 町の パズルで、置いた ピースの 緑の ふちが 太く 見えて いたのを 細く 直したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>ご要望から、プロフィールの「ブロック」を まちがえて 押しても すぐに 実行しないよう、通報と 同じく かくにんを だすように したよ。ごいけん ありがとうございました</li><li>不具合ほうこくより、珠洲市（正院町・上戸町・宝立町・三崎町）と 奥州市の 町名の 読みを 直したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、一部の 機種で まち紹介の 文字（、。ー など）が うまく 出て いなかったのを 直したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、京都市の まち紹介で、他の 市の 名所（天橋立）の 写真が まざって いたのを 直したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、岡谷市・諏訪市の 町名の 読みを たくさん 直したよ（諏訪湖「すわこ」など）。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>ご要望から、まち紹介の 読み上げで、地名や 単位（メートル）、大名家などの 読みまちがいを 直したよ。ごいけん ありがとうございました</li><li>パズルや クイズで 街を えらぶ ときにも、その 街の「しょうかい」を すぐ 見られる ボタンを つけたよ。</li></ul>
+    </article>
+    <!-- NEWS:END -->
+  </div>
+  <p style="text-align:center;margin-top:8px"><a href="/news/" style="font-weight:700">▶ すべての更新情報を見る</a></p>
+</section>
+
+<section class="wrap">
   <h2>公式SNSで最新情報を</h2>
-  <p class="lead">今日の日本一・新機能・激ムズプレイ動画を毎日配信中！フォローしてね。</p>
+  <p class="lead">今日の日本一・新機能・激ムズプレイ動画を毎日配信中！フォローしてね。<br>
+    アプリの<a href="/news/">更新情報・お知らせ</a>はこちら。</p>
   <div class="social">
     <a class="x" href="https://x.com/japan_puzzle" target="_blank" rel="noopener"><span class="glyph">𝕏</span> X</a>
     <a class="yt" href="https://www.youtube.com/channel/UC_i-NXoW66D4YNASfVFxIQg" target="_blank" rel="noopener"><span class="glyph">▶</span> YouTube</a>
@@ -492,10 +762,17 @@
     <a href="https://www.tiktok.com/@japanmap.app" target="_blank" rel="noopener">TikTok</a>
   </p>
   <p>
-    <a href="/creators/">🎥 配信者・レビュアーの方へ（フル版コードを配布）</a>・
+    <a href="/news/">更新情報</a>・<a href="/creators/">🎥 配信者・レビュアーの方へ（フル版コードを配布）</a>・
+    <a href="/city/">主要都市</a>・
+      <a href="/guide/">観光ガイド</a>・
+    <a href="/ranking/">日本地図の豆知識</a>・
+    <a href="/event/">都道府県対抗</a>・
+    <a href="/players/">プレイヤーランキング</a>・
+    <a href="/videos/">プレイ動画</a>・
     <a href="japanmap-support.html">サポート</a>・
     <a href="japanmap-privacy.html">プライバシーポリシー</a>・
     <a href="/press/">プレスキット</a>・
+    <a href="/creators/">配信者・メディアの方へ（コード配布・掲載）</a>・
     <a href="mailto:limo_game@outlook.jp">お問い合わせ</a>
   </p>
   <p style="font-size:.82em;opacity:.75;margin-top:10px">地図データ出典：<a href="https://nlftp.mlit.go.jp/ksj/" target="_blank" rel="noopener">国土交通省 国土数値情報</a>（クリエイティブ・コモンズ 表示 4.0）</p>
