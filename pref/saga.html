@@ -7,6 +7,26 @@
   gtag('js', new Date());
   gtag('config', 'AW-18330119849');
   gtag('config', 'G-DP16PC4C8J');
+
+  // ストアへ出ていくクリックを数える。
+  // ⚠ これが無いと「LP → ストア」の歩留まりが一切分からない。着地ページごとの
+  //   良し悪しを比べられず、SNSの誘導先を勘で決めることになる（実際そうなっていた）。
+  // ⚠ GA4 の拡張計測(outbound click)任せにしない。イベント名が page ごとに
+  //   混ざって比較しづらいので、store_click として明示的に送る。
+  // ⚠ キャプチャ段階(true)で拾う。途中で伝播を止める実装があっても取りこぼさない。
+  // ⚠ 同じタブで遷移するが、gtag は sendBeacon で送るので離脱しても届く。
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(!t || !t.closest) return;
+    var a = t.closest('a[href]');
+    if(!a) return;
+    var h = a.hostname || '';
+    var s = h.indexOf('apps.apple.com') >= 0 ? 'ios'
+          : h.indexOf('play.google.com') >= 0 ? 'android'
+          : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
+    if(!s) return;
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
+  }, true);
 </script>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>佐賀県の市区町村一覧（全20）｜名産・見どころつき｜日本地図 都市パズル</title>
