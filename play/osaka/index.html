@@ -26,6 +26,9 @@
 <meta property="og:url" content="https://japan-map.app/play/osaka/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "大阪市の地図パズル（24区）", "description": "大阪市の全24区（中央・住之江・住吉…）をドラッグして地図を完成させる無料のブラウザパズル。インストール不要、地理学習にも。", "url": "https://japan-map.app/play/osaka/", "genre": ["パズル", "教育"], "gamePlatform": "Web browser", "applicationCategory": "GameApplication", "operatingSystem": "Any (web browser)", "inLanguage": "ja", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "JPY"}, "publisher": {"@type": "Organization", "name": "LIMO", "url": "https://japan-map.app/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://japan-map.app/"}, {"@type": "ListItem", "position": 2, "name": "遊ぶ", "item": "https://japan-map.app/play/"}, {"@type": "ListItem", "position": 3, "name": "大阪市の地図パズル（24区）", "item": "https://japan-map.app/play/osaka/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "大阪市の地図パズルは無料で遊べますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。インストールも会員登録も不要で、ブラウザだけで何度でも無料で遊べます。"}}, {"@type": "Question", "name": "ピースは全部でいくつありますか？", "acceptedAnswer": {"@type": "Answer", "text": "全24区です。すべて正しい位置に置くとクリアになります。"}}, {"@type": "Question", "name": "スマートフォンでも遊べますか？", "acceptedAnswer": {"@type": "Answer", "text": "遊べます。ピースを指でドラッグして地図の上に置いてください。"}}, {"@type": "Question", "name": "もっと細かい単位でも遊べますか？", "acceptedAnswer": {"@type": "Answer", "text": "このページは区までですが、アプリ版では全国1,746市区町村と、さらに細かい町丁目まで遊べます。"}}]}</script>
 <style>
   :root{ color-scheme: light dark;
     --blue:#2a64c0; --blue-deep:#0a3478; --accent:#ff8a3d;
@@ -81,7 +84,9 @@
   .win.show{ display:flex; }
   .win .card{ background:linear-gradient(160deg,var(--blue),var(--blue-deep)); color:#fff;
     border-radius:18px; padding:22px 24px; text-align:center; box-shadow:0 16px 40px rgba(8,36,92,.4); max-width:88%; }
-  .win h2{ margin:0 0 6px; color:#fff; } .win p{ margin:0 0 14px; color:rgba(255,255,255,.94); }
+  /* ⚠ ここは見出しではなくクリア演出のUI。h2 にするとページ唯一の h2 が
+     「クリア！🎉」になり、検索側から見た構成が壊れる。 */
+  .win .wt{ margin:0 0 6px; color:#fff; font-size:1.5em; font-weight:800; } .win p{ margin:0 0 14px; color:rgba(255,255,255,.94); }
   .win .btns{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   .win .btns a, .win .btns button{ font:inherit; font-weight:800; border:0; cursor:pointer;
     background:#fff; color:var(--blue-deep); padding:9px 16px; border-radius:999px; text-decoration:none; }
@@ -164,7 +169,7 @@
       </svg>
       <div class="win" id="win">
         <div class="card">
-          <h2>クリア！🎉</h2>
+          <p class="wt">クリア！🎉</p>
           <p id="wintime"></p>
           <p>全国47都道府県・市区町村まで（全1,746）はアプリで遊べます。</p>
           <div class="btns">
@@ -204,6 +209,7 @@
     </div>
     <div class="cta"><a class="b" href="/">▶ 全国47都道府県・市区町村をアプリで（無料）</a></div>
     <p class="wards">収録エリア（全24区）：中央区、住之江区、住吉区、北区、城東区、大正区、天王寺区、平野区、旭区、東住吉区、東成区、東淀川区、此花区、浪速区、淀川区、港区、生野区、福島区、西区、西成区、西淀川区、都島区、阿倍野区、鶴見区</p>
+<section class="howto"><h2>大阪市の地図パズルの遊び方</h2><ol><li>下のトレイからピースを1つ選んで、地図の上へドラッグします。</li><li>正しい位置に近づくと自動で吸い付いて、ピースが地図にはまります。</li><li>全24区をそろえるとクリア。かかった時間が出ます。</li></ol><h2>よくある質問</h2><h3>大阪市の地図パズルは無料で遊べますか？</h3><p>はい。インストールも会員登録も不要で、ブラウザだけで何度でも無料で遊べます。</p><h3>ピースは全部でいくつありますか？</h3><p>全24区です。すべて正しい位置に置くとクリアになります。</p><h3>スマートフォンでも遊べますか？</h3><p>遊べます。ピースを指でドラッグして地図の上に置いてください。</p><h3>もっと細かい単位でも遊べますか？</h3><p>このページは区までですが、アプリ版では全国1,746市区町村と、さらに細かい町丁目まで遊べます。</p></section>
     <footer class="pg">地図データ：国土交通省 国土数値情報（CC BY 4.0）／ <a href="/">japan-map.app</a></footer>
   </div>
 
