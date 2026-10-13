@@ -367,7 +367,8 @@ function renderClearsForm(){
       <div class="meta">対抗戦で「誰が・いつ・どのコースを・何点」取得したかの時系列。加点されたクリアのみ（自動モード=0点は残りません）。
         <b>間隔が極端に短い</b>（数十秒未満で次々）と自動化/不正の疑い。180日で自動削除。</div>
     </div>
-    <div id="clearsout"></div>`;
+    <div id="clearsout"></div>
+    <div id="userfb"></div>`;
   if (CLEARS_UID) loadClears();
 }
 async function loadClears(){
@@ -379,9 +380,38 @@ async function loadClears(){
   try {
     const d = await api("get_player_clears", { user_id: uid, season_id: season });
     renderClears(d);
+    try { const fd = await api("user_feedback", { user_id: uid, limit: 100 }); renderUserFeedback(uid, fd); } catch(e){}
     setMsg(`${(d.clears||[]).length} クリア`);
   } catch(e){ setMsg("読み込み失敗: " + (e && e.message ? e.message : e)); }
 }
+function renderUserFeedback(uid, d){
+  const el = document.getElementById("userfb");
+  if (!el) return;
+  const fb = d.feedback||[], ignored = !!d.ignored;
+  const toggle = ignored
+    ? `<button class="b-green" onclick="setFeedbackIgnore('${esc(uid)}',false)">ごいけんの無視を解除</button>`
+    : `<button class="b-orange" onclick="setFeedbackIgnore('${esc(uid)}',true)">このユーザーのごいけんを無視</button>`;
+  const head = `<div class="card"><div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap">
+      <div class="title">\uD83D\uDCEE このユーザーの ごいけん・ふぐあい（${fb.length}件）${ignored?' <span class="pill p-rejected">無視中</span>':''}</div>
+      ${toggle}</div>
+      ${ignored && d.ignore_reason?`<div class="meta">無視理由: ${esc(d.ignore_reason)}</div>`:''}</div>`;
+  if (!fb.length){ el.innerHTML = head + '<p class="muted">このユーザーの投稿はありません。</p>'; return; }
+  const TY={reading:'読み',bug:'不具合',request:'要望'};
+  const rows = fb.map(f=>`<div class="card">
+    <div class="meta">${esc(jstTime(f.created_at))} \u30FB ${esc(TY[f.type]||f.type)} \u30FB ${esc(f.status)} \u30FB v${esc(f.app_version||'?')} (${esc(f.platform||'')})</div>
+    <div class="body">${esc(f.body)}</div>
+  </div>`).join("");
+  el.innerHTML = head + rows;
+}
+
+async function setFeedbackIgnore(uid, on){
+  if (on && !confirm("このユーザーのごいけん・ふぐあいを無視しますか？\n（以後の投稿は精査キューから自動で外れます。既存の未読もまとめて外します）\n"+uid)) return;
+  try {
+    await api(on ? "ignore_feedback_user" : "unignore_feedback_user", on ? {user_id:uid, reason:"いたずら投稿"} : {user_id:uid});
+    await loadClears();
+  } catch(e){}
+}
+
 function renderClears(d){
   const el = document.getElementById("clearsout");
   if (!el) return;
