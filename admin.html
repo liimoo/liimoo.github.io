@@ -429,9 +429,12 @@ function renderClears(d){
     return Object.assign({}, c, { gap });
   }).reverse();
 
+  const paid = p.is_full === true
+    ? '<span class="pill p-approved">💎 課金（フル版）</span>'
+    : '<span class="pill p-gray">無課金</span>';
   const header = `
     <div class="card">
-      <div class="title">${esc(p.display_name||"（名前なし）")} <span class="meta">・ ${esc(p.platform||"")}</span></div>
+      <div class="title">${esc(p.display_name||"（名前なし）")} <span class="meta">・ ${esc(p.platform||"")}</span> ${paid}</div>
       ${titles ? `<div class="meta">称号: ${titles}</div>`:""}
       <div class="meta" style="word-break:break-all">user_id: ${esc(CLEARS_UID)}</div>
       <div style="margin-top:6px">${entries}</div>

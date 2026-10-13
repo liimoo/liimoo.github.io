@@ -89,6 +89,22 @@ const SUPABASE = "https://djgafiowdldqtearqtdd.supabase.co";
 const ANON = "sb_publishable_sPdzya_DNqn3uTglBjvn7w_tKugUATk";
 let token = sessionStorage.getItem("jm_admin_token") || "";
 
+// 読み項目のコード(20429/01 等)→県・市名の解決（admin.html と同じ admin-cities.json）。
+let CITY = null;   // {prefs:{"01":"北海道"...}, codes:{"20429":"長野県 王滝村"...}}
+async function fetchCities(){
+  if (CITY) return;
+  try { const r = await fetch("./admin-cities.json"); CITY = await r.json(); } catch(e){ CITY = null; }
+}
+function readingLoc(body){
+  if (!CITY) return "";
+  const m = /^\[よみ\]\s*([0-9A-Za-z]+)\b/.exec(body||"");
+  if (!m) return "";
+  const code = m[1];
+  if (/^\d{2}$/.test(code)) return CITY.prefs[code] || "";            // 2桁=県
+  if (/^\d{5}$/.test(code)) return CITY.codes[code] || "";            // 5桁=「県 市区町村」
+  return "";
+}
+
 function esc(s){ return String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 
 // 日時は DB から UTC で届く。管理ページは日本時間で判断するので必ず JST へ直して出す。
@@ -143,6 +159,7 @@ async function api(action, params){
 async function load(){
   setMsg("読み込み中…");
   try {
+    await fetchCities();
     const status = document.getElementById("filter").value;
     const type = document.getElementById("typefilter").value;
     const d = await api("list_feedback", { status, type, limit: 200 });
@@ -172,8 +189,11 @@ function render(rows){
       ? `<span class="meta" style="word-break:break-all">from: <a class="ulink" href="./admin.html?clears=${encodeURIComponent(f.user_id)}" target="_blank" rel="noopener" title="このユーザーを見る">${esc(f.display_name || f.user_id)}</a></span>`
       : '<span class="meta">匿名</span>';
     const ver = f.app_version ? ` ・ v${esc(f.app_version)}` : "";
+    const loc = f.type === "reading" ? readingLoc(f.body) : "";
+    const locLine = loc ? `<div class="meta">\uD83D\uDCCD ${esc(loc)}</div>` : "";
     return `<div class="card">
       <div>${typePill(f.type)}${statusPill(f.status)}<span class="meta">${esc(f.platform||"unknown")}${ver} ・ ${esc(jst(f.created_at))} ・ #${f.id}</span></div>
+      ${locLine}
       <div class="body">${esc(f.body)}</div>
       ${who}
       <div class="row" style="margin-top:8px">
