@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Google tag (gtag.js) — GA4(アクセス解析) ＋ Google広告 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DP16PC4C8J"></script>
 <script>
@@ -30,8 +32,6 @@
     try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
   }, true);
 </script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preload" as="image" href="assets/japanmap/logo.webp" type="image/webp" fetchpriority="high">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -165,6 +165,10 @@
   .faq .qa p{ margin:0; opacity:.9; line-height:1.75; }
   .hero .tag{ font-size:1.15em; opacity:.98; margin:0 auto 8px; max-width:30em; font-weight:700; }
   .hero .sub{ font-size:.95em; opacity:.9; margin:0 0 24px; }
+  /* ⚠ 日本語は行中のどこでも折り返せるので、箱が狭いと「録。」のような
+     半端な尾が次の行に残る。span を inline-block にして、折り返しを
+     句読点の切れ目だけに限定する（260〜560px のどの幅でも実測で確認）。 */
+  .hero .sub span{ display:inline-block; }
   .badges{ display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; }
   .badge-link{ display:inline-block; transition:transform .12s ease; line-height:0; }
   .badge-link:hover{ transform:translateY(-2px); }
@@ -342,7 +346,11 @@
         <source srcset="assets/japanmap/logo.webp" type="image/webp">
         <img class="logo" src="assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" fetchpriority="high">
       </picture>
-      <p class="sub">都道府県から市区町村まで遊べる、日本地図パズルの決定版。1,741市区町村を収録。</p>
+      <!-- ⚠ 読点・句点の単位で <span> に分ける。この .sub は <h1 class="hero-logo"> の中にあり、
+           ロゴ画像に合わせた width:min(560px,92%) に閉じこめられているので字数に対して箱が狭い。
+           素の1文のままだと任意の位置で折れて「録。」だけが3行目に残った（2026-10-14 に報告）。
+           span を inline-block にすると、折り返しが span の切れ目＝句読点でしか起きなくなる。 -->
+      <p class="sub"><span>都道府県から市区町村まで遊べる、</span><span>日本地図パズルの決定版。</span><span>1,741市区町村を収録。</span></p>
       <img class="stamp" src="assets/japanmap/stamp.png" alt="市区町村も完璧！" width="418" height="149">
     </h1>
     <p class="tag">市区町村も完璧！ 日本全国すべての街が、<br>一生遊べる地理パズル。</p>
