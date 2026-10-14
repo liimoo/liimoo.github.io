@@ -1,33 +1,4 @@
 <!doctype html><html lang="ja"><head>
-<!-- Google tag (gtag.js) — GA4(アクセス解析) ＋ Google広告 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DP16PC4C8J"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'AW-18330119849');
-  gtag('config', 'G-DP16PC4C8J');
-
-  // ストアへ出ていくクリックを数える。
-  // ⚠ これが無いと「LP → ストア」の歩留まりが一切分からない。着地ページごとの
-  //   良し悪しを比べられず、SNSの誘導先を勘で決めることになる（実際そうなっていた）。
-  // ⚠ GA4 の拡張計測(outbound click)任せにしない。イベント名が page ごとに
-  //   混ざって比較しづらいので、store_click として明示的に送る。
-  // ⚠ キャプチャ段階(true)で拾う。途中で伝播を止める実装があっても取りこぼさない。
-  // ⚠ 同じタブで遷移するが、gtag は sendBeacon で送るので離脱しても届く。
-  document.addEventListener('click', function(e){
-    var t = e.target;
-    if(!t || !t.closest) return;
-    var a = t.closest('a[href]');
-    if(!a) return;
-    var h = a.hostname || '';
-    var s = h.indexOf('apps.apple.com') >= 0 ? 'ios'
-          : h.indexOf('play.google.com') >= 0 ? 'android'
-          : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
-    if(!s) return;
-    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
-  }, true);
-</script>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>プレスキット（メディアキット）｜日本地図 都市パズル</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -71,15 +42,15 @@ ul{padding-left:1.2em}li{margin:.25em 0}
 .shotgrid img{width:100%;height:auto;aspect-ratio:720/1600;border-radius:10px;border:1px solid var(--line);display:block;margin-bottom:5px}
 .shotgrid a{display:block;margin-top:2px}
 .btn{display:inline-block;background:var(--blue);color:#fff;text-decoration:none;padding:9px 14px;border-radius:10px;font-weight:700;margin:4px 4px 0 0}
-footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
 .nb{display:none}@media(max-width:560px){.nb{display:inline}}
+footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
 </style>
 </head><body>
-<div class="top"><a href="/">🗾 日本地図 都市パズル</a>　<span style="opacity:.9;font-size:.86em">｜ <a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/ranking/">豆知識</a></span></div>
+<div class="top"><a href="/">🗾 日本地図 都市パズル</a>　<span style="opacity:.9;font-size:.86em">｜ <a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></span></div>
 <div class="wrap">
 <span class="badge">PRESS KIT ／ メディアキット</span>
 <h1>日本地図 都市パズル</h1>
-<p class="lead">全国1,746市区町村ぜんぶ遊べる、無料の地図パズルアプリ。<br>
+<p class="lead">全国1,741市区町村ぜんぶ遊べる、無料の地図パズルアプリ。<br>
 このページは自由にご活用ください（ロゴ・スクリーンショットの掲載歓迎）。</p>
 <p><a class="btn" href="https://apps.apple.com/jp/app/id6777826991" target="_blank" rel="noopener">App Store</a>
 <a class="btn" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" target="_blank" rel="noopener">Google Play</a>
@@ -87,10 +58,10 @@ footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
 
 <h2>基本情報</h2>
 <table>
-<tr><th>アプリ名</th><td>日本地図 都市パズル（ストア表記：市区町村まで完璧！日本地図 都市パズル）</td></tr>
+<tr><th>アプリ名</th><td>日本地図 都市パズル（ストア表記：日本地図 都市パズル 都道府県も市区町村も完璧！）</td></tr>
 <tr><th>ジャンル</th><td>地図・地理パズル／教育・知育ゲーム</td></tr>
-<tr><th>対応OS</th><td>iOS / Android / PC（Steam）</td></tr>
-<tr><th>オンラインイベント</th><td>都道府県対抗を毎月15日〜月末に開催（第1回 2026年8月15日〜31日）</td></tr>
+<tr><th>対応OS</th><td>iOS / Android</td></tr>
+<tr><th>今後の展開</th><td>PC版（Steam）を近日配信予定</td></tr>
 <tr><th>価格</th><td>基本無料（全コース無料で遊べる／買い切りのフル版で広告なし）</td></tr>
 <tr><th>デベロッパー</th><td>LIMO</td></tr>
 <tr><th>公式サイト</th><td><a href="https://japan-map.app/">https://japan-map.app</a></td></tr>
@@ -99,30 +70,18 @@ footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
 
 <h2>特徴</h2>
 <ul>
-<li><b>全国1,746市区町村すべてが遊べる</b>——都道府県から市・区・町・村、さらに町丁目レベルまで。</li>
+<li><b>全国1,741市区町村すべてが遊べる</b>——都道府県から市・区・町・村、さらに町丁目レベルまで。</li>
 <li><b>政令指定都市は「区」単位まで</b>細かく収録。</li>
 <li><b>山モード・川モード</b>——日本の名峰・有名な河川も並べて覚えられる。</li>
 <li><b>街占い</b>——推しの街の今日の運勢と全国順位を毎日占える。</li>
 <li><b>みんなの声</b>——全国のプレイヤーと応援・お祝い・地域紹介を送り合える。</li>
-<li><b>都道府県対抗（オンラインイベント）</b>——自分の"推し都道府県"の代表として参加し、全国のプレイで都道府県順位を競う期間限定イベント。上位県の結果発表や称号も。</li>
 <li><b>共通ランキング／クラウド記録復元／自動モード</b>など、遊びやすさも充実。</li>
 <li>ふりがな付きで<b>子どもの地理学習・中学受験対策・親子の知育</b>にも。</li>
 </ul>
 
-<h2>都道府県対抗（オンラインイベント）🏁</h2>
-<p>『日本地図 都市パズル』では、全国のプレイヤーが<b>自分の"推し都道府県"の代表</b>として参加し、
-みんなのプレイが<b>都道府県ごとの順位</b>に反映される、<b>期間限定のオンラインイベント「都道府県対抗」</b>を実施します。
-お祭りムードの演出、開催中のお知らせ通知、期間終了後の<b>上位都道府県の結果発表</b>、参加者に贈られる<b>称号</b>など、
-"我が県のために競う"熱いイベントです（オフラインでも通常のパズルはそのまま遊べます）。</p>
-<ul>
-<li><b>毎月15日〜月末に開催</b>（第1回：2026年8月15日〜31日）</li>
-<li>参加は無料。自分の推しの都道府県を選んでエントリー。</li>
-<li>結果は<b>上位都道府県を発表</b>、参加者には<b>称号</b>を進呈。</li>
-</ul>
-
 <h2>数字で見る</h2>
 <ul class="nums">
-<li><b>1,746</b>市区町村を収録</li>
+<li><b>1,741</b>市区町村を収録</li>
 <li><b>47</b>都道府県</li>
 <li><b>約1,900</b>収録ピース</li>
 <li><b>無料</b>で全コース</li>
@@ -134,14 +93,13 @@ footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
 <li>「日本全国の市区町村を"まるごと"収録した地図パズル」——網羅性・スケールの切り口</li>
 <li>「遊びながら地理が身につく——中学受験・知育に」——学習・教育の切り口</li>
 <li>「街の運勢を占う"街占い"、全国とつながる"みんなの声"」——新しい遊び方の切り口</li>
-<li>「"我が県"の代表として全国と競う——都道府県対抗のオンラインイベント（毎月15日〜／第1回8/15〜31）」——コミュニティ・季節イベントの切り口</li>
-<li>「モバイルで人気の地図パズルが、PC（Steam）でも配信中」——新展開・タイムリーの切り口</li>
+<li>「モバイルで人気の地図パズルが、PC（Steam）にも近日登場」——新展開・タイムリーの切り口</li>
 </ul>
 
 <h2>コピペ用 紹介文</h2>
-<div class="copy"><h3>ショート（〜60字）</h3>『日本地図 都市パズル』は、日本全国47都道府県から市区町村・町丁目までを組み立てて覚える無料の地図パズルアプリ。全国1,746市区町村すべてが遊べる。</div>
-<div class="copy"><h3>ミドル（〜150字）</h3>『日本地図 都市パズル』は、日本全国の都道府県・市区町村・町丁目を並べて覚える無料の地図パズルアプリ。全国1,746市区町村すべてを収録し、山・川モードや、推しの街の運勢を占う「街占い」、全国のプレイヤーと応援・お祝いを送り合う「みんなの声」、自分の推し都道府県の代表として競う「都道府県対抗」オンラインイベントも楽しめる。遊びながら地理が身につくため、小学生の地理学習や中学受験対策、親子の知育にも人気。iOS / Android / PC（Steam）で配信中（基本無料）。</div>
-<div class="copy"><h3>ロング（〜300字）</h3>『日本地図 都市パズル』は、日本全国の都道府県から市区町村、さらに町丁目レベルまでをパズルとして組み立て、遊びながら日本地図を覚えられる無料アプリです。全国1,746の市区町村すべてを収録し、収録ピースは合計およそ1,900。日本の名峰・河川を並べる「山モード・川モード」、あなたの推しの街の今日の運勢と全国順位を占う「街占い」、全国のプレイヤーと応援・お祝い・地域紹介コメントを送り合う「みんなの声」、自分の推し都道府県の代表として全国と競う「都道府県対抗」オンラインイベント（毎月15日〜月末開催・第1回2026年8月15日〜31日）など、パズル以外の毎日楽しめる要素も充実。ふりがな付きで小さなお子さまでも遊べ、小学校の地理学習、中学受験・高校受験対策、大人の学び直しにもおすすめです。iOS / Android / PC（Steam）で配信中で、全コース無料で遊べます。</div>
+<div class="copy"><h3>ショート（〜60字）</h3>『日本地図 都市パズル』は、日本全国47都道府県から市区町村・町丁目までを組み立てて覚える無料の地図パズルアプリ。全国1,741市区町村すべてが遊べる。</div>
+<div class="copy"><h3>ミドル（〜150字）</h3>『日本地図 都市パズル』は、日本全国の都道府県・市区町村・町丁目を並べて覚える無料の地図パズルアプリ。全国1,741市区町村すべてを収録し、山・川モードや、推しの街の運勢を占う「街占い」、全国のプレイヤーと応援・お祝いを送り合う「みんなの声」も楽しめる。遊びながら地理が身につくため、小学生の地理学習や中学受験対策、親子の知育にも人気。iOS / Android で配信中（基本無料）。</div>
+<div class="copy"><h3>ロング（〜300字）</h3>『日本地図 都市パズル』は、日本全国の都道府県から市区町村、さらに町丁目レベルまでをパズルとして組み立て、遊びながら日本地図を覚えられる無料アプリです。全国1,741の市区町村すべてを収録し、収録ピースは合計およそ1,900。日本の名峰・河川を並べる「山モード・川モード」、あなたの推しの街の今日の運勢と全国順位を占う「街占い」、全国のプレイヤーと応援・お祝い・地域紹介コメントを送り合う「みんなの声」など、パズル以外の毎日楽しめる要素も充実。ふりがな付きで小さなお子さまでも遊べ、小学校の地理学習、中学受験・高校受験対策、大人の学び直しにもおすすめです。iOS / Android で配信中で、全コース無料で遊べます。</div>
 
 <h2>ロゴ・キービジュアル</h2>
 <p class="lead">保存してご利用ください。掲載時のクレジット表記は任意です。</p>
@@ -170,8 +128,7 @@ footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
 <p>本ページのロゴ・スクリーンショット・キービジュアルは、<b>本アプリの紹介を目的とした記事・動画・SNSでの利用を歓迎</b>します（改変してロゴの印象を損なう使い方はご遠慮ください）。ご不明点や高解像度素材のご希望はお問い合わせください。</p>
 
 <h2>お問い合わせ（プレス）</h2>
-<p>取材・掲載のお問い合わせ、追加素材のご依頼はこちらへお気軽にご連絡ください。<br><a href="https://x.com/japan_puzzle" target="_blank" rel="noopener">X: @japan_puzzle（DM）</a><br>メール: <a href="mailto:limo_game@outlook.jp">limo_game@outlook.jp</a></p><p><b>レビュー・紹介用のフル版プロモコード（iOS / Android / Steam）をお渡しできます。</b>記事・動画・SNSでのご紹介をご検討の方は、上記までお気軽にご連絡ください。開発者コメント・追加のスクリーンショット/動画のご提供も可能です。</p>
-<p>▶ <a href="/creators/">配信・レビュー用コードの配布について</a>　　▶ <a href="/creators/videos/">アプリ内「プレイ動画」への掲載について</a></p>
+<p>取材・掲載のお問い合わせ、追加素材のご依頼はこちらへお気軽にご連絡ください。<br><a href="https://x.com/japan_puzzle" target="_blank" rel="noopener">X: @japan_puzzle（DM）</a><br>メール: <a href="mailto:limo_game@outlook.jp">limo_game@outlook.jp</a></p><p><b>レビュー・紹介用のフル版プロモコード（iOS / Android）をお渡しできます。</b>記事・動画・SNSでのご紹介をご検討の方は、上記までお気軽にご連絡ください。開発者コメント・追加のスクリーンショット/動画のご提供も可能です。</p>
 
 </div>
 <footer>© 日本地図 都市パズル ／ <a href="/">トップへ</a></footer>
