@@ -113,6 +113,24 @@
       </div>
       <div class="note muted" id="thnote"></div>
     </div>
+    <!-- ご当地クイズの1か月のアップロード上限 -->
+    <div class="hint">
+      <b>ご当地クイズのアップロード上限</b>は、1人が <b>1か月に</b> 公開できるクイズの数です（全員共通・既定 <code>10</code>）。<br>
+      ・アプリのアップロード確認に「今月はあと◯回アップロードできます」と出る数がこれに従います。<br>
+      ・<code>0</code> にすると、新しいアップロードを止められます（公開済みのクイズは そのまま遊べます）。<br>
+      ・取り下げても回数は戻りません。月は日本時間の1日に切り替わります。
+    </div>
+    <div class="card">
+      <div class="row">
+        <label class="title">ご当地クイズのアップロード上限（1か月・回）</label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <input class="numinput" id="rqmax" type="number" min="0" max="100" step="1" placeholder="10">
+        <button class="b-blue" onclick="saveRqMax()">保存</button>
+        <span class="spacer"></span>
+      </div>
+      <div class="note muted" id="rqnote"></div>
+    </div>
 
   </div>
 </div>
@@ -178,6 +196,13 @@ async function load(){
     tn.textContent = "現在: " + t.value + " 件で自動非表示";
     tn.className = "note muted";
   } catch(e){}
+  try {
+    const q = await api("get_region_quiz_month_max");
+    document.getElementById("rqmax").value = q.value;
+    const qn = document.getElementById("rqnote");
+    qn.textContent = q.value > 0 ? "現在: 1か月に " + q.value + " 回まで" : "現在: 0（アップロード停止中）";
+    qn.className = "note muted";
+  } catch(e){}
   setMsg("");
 }
 
@@ -214,6 +239,25 @@ async function saveThreshold(){
     const d = await api("set_report_threshold", { value: n });
     input.value = d.value;
     note.textContent = "✓ 保存しました（" + d.value + " 件で自動非表示）";
+    note.className = "note ok";
+  } catch(e){
+    note.textContent = "✗ 保存に失敗しました。"; note.className = "note err";
+  }
+}
+
+async function saveRqMax(){
+  const input = document.getElementById("rqmax");
+  const note = document.getElementById("rqnote");
+  const n = Math.round(Number(input.value));
+  if (input.value.trim() === "" || !Number.isFinite(n) || n < 0 || n > 100){
+    note.textContent = "✗ 0〜100 の整数を入れてください。";
+    note.className = "note err"; return;
+  }
+  note.textContent = "保存中…"; note.className = "note muted";
+  try {
+    const d = await api("set_region_quiz_month_max", { value: n });
+    input.value = d.value;
+    note.textContent = "✓ 保存しました（" + (d.value > 0 ? "1か月に " + d.value + " 回まで" : "0＝アップロード停止") + "）";
     note.className = "note ok";
   } catch(e){
     note.textContent = "✗ 保存に失敗しました。"; note.className = "note err";
