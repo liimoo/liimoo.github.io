@@ -74,6 +74,7 @@
       <option value="bug">🐛 ふぐあい</option>
       <option value="request">💡 ようぼう</option>
       <option value="reading">🗣️ 地名のよみ</option>
+      <option value="quiz">❓ ご当地クイズ</option>
     </select>
     <button class="b-gray" onclick="load()">更新</button>
     <span id="msg"></span>
@@ -171,6 +172,7 @@ async function load(){
 function typePill(t){
   if (t === "bug") return '<span class="pill" style="background:#7a3a3a">🐛 ふぐあい</span>';
   if (t === "reading") return '<span class="pill" style="background:#2a5a6a">🗣️ 地名のよみ</span>';
+  if (t === "quiz") return '<span class="pill" style="background:#2a4f8a">❓ ご当地クイズ</span>';
   return '<span class="pill" style="background:#8a5a16">💡 ようぼう</span>';
 }
 function statusPill(s){
@@ -190,7 +192,8 @@ function render(rows){
       : '<span class="meta">匿名</span>';
     const ver = f.app_version ? ` ・ v${esc(f.app_version)}` : "";
     const loc = f.type === "reading" ? readingLoc(f.body) : "";
-    const locLine = loc ? `<div class="meta">\uD83D\uDCCD ${esc(loc)}</div>` : "";
+    const locLine = loc ? `<div class="meta">\uD83D\uDCCD ${esc(loc)}</div>`
+      : (f.ref ? `<div class="meta">\u2753 対象: ${esc(f.ref)}</div>` : "");
     return `<div class="card">
       <div>${typePill(f.type)}${statusPill(f.status)}<span class="meta">${esc(f.platform||"unknown")}${ver} ・ ${esc(jst(f.created_at))} ・ #${f.id}</span></div>
       ${locLine}
