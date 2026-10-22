@@ -174,6 +174,8 @@
       button('難易度を選び直す', () => chooseDifficulty(true), 'button secondary'));
     result.append(medal, title, total, node('p', '問正解', 'muted'),
       node('p', perfect ? 'すばらしい！ 次の難易度にも挑戦してみよう。' : '答えを覚えて、もう一度チャレンジ！'), actions);
+    const promo = document.getElementById('quiz-result-promo');
+    if (promo instanceof HTMLTemplateElement) result.append(promo.content.cloneNode(true));
     if (mistakes.length) {
       const review = node('div', undefined, 'quiz-review');
       review.append(node('h3', 'まちがえた問題を復習'));

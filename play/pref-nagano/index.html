@@ -29,9 +29,12 @@
           : h.indexOf('play.google.com') >= 0 ? 'android'
           : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
     if(!s) return;
-    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
+    var promo = a.closest('[data-promo-placement]');
+    var placement = promo ? promo.getAttribute('data-promo-placement') : 'page';
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname, placement: placement }); }catch(err){}
   }, true);
 </script>
+<link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
 <title>長野県の市区町村パズル（全77）｜無料・ブラウザで遊べる</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -100,10 +103,10 @@
   .thumb.gone{ display:none; }
   .ghost{ position:fixed; pointer-events:none; z-index:60; filter:drop-shadow(0 3px 6px rgba(0,0,0,.45)); }
   .ghost use{ stroke:#fff; stroke-width:2.373; }
-  .win{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; }
+  .win{ position:fixed; inset:0; z-index:80; padding:12px; background:rgba(4,12,30,.68); display:none; align-items:center; justify-content:center; }
   .win.show{ display:flex; }
   .win .card{ background:linear-gradient(160deg,var(--blue),var(--blue-deep)); color:#fff;
-    border-radius:18px; padding:22px 24px; text-align:center; box-shadow:0 16px 40px rgba(8,36,92,.4); max-width:88%; }
+    border-radius:18px; padding:18px; text-align:center; box-shadow:0 16px 40px rgba(8,36,92,.4); width:480px; max-width:100%; max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain; }
   /* ⚠ ここは見出しではなくクリア演出のUI。h2 にするとページ唯一の h2 が
      「クリア！🎉」になり、検索側から見た構成が壊れる。 */
   .win .wt{ margin:0 0 6px; color:#fff; font-size:1.5em; font-weight:800; } .win p{ margin:0 0 14px; color:rgba(255,255,255,.94); }
@@ -198,11 +201,12 @@
     <path id="p76" d="M541.3 119.3 L546.7 120.3 L554.6 118.2 L560.3 120.2 L564.4 118.8 L566.9 121.2 L560.2 127.9 L564.2 132.1 L563.3 133.7 L564.9 135.0 L570.0 135.5 L569.9 136.7 L575.0 139.3 L589.0 137.9 L594.0 139.5 L596.3 144.8 L598.8 144.8 L598.4 146.9 L600.4 147.2 L599.0 151.5 L599.8 152.9 L597.4 155.8 L598.7 158.1 L596.9 162.7 L603.7 171.7 L603.8 176.6 L618.5 173.6 L622.2 171.1 L627.1 170.2 L623.7 158.4 L617.0 156.4 L615.4 152.8 L616.6 150.7 L623.1 147.8 L627.0 140.2 L623.2 135.7 L620.0 134.5 L624.6 129.5 L625.9 119.9 L620.8 115.3 L610.4 114.2 L607.6 111.4 L600.7 109.1 L601.0 107.5 L596.6 108.0 L593.3 103.8 L594.7 98.6 L591.2 96.7 L584.0 97.3 L580.7 94.3 L582.2 89.4 L578.2 88.0 L580.0 76.7 L579.9 62.3 L575.2 58.8 L570.8 48.0 L565.1 46.9 L558.1 48.1 L551.8 44.2 L547.3 54.1 L540.9 57.5 L538.7 61.7 L539.7 65.8 L541.6 66.6 L549.9 63.7 L551.7 64.5 L549.7 68.1 L540.7 73.7 L534.1 87.3 L535.0 89.8 L541.0 89.6 L548.4 96.7 L544.6 100.9 L543.2 105.0 L539.7 106.6 L541.9 107.5 L543.0 110.6 L541.9 113.5 L542.9 115.8 L540.5 118.9 Z"/>
   </defs></svg>
   <div class="wrap">
-    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></div>
+    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/quiz/">ご当地クイズ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></div>
     <header class="pg">
       <h1>長野県の市区町村パズル（全77）</h1>
       <p class="intro">「長野県の市区町村パズル」は、長野県の全77市区町村をドラッグで正しい位置に並べる無料のブラウザゲームです。長野・松本・上田…など、遊びながら市区町村の位置と名前が身につきます。</p>
     </header>
+    <p style="text-align:center;margin:8px 0;font-size:.9em"><a href="/quiz/" style="color:var(--blue);font-weight:700">地元の名物・歴史も知りたい？ ご当地クイズで遊ぶ →</a></p>
     <nav class="pzlist" aria-label="ほかのパズル"><span class="lbl">一覧：</span><a href="/play/list/">市区町村パズル一覧</a><span class="navbr"></span><span class="lbl">全国・政令市：</span><a href="/play/">東京23区</a><a href="/play/japan/">全国47都道府県</a><a href="/play/osaka/">大阪</a><a href="/play/yokohama/">横浜</a><a href="/play/nagoya/">名古屋</a><a href="/play/sapporo/">札幌</a><a href="/play/kobe/">神戸</a><a href="/play/kyoto/">京都</a><a href="/play/fukuoka/">福岡</a><a href="/play/kawasaki/">川崎</a><a href="/play/saitama/">さいたま</a><a href="/play/hiroshima/">広島</a><a href="/play/sendai/">仙台</a><a href="/play/chiba/">千葉</a><a href="/play/kitakyushu/">北九州</a><a href="/play/niigata/">新潟</a><a href="/play/sakai/">堺</a><a href="/play/okayama/">岡山</a><a href="/play/kumamoto/">熊本</a><a href="/play/shizuoka/">静岡</a><a href="/play/hamamatsu/">浜松</a><a href="/play/sagamihara/">相模原</a><span class="navbr"></span><span class="lbl">都道府県の市区町村：</span><a href="/play/pref-hokkaido/">北海道</a><a href="/play/pref-aomori/">青森県</a><a href="/play/pref-iwate/">岩手県</a><a href="/play/pref-miyagi/">宮城県</a><a href="/play/pref-akita/">秋田県</a><a href="/play/pref-yamagata/">山形県</a><a href="/play/pref-fukushima/">福島県</a><a href="/play/pref-ibaraki/">茨城県</a><a href="/play/pref-tochigi/">栃木県</a><a href="/play/pref-gunma/">群馬県</a><a href="/play/pref-saitama/">埼玉県</a><a href="/play/pref-chiba/">千葉県</a><a href="/play/pref-tokyo/">東京都</a><a href="/play/pref-kanagawa/">神奈川県</a><a href="/play/pref-niigata/">新潟県</a><a href="/play/pref-toyama/">富山県</a><a href="/play/pref-ishikawa/">石川県</a><a href="/play/pref-fukui/">福井県</a><a href="/play/pref-yamanashi/">山梨県</a><b class="cur">長野県</b><a href="/play/pref-gifu/">岐阜県</a><a href="/play/pref-shizuoka/">静岡県</a><a href="/play/pref-aichi/">愛知県</a><a href="/play/pref-mie/">三重県</a><a href="/play/pref-shiga/">滋賀県</a><a href="/play/pref-kyoto/">京都府</a><a href="/play/pref-osaka/">大阪府</a><a href="/play/pref-hyogo/">兵庫県</a><a href="/play/pref-nara/">奈良県</a><a href="/play/pref-wakayama/">和歌山県</a><a href="/play/pref-tottori/">鳥取県</a><a href="/play/pref-shimane/">島根県</a><a href="/play/pref-okayama/">岡山県</a><a href="/play/pref-hiroshima/">広島県</a><a href="/play/pref-yamaguchi/">山口県</a><a href="/play/pref-tokushima/">徳島県</a><a href="/play/pref-kagawa/">香川県</a><a href="/play/pref-ehime/">愛媛県</a><a href="/play/pref-kochi/">高知県</a><a href="/play/pref-fukuoka/">福岡県</a><a href="/play/pref-saga/">佐賀県</a><a href="/play/pref-nagasaki/">長崎県</a><a href="/play/pref-kumamoto/">熊本県</a><a href="/play/pref-oita/">大分県</a><a href="/play/pref-miyazaki/">宮崎県</a><a href="/play/pref-kagoshima/">鹿児島県</a><a href="/play/pref-okinawa/">沖縄県</a></nav>
     <div class="hud">
       <div>そろった：<span class="val" id="prog">0 / 77</span></div>
@@ -293,16 +297,23 @@
         </g>
         <g id="placed"></g>
       </svg>
-      <div class="win" id="win">
+      <div class="win" id="win" role="region" aria-label="パズルのクリア結果">
         <div class="card">
           <p class="wt">クリア！🎉</p>
           <p id="wintime"></p>
-          <p>全国47都道府県・市区町村まで（全1,741）はアプリで遊べます。</p>
-          <div class="btns">
-            <a href="https://apps.apple.com/jp/app/id6777826991">App Store</a>
-            <a href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap">Google Play</a>
-            <button id="again">もう一度</button>
-          </div>
+          <div class="btns"><button id="again">もう一度</button></div>
+          <aside class="jm-app-promo jm-app-promo--compact" data-promo-placement="puzzle_result" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">次はアプリで、あなたの街を。</p><p class="jm-app-promo-description">全国の市区町村から、もっと細かい町丁目まで遊べます。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside>
         </div>
       </div>
     </div>
@@ -386,7 +397,18 @@
     <button class="thumb" data-pid="p75" data-color="#ff922b" data-label="飯綱町" data-reading="いいづなまち" data-cx="420.9" data-cy="155.3" data-vb="384.1 127.7 73.7 55.2"><svg viewBox="384.1 127.7 73.7 55.2"><use href="#p75" fill="#ff922b"/></svg><span><ruby>飯綱町<rt>いいづなまち</rt></ruby></span></button>
     <button class="thumb" data-pid="p76" data-color="#f06595" data-label="栄村" data-reading="さかえむら" data-cx="580.6" data-cy="110.3" data-vb="534.1 44.0 93.1 132.6"><svg viewBox="534.1 44.0 93.1 132.6"><use href="#p76" fill="#f06595"/></svg><span><ruby>栄村<rt>さかえむら</rt></ruby></span></button>
     </div>
-    <div class="cta"><a class="b" href="/">▶ 全国47都道府県・市区町村をアプリで（無料）</a></div>
+    <aside class="jm-app-promo" data-promo-placement="puzzle_content" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">あなたの街を、もっと遊ぼう。</p><p class="jm-app-promo-description">市区町村や町丁目のパズル、ご当地クイズもアプリで楽しめます。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside>
     <p class="wards">収録エリア（全77市区町村）：長野市、松本市、上田市、岡谷市、飯田市、諏訪市、須坂市、小諸市、伊那市、駒ヶ根市、中野市、大町市、飯山市、茅野市、塩尻市、佐久市、千曲市、東御市、安曇野市、小海町、川上村、南牧村、南相木村、北相木村、佐久穂町、軽井沢町、御代田町、立科町、青木村、長和町、下諏訪町、富士見町、原村、辰野町、箕輪町、飯島町、南箕輪村、中川村、宮田村、松川町、高森町、阿南町、阿智村、平谷村、根羽村、下條村、売木村、天龍村、泰阜村、喬木村、豊丘村、大鹿村、上松町、南木曽町、木祖村、王滝村、大桑村、木曽町、麻績村、生坂村、山形村、朝日村、筑北村、池田町、松川村、白馬村、小谷村、坂城町、小布施町、高山村、山ノ内町、木島平村、野沢温泉村、信濃町、小川村、飯綱町、栄村</p>
 <section class="howto"><h2>長野県の市区町村パズルの遊び方</h2><ol><li>下のトレイからピースを1つ選んで、地図の上へドラッグします。</li><li>正しい位置に近づくと自動で吸い付いて、ピースが地図にはまります。</li><li>全77市区町村をそろえるとクリア。かかった時間が出ます。</li></ol><h2>よくある質問</h2><h3>長野県の市区町村パズルは無料で遊べますか？</h3><p>はい。インストールも会員登録も不要で、ブラウザだけで何度でも無料で遊べます。</p><h3>ピースは全部でいくつありますか？</h3><p>全77市区町村です。すべて正しい位置に置くとクリアになります。</p><h3>スマートフォンでも遊べますか？</h3><p>遊べます。ピースを指でドラッグして地図の上に置いてください。</p><h3>もっと細かい単位でも遊べますか？</h3><p>このページは市区町村までですが、アプリ版では全国1,741市区町村と、さらに細かい町丁目まで遊べます。</p></section>
     <footer class="pg">地図データ：国土交通省 国土数値情報（CC BY 4.0）／ <a href="/">japan-map.app</a></footer>

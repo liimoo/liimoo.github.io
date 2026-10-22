@@ -29,9 +29,12 @@
           : h.indexOf('play.google.com') >= 0 ? 'android'
           : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
     if(!s) return;
-    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
+    var promo = a.closest('[data-promo-placement]');
+    var placement = promo ? promo.getAttribute('data-promo-placement') : 'page';
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname, placement: placement }); }catch(err){}
   }, true);
 </script>
+<link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
 <title>長崎県の市区町村パズル（全21）｜無料・ブラウザで遊べる</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -100,10 +103,10 @@
   .thumb.gone{ display:none; }
   .ghost{ position:fixed; pointer-events:none; z-index:60; filter:drop-shadow(0 3px 6px rgba(0,0,0,.45)); }
   .ghost use{ stroke:#fff; stroke-width:1.852; }
-  .win{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; }
+  .win{ position:fixed; inset:0; z-index:80; padding:12px; background:rgba(4,12,30,.68); display:none; align-items:center; justify-content:center; }
   .win.show{ display:flex; }
   .win .card{ background:linear-gradient(160deg,var(--blue),var(--blue-deep)); color:#fff;
-    border-radius:18px; padding:22px 24px; text-align:center; box-shadow:0 16px 40px rgba(8,36,92,.4); max-width:88%; }
+    border-radius:18px; padding:18px; text-align:center; box-shadow:0 16px 40px rgba(8,36,92,.4); width:480px; max-width:100%; max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain; }
   /* ⚠ ここは見出しではなくクリア演出のUI。h2 にするとページ唯一の h2 が
      「クリア！🎉」になり、検索側から見た構成が壊れる。 */
   .win .wt{ margin:0 0 6px; color:#fff; font-size:1.5em; font-weight:800; } .win p{ margin:0 0 14px; color:rgba(255,255,255,.94); }
@@ -142,11 +145,12 @@
     <path id="p20" d="M274.4 549.3 L271.5 548.2 L275.1 547.8 L273.1 546.6 L275.8 545.8 L273.2 545.6 L274.7 544.2 L273.0 542.5 L276.4 540.9 L276.9 539.5 L278.5 542.8 L278.3 540.0 L280.1 540.3 L279.8 541.6 L281.8 543.7 L282.5 540.6 L286.5 539.5 L287.1 544.0 L287.8 538.8 L289.0 539.4 L290.3 537.9 L291.4 538.2 L289.0 538.2 L287.1 536.7 L286.8 538.1 L285.5 536.8 L285.0 535.0 L287.1 534.3 L284.8 532.2 L285.9 529.2 L285.1 525.7 L286.1 523.8 L288.0 523.4 L287.2 522.1 L292.0 520.8 L292.0 526.1 L293.5 527.3 L292.4 527.9 L297.3 526.5 L294.5 523.3 L296.4 521.5 L293.6 518.0 L295.8 517.4 L296.6 512.7 L301.0 511.7 L302.6 509.6 L302.0 508.2 L303.1 506.2 L300.0 505.2 L301.7 502.8 L299.0 500.6 L300.3 499.7 L299.2 498.5 L300.7 497.5 L302.5 490.6 L304.6 489.2 L305.3 491.2 L303.4 493.5 L304.3 495.2 L301.3 499.9 L305.2 502.4 L305.9 506.7 L302.8 514.9 L302.8 516.0 L304.3 516.3 L301.7 516.9 L300.1 519.1 L301.9 520.0 L298.2 522.8 L298.7 524.5 L299.9 524.4 L300.1 526.3 L297.7 528.7 L299.6 533.0 L299.3 535.1 L298.5 534.6 L297.1 537.4 L298.3 538.3 L299.1 536.8 L299.9 538.4 L301.2 538.1 L301.0 537.2 L302.8 537.2 L302.9 538.2 L304.2 537.0 L303.4 536.4 L304.7 536.2 L302.5 536.1 L304.4 535.5 L306.4 537.3 L307.7 535.4 L309.3 535.4 L309.4 532.6 L310.7 533.4 L313.1 532.2 L315.9 533.2 L318.1 530.8 L319.1 533.5 L320.6 531.2 L322.8 532.6 L320.4 533.9 L322.8 540.4 L313.9 544.5 L311.4 550.0 L308.8 547.9 L308.1 549.3 L305.3 549.6 L304.4 546.9 L301.4 545.0 L301.0 543.4 L300.9 546.3 L302.4 546.4 L303.6 548.9 L301.9 551.1 L303.0 551.4 L303.0 552.8 L296.4 552.9 L297.4 554.5 L299.4 554.8 L299.6 556.0 L297.7 557.3 L299.3 559.0 L296.5 558.7 L295.5 561.0 L297.3 561.6 L296.5 562.6 L297.7 561.7 L298.5 562.4 L297.5 564.7 L295.8 564.7 L299.2 564.8 L299.9 566.8 L298.6 567.3 L300.0 567.9 L300.6 570.6 L298.1 572.0 L291.4 569.9 L290.7 573.6 L289.0 574.0 L290.6 574.9 L291.1 574.1 L291.2 576.2 L290.3 576.2 L292.1 577.1 L290.6 582.2 L285.3 580.7 L287.6 579.4 L285.9 578.8 L287.2 577.1 L285.7 574.8 L286.8 572.4 L284.8 570.7 L286.4 570.5 L286.5 568.4 L284.6 567.3 L285.3 566.5 L284.4 564.8 L287.1 566.8 L287.8 565.5 L285.3 563.8 L287.7 564.0 L289.2 565.7 L288.5 563.1 L289.8 562.9 L288.5 561.1 L287.7 563.0 L286.8 561.2 L285.3 561.8 L284.1 560.1 L285.2 559.8 L284.3 559.2 L284.9 557.9 L283.9 557.6 L286.0 557.8 L285.7 558.8 L286.9 558.6 L288.0 560.2 L287.7 558.0 L289.6 558.1 L289.9 561.2 L291.2 560.4 L290.7 558.7 L291.9 558.7 L290.3 558.3 L290.5 557.3 L287.8 557.1 L286.7 555.5 L287.3 554.2 L283.6 553.0 L282.8 555.0 L280.8 554.7 L282.4 551.2 L283.9 552.6 L284.7 551.9 L283.3 547.6 L282.3 550.2 L281.2 549.3 L279.9 551.3 L278.8 549.5 L277.5 550.0 L278.5 548.5 L277.7 546.8 L275.0 548.6 Z M273.5 568.4 L270.1 568.8 L269.0 570.8 L267.5 570.7 L268.9 567.8 L264.6 567.4 L267.1 565.7 L263.3 560.0 L263.5 558.9 L266.1 559.0 L266.2 561.1 L267.1 560.3 L269.3 561.3 L270.1 565.2 L270.0 562.7 L271.4 561.4 L273.6 564.2 L273.5 565.7 L274.9 564.8 L272.9 561.2 L274.1 559.2 L272.1 560.8 L268.5 558.8 L269.3 557.4 L270.6 557.7 L267.8 554.9 L271.2 553.7 L269.1 551.8 L270.9 551.1 L273.5 552.5 L274.1 554.7 L276.6 553.0 L278.0 553.6 L277.3 555.3 L279.3 555.2 L280.1 556.5 L279.5 559.3 L281.2 558.9 L280.6 560.7 L281.9 559.6 L282.7 561.2 L279.7 562.8 L282.4 562.6 L280.8 563.9 L281.5 566.0 L279.2 567.0 L281.5 567.8 L281.4 570.0 L280.0 569.7 L281.9 572.1 L281.2 574.7 L280.1 573.7 L278.9 574.5 L279.4 572.8 L277.2 572.5 L280.0 571.9 L279.5 571.2 L276.6 571.5 L277.2 570.4 L279.8 570.0 L277.1 568.3 L275.6 570.6 L274.2 568.5 Z M263.1 555.6 L261.4 555.8 L262.2 557.8 L264.4 556.1 L265.8 556.8 L263.7 558.7 L261.2 557.2 L259.7 558.4 L256.7 557.1 L255.1 554.7 L256.8 553.1 L259.5 553.2 L259.9 554.7 L262.1 555.6 L262.3 552.5 L263.8 551.2 L265.5 551.9 L265.5 553.0 L264.9 555.0 L263.7 555.1 Z M269.3 546.8 L269.3 548.2 L267.9 547.2 L267.8 544.2 L269.7 544.0 L271.0 542.3 L272.9 543.3 L272.0 546.2 L270.7 545.5 L269.0 546.3 Z M320.8 530.4 L320.4 529.1 L324.4 529.3 L324.3 527.8 L326.2 528.3 L326.6 530.4 L321.8 531.4 L321.0 530.3 Z"/>
   </defs></svg>
   <div class="wrap">
-    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></div>
+    <div class="top"><a href="/">🗾 トップ</a>・<a href="/play/">遊ぶ</a>・<a href="/quiz/">ご当地クイズ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></div>
     <header class="pg">
       <h1>長崎県の市区町村パズル（全21）</h1>
       <p class="intro">「長崎県の市区町村パズル」は、長崎県の全21市区町村をドラッグで正しい位置に並べる無料のブラウザゲームです。長崎・佐世保・島原…など、遊びながら市区町村の位置と名前が身につきます。</p>
     </header>
+    <p style="text-align:center;margin:8px 0;font-size:.9em"><a href="/quiz/" style="color:var(--blue);font-weight:700">地元の名物・歴史も知りたい？ ご当地クイズで遊ぶ →</a></p>
     <nav class="pzlist" aria-label="ほかのパズル"><span class="lbl">一覧：</span><a href="/play/list/">市区町村パズル一覧</a><span class="navbr"></span><span class="lbl">全国・政令市：</span><a href="/play/">東京23区</a><a href="/play/japan/">全国47都道府県</a><a href="/play/osaka/">大阪</a><a href="/play/yokohama/">横浜</a><a href="/play/nagoya/">名古屋</a><a href="/play/sapporo/">札幌</a><a href="/play/kobe/">神戸</a><a href="/play/kyoto/">京都</a><a href="/play/fukuoka/">福岡</a><a href="/play/kawasaki/">川崎</a><a href="/play/saitama/">さいたま</a><a href="/play/hiroshima/">広島</a><a href="/play/sendai/">仙台</a><a href="/play/chiba/">千葉</a><a href="/play/kitakyushu/">北九州</a><a href="/play/niigata/">新潟</a><a href="/play/sakai/">堺</a><a href="/play/okayama/">岡山</a><a href="/play/kumamoto/">熊本</a><a href="/play/shizuoka/">静岡</a><a href="/play/hamamatsu/">浜松</a><a href="/play/sagamihara/">相模原</a><span class="navbr"></span><span class="lbl">都道府県の市区町村：</span><a href="/play/pref-hokkaido/">北海道</a><a href="/play/pref-aomori/">青森県</a><a href="/play/pref-iwate/">岩手県</a><a href="/play/pref-miyagi/">宮城県</a><a href="/play/pref-akita/">秋田県</a><a href="/play/pref-yamagata/">山形県</a><a href="/play/pref-fukushima/">福島県</a><a href="/play/pref-ibaraki/">茨城県</a><a href="/play/pref-tochigi/">栃木県</a><a href="/play/pref-gunma/">群馬県</a><a href="/play/pref-saitama/">埼玉県</a><a href="/play/pref-chiba/">千葉県</a><a href="/play/pref-tokyo/">東京都</a><a href="/play/pref-kanagawa/">神奈川県</a><a href="/play/pref-niigata/">新潟県</a><a href="/play/pref-toyama/">富山県</a><a href="/play/pref-ishikawa/">石川県</a><a href="/play/pref-fukui/">福井県</a><a href="/play/pref-yamanashi/">山梨県</a><a href="/play/pref-nagano/">長野県</a><a href="/play/pref-gifu/">岐阜県</a><a href="/play/pref-shizuoka/">静岡県</a><a href="/play/pref-aichi/">愛知県</a><a href="/play/pref-mie/">三重県</a><a href="/play/pref-shiga/">滋賀県</a><a href="/play/pref-kyoto/">京都府</a><a href="/play/pref-osaka/">大阪府</a><a href="/play/pref-hyogo/">兵庫県</a><a href="/play/pref-nara/">奈良県</a><a href="/play/pref-wakayama/">和歌山県</a><a href="/play/pref-tottori/">鳥取県</a><a href="/play/pref-shimane/">島根県</a><a href="/play/pref-okayama/">岡山県</a><a href="/play/pref-hiroshima/">広島県</a><a href="/play/pref-yamaguchi/">山口県</a><a href="/play/pref-tokushima/">徳島県</a><a href="/play/pref-kagawa/">香川県</a><a href="/play/pref-ehime/">愛媛県</a><a href="/play/pref-kochi/">高知県</a><a href="/play/pref-fukuoka/">福岡県</a><a href="/play/pref-saga/">佐賀県</a><b class="cur">長崎県</b><a href="/play/pref-kumamoto/">熊本県</a><a href="/play/pref-oita/">大分県</a><a href="/play/pref-miyazaki/">宮崎県</a><a href="/play/pref-kagoshima/">鹿児島県</a><a href="/play/pref-okinawa/">沖縄県</a></nav>
     <div class="hud">
       <div>そろった：<span class="val" id="prog">0 / 21</span></div>
@@ -181,16 +185,23 @@
         </g>
         <g id="placed"></g>
       </svg>
-      <div class="win" id="win">
+      <div class="win" id="win" role="region" aria-label="パズルのクリア結果">
         <div class="card">
           <p class="wt">クリア！🎉</p>
           <p id="wintime"></p>
-          <p>全国47都道府県・市区町村まで（全1,741）はアプリで遊べます。</p>
-          <div class="btns">
-            <a href="https://apps.apple.com/jp/app/id6777826991">App Store</a>
-            <a href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap">Google Play</a>
-            <button id="again">もう一度</button>
-          </div>
+          <div class="btns"><button id="again">もう一度</button></div>
+          <aside class="jm-app-promo jm-app-promo--compact" data-promo-placement="puzzle_result" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">次はアプリで、あなたの街を。</p><p class="jm-app-promo-description">全国の市区町村から、もっと細かい町丁目まで遊べます。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside>
         </div>
       </div>
     </div>
@@ -218,7 +229,18 @@
     <button class="thumb" data-pid="p19" data-color="#ff922b" data-label="佐々町" data-reading="さざちょう" data-cx="449.6" data-cy="468.0" data-vb="440.3 458.4 18.6 19.2"><svg viewBox="440.3 458.4 18.6 19.2"><use href="#p19" fill="#ff922b"/></svg><span><ruby>佐々町<rt>さざちょう</rt></ruby></span></button>
     <button class="thumb" data-pid="p20" data-color="#f06595" data-label="新上五島町" data-reading="しんかみごとうちょう" data-cx="290.8" data-cy="535.7" data-vb="255.1 489.2 71.6 93.0"><svg viewBox="255.1 489.2 71.6 93.0"><use href="#p20" fill="#f06595"/></svg><span><ruby>新上五島町<rt>しんかみごとうちょう</rt></ruby></span></button>
     </div>
-    <div class="cta"><a class="b" href="/">▶ 全国47都道府県・市区町村をアプリで（無料）</a></div>
+    <aside class="jm-app-promo" data-promo-placement="puzzle_content" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">あなたの街を、もっと遊ぼう。</p><p class="jm-app-promo-description">市区町村や町丁目のパズル、ご当地クイズもアプリで楽しめます。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside>
     <p class="wards">収録エリア（全21市区町村）：長崎市、佐世保市、島原市、諫早市、大村市、平戸市、松浦市、対馬市、壱岐市、五島市、西海市、雲仙市、南島原市、長与町、時津町、東彼杵町、川棚町、波佐見町、小値賀町、佐々町、新上五島町</p>
 <section class="howto"><h2>長崎県の市区町村パズルの遊び方</h2><ol><li>下のトレイからピースを1つ選んで、地図の上へドラッグします。</li><li>正しい位置に近づくと自動で吸い付いて、ピースが地図にはまります。</li><li>全21市区町村をそろえるとクリア。かかった時間が出ます。</li></ol><h2>よくある質問</h2><h3>長崎県の市区町村パズルは無料で遊べますか？</h3><p>はい。インストールも会員登録も不要で、ブラウザだけで何度でも無料で遊べます。</p><h3>ピースは全部でいくつありますか？</h3><p>全21市区町村です。すべて正しい位置に置くとクリアになります。</p><h3>スマートフォンでも遊べますか？</h3><p>遊べます。ピースを指でドラッグして地図の上に置いてください。</p><h3>もっと細かい単位でも遊べますか？</h3><p>このページは市区町村までですが、アプリ版では全国1,741市区町村と、さらに細かい町丁目まで遊べます。</p></section>
     <footer class="pg">地図データ：国土交通省 国土数値情報（CC BY 4.0）／ <a href="/">japan-map.app</a></footer>

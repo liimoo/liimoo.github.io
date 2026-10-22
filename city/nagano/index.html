@@ -27,9 +27,12 @@
           : h.indexOf('play.google.com') >= 0 ? 'android'
           : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
     if(!s) return;
-    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
+    var promo = a.closest('[data-promo-placement]');
+    var placement = promo ? promo.getAttribute('data-promo-placement') : 'page';
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname, placement: placement }); }catch(err){}
   }, true);
 </script>
+<link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
 <title>長野市（長野県）の町名・見どころ｜238の町丁目を収録｜日本地図 都市パズル</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -55,7 +58,6 @@ h1{font-size:1.55em;margin:.2em 0 .4em;line-height:1.35}
 h2{font-size:1.18em;margin:1.4em 0 .5em;border-left:5px solid var(--blue);padding-left:.5em}
 .intro{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
 .facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin:.6em 0 0;font-size:.9em;color:var(--sub)}
-.badges{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.badges img{height:50px}
 .muni{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 12px}
 .muni li{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:.92em}
 .muni .sp{display:block;color:var(--sub);font-size:.8em;margin-top:1px}
@@ -68,4 +70,15 @@ footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
 </style><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://japan-map.app/"},{"@type":"ListItem","position":2,"name":"主要都市","item":"https://japan-map.app/city/"},{"@type":"ListItem","position":3,"name":"長野市","item":"https://japan-map.app/city/nagano/"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"長野市の名産は？","acceptedAnswer":{"@type":"Answer","text":"そばです。"}},{"@type":"Question","name":"長野市の見どころは？","acceptedAnswer":{"@type":"Answer","text":"善光寺です。"}},{"@type":"Question","name":"長野市にはいくつの町丁目がありますか？","acceptedAnswer":{"@type":"Answer","text":"『日本地図 都市パズル』には長野市の町丁目を238収録しています。"}}]}</script>
 </head><body>
 <div class="top"><a href="/">🗾 日本地図 都市パズル</a>　<span style="opacity:.9;font-size:.86em">｜ <a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></span></div>
-<div class="wrap"><nav class="crumb"><a href="/">ホーム</a> › <a href="/city/">主要都市</a> › <a href="/pref/nagano.html">長野県</a> › 長野市</nav><h1>長野市（長野県）の町名と見どころ</h1><div class="intro"><p><b>長野市</b>は長野県の県庁所在地です。名産は<b>そば</b>、見どころは<b>善光寺</b>。ゆうめいな善光寺があるまちだよ。<br>『日本地図 都市パズル』には<b>長野市の町丁目を238</b>収録しており、パズルで遊びながら町名と位置を自然に覚えられます。</p><div class="facts"><span>🗾 長野県</span><span>🏛 県庁所在地</span><span>🍚 名産：そば</span><span>📍 見どころ：善光寺</span><span>🧩 町丁目：238</span></div><p class="playlinks">🧩 ブラウザで無料であそぶ：<a href="/play/pref-nagano/">長野県の市区町村パズル</a>・<a href="/play/japan/">全国47都道府県</a>・<a href="/play/list/">パズル一覧</a></p><div class="badges"><a href="https://apps.apple.com/jp/app/id6777826991"><img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" height="50"></a><a href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap"><img src="/assets/japanmap/googleplay_badge.png" alt="Google Playで手に入れよう" height="50"></a></div></div><h2>長野市の歴史と観光</h2><p>長野市の街の成り立ち、おすすめの観光スポット、お土産を写真つきでまとめています。</p><p class="playlinks">📷 <a href="/guide/nagano/">長野市の観光ガイドを見る</a></p><h2>長野県の市区町村をもっと見る</h2><p><a href="/pref/nagano.html">長野県の市区町村一覧（名産・見どころつき）</a>　｜　<a href="/ranking/">日本地図の豆知識</a>　｜　<a href="/city/">主要都市の一覧</a></p></div><footer>© 日本地図 都市パズル ／ <a href="/">トップへ</a>・<a href="/city/">主要都市一覧</a>・<a href="/pref/">都道府県一覧</a></footer></body></html>
+<div class="wrap"><nav class="crumb"><a href="/">ホーム</a> › <a href="/city/">主要都市</a> › <a href="/pref/nagano.html">長野県</a> › 長野市</nav><h1>長野市（長野県）の町名と見どころ</h1><div class="intro"><p><b>長野市</b>は長野県の県庁所在地です。名産は<b>そば</b>、見どころは<b>善光寺</b>。ゆうめいな善光寺があるまちだよ。<br>『日本地図 都市パズル』には<b>長野市の町丁目を238</b>収録しており、パズルで遊びながら町名と位置を自然に覚えられます。</p><div class="facts"><span>🗾 長野県</span><span>🏛 県庁所在地</span><span>🍚 名産：そば</span><span>📍 見どころ：善光寺</span><span>🧩 町丁目：238</span></div><p class="playlinks">🧩 ブラウザで無料であそぶ：<a href="/play/pref-nagano/">長野県の市区町村パズル</a>・<a href="/play/japan/">全国47都道府県</a>・<a href="/play/list/">パズル一覧</a></p></div><h2>長野市の歴史と観光</h2><p>長野市の街の成り立ち、おすすめの観光スポット、お土産を写真つきでまとめています。</p><p class="playlinks">📷 <a href="/guide/nagano/">長野市の観光ガイドを見る</a></p><h2>長野県の市区町村をもっと見る</h2><p><a href="/pref/nagano.html">長野県の市区町村一覧（名産・見どころつき）</a>　｜　<a href="/ranking/">日本地図の豆知識</a>　｜　<a href="/city/">主要都市の一覧</a></p><aside class="jm-app-promo" data-promo-placement="city_content" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">長野市を、パズルで遊ぼう</p><p class="jm-app-promo-description">気になった街の町名と位置を、アプリでも楽しく覚えられます。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside></div><footer>© 日本地図 都市パズル ／ <a href="/">トップへ</a>・<a href="/city/">主要都市一覧</a>・<a href="/pref/">都道府県一覧</a></footer></body></html>
