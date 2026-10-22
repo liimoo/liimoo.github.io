@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) — GA4(アクセス解析) ＋ Google広告 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DP16PC4C8J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18330119849');
+  gtag('config', 'G-DP16PC4C8J');
+
+  // ストアへ出ていくクリックを数える。
+  // ⚠ これが無いと「LP → ストア」の歩留まりが一切分からない。着地ページごとの
+  //   良し悪しを比べられず、SNSの誘導先を勘で決めることになる（実際そうなっていた）。
+  // ⚠ GA4 の拡張計測(outbound click)任せにしない。イベント名が page ごとに
+  //   混ざって比較しづらいので、store_click として明示的に送る。
+  // ⚠ キャプチャ段階(true)で拾う。途中で伝播を止める実装があっても取りこぼさない。
+  // ⚠ 同じタブで遷移するが、gtag は sendBeacon で送るので離脱しても届く。
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(!t || !t.closest) return;
+    var a = t.closest('a[href]');
+    if(!a) return;
+    var h = a.hostname || '';
+    var s = h.indexOf('apps.apple.com') >= 0 ? 'ios'
+          : h.indexOf('play.google.com') >= 0 ? 'android'
+          : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
+    if(!s) return;
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
+  }, true);
+</script>
+<title>ご当地クイズ｜47都道府県の無料クイズで遊ぼう | 日本地図 都市パズル</title>
+<meta name="description" content="47都道府県のご当地クイズを無料で遊べます。名物・観光・歴史・地理の公式問題を入門から超上級まで5段階で。登録不要、スマホ・パソコンに対応。">
+<link rel="canonical" href="https://japan-map.app/quiz/">
+<meta property="og:title" content="ご当地クイズ｜47都道府県の無料クイズで遊ぼう | 日本地図 都市パズル">
+<meta property="og:description" content="47都道府県のご当地クイズを無料で遊べます。名物・観光・歴史・地理の公式問題を入門から超上級まで5段階で。登録不要、スマホ・パソコンに対応。">
+<meta property="og:type" content="website"><meta property="og:url" content="https://japan-map.app/quiz/">
+<meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/quiz/quiz.css?v=20261022">
+</head><body>
+<header class="site-header"><div class="container"><a class="brand" href="/">🗾 日本地図 都市パズル</a>
+<nav aria-label="サイトメニュー"><a href="/quiz/">ご当地クイズ</a> <a href="/play/">地図パズル</a> <a href="/event/">対抗戦</a></nav></div></header>
+<main class="container"><nav class="breadcrumb" aria-label="現在地"><a href="/">ホーム</a> / ご当地クイズ</nav>
+<header class="hero"><p class="eyebrow">47都道府県、知らなかった発見へ。</p><h1>ご当地クイズ</h1>
+<p class="lead">あなたの地元、どれくらい知ってる？</p>
+<p>名物・観光・歴史・地理。アプリの公式問題を、ブラウザで気軽に。<br>無料・登録不要で、全47都道府県の選択式 4,262問が遊べます。</p>
+<a class="button" href="#prefectures">都道府県を選んで遊ぶ</a></header>
+<section class="card"><h2>出身地から、旅先から。</h2><p>都道府県を選び、入門〜超上級の5段階から挑戦。1セット14〜19問、答えるたびに正解を確認できます。まずは入門がおすすめです。</p></section>
+<div id="prefectures"><h2 class="section-heading">どの都道府県に挑戦する？</h2><section><h3>北海道・東北</h3><div class="pref-grid"><a class="pref-card" href="/quiz/hokkaido.html"><strong>北海道</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/aomori.html"><strong>青森県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/iwate.html"><strong>岩手県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/miyagi.html"><strong>宮城県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/akita.html"><strong>秋田県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/yamagata.html"><strong>山形県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/fukushima.html"><strong>福島県</strong><span>入門から超上級まで →</span></a></div></section><section><h3>関東</h3><div class="pref-grid"><a class="pref-card" href="/quiz/ibaraki.html"><strong>茨城県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/tochigi.html"><strong>栃木県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/gunma.html"><strong>群馬県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/saitama.html"><strong>埼玉県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/chiba.html"><strong>千葉県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/tokyo.html"><strong>東京都</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/kanagawa.html"><strong>神奈川県</strong><span>入門から超上級まで →</span></a></div></section><section><h3>中部</h3><div class="pref-grid"><a class="pref-card" href="/quiz/niigata.html"><strong>新潟県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/toyama.html"><strong>富山県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/ishikawa.html"><strong>石川県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/fukui.html"><strong>福井県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/yamanashi.html"><strong>山梨県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/nagano.html"><strong>長野県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/gifu.html"><strong>岐阜県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/shizuoka.html"><strong>静岡県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/aichi.html"><strong>愛知県</strong><span>入門から超上級まで →</span></a></div></section><section><h3>近畿</h3><div class="pref-grid"><a class="pref-card" href="/quiz/mie.html"><strong>三重県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/shiga.html"><strong>滋賀県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/kyoto.html"><strong>京都府</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/osaka.html"><strong>大阪府</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/hyogo.html"><strong>兵庫県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/nara.html"><strong>奈良県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/wakayama.html"><strong>和歌山県</strong><span>入門から超上級まで →</span></a></div></section><section><h3>中国</h3><div class="pref-grid"><a class="pref-card" href="/quiz/tottori.html"><strong>鳥取県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/shimane.html"><strong>島根県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/okayama.html"><strong>岡山県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/hiroshima.html"><strong>広島県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/yamaguchi.html"><strong>山口県</strong><span>入門から超上級まで →</span></a></div></section><section><h3>四国</h3><div class="pref-grid"><a class="pref-card" href="/quiz/tokushima.html"><strong>徳島県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/kagawa.html"><strong>香川県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/ehime.html"><strong>愛媛県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/kochi.html"><strong>高知県</strong><span>入門から超上級まで →</span></a></div></section><section><h3>九州・沖縄</h3><div class="pref-grid"><a class="pref-card" href="/quiz/fukuoka.html"><strong>福岡県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/saga.html"><strong>佐賀県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/nagasaki.html"><strong>長崎県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/kumamoto.html"><strong>熊本県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/oita.html"><strong>大分県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/miyazaki.html"><strong>宮崎県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/kagoshima.html"><strong>鹿児島県</strong><span>入門から超上級まで →</span></a><a class="pref-card" href="/quiz/okinawa.html"><strong>沖縄県</strong><span>入門から超上級まで →</span></a></div></section></div><section class="app-cta" aria-labelledby="app-heading">
+<p class="eyebrow">もっと地元を楽しもう</p><h2 id="app-heading">次はアプリで、地図にも挑戦。</h2>
+<p>アプリでは地図から答えるご当地クイズや、市区町村の地図パズルも楽しめます。毎月1日〜25日は都道府県対抗戦も開催。</p>
+<div class="store-links"><a class="button" href="https://apps.apple.com/jp/app/id6777826991">App Store で見る</a>
+<a class="button secondary" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap">Google Play で見る</a></div>
+<p class="muted">Web版の解答結果は、アプリの記録・ランキング・対抗戦には反映されません。</p></section></main>
+<footer class="site-footer"><div class="container"><a href="/">日本地図 都市パズル</a> · <a href="/quiz/">47都道府県のクイズ</a></div></footer>
+</body></html>

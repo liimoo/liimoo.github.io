@@ -196,6 +196,18 @@
   .feat li{ list-style:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
   .feat b{ color:var(--blue); }
 
+  /* ---- ブラウザ版ご当地クイズ ---- */
+  .quiz-entry{ padding-top:20px; padding-bottom:24px; }
+  .quiz-entry .quiz-card{ background:var(--card); border:1px solid var(--line);
+    border-radius:18px; padding:24px 20px; text-align:center; }
+  .quiz-entry .quiz-label{ color:var(--blue); font-weight:800; margin:0 0 6px; }
+  .quiz-entry h2{ font-size:1.35em; }
+  .quiz-entry h2 span{ display:inline-block; }
+  .quiz-entry .lead{ max-width:38em; margin:10px auto 18px; }
+  .quiz-entry .quiz-link{ display:inline-block; background:var(--blue); color:#fff;
+    padding:12px 22px; border-radius:999px; font-weight:800; text-decoration:none; }
+  .quiz-entry .quiz-link:hover{ background:var(--blue-deep); }
+
   /* ---- 更新情報（トップの抜粋・詳細は /news/） ---- */
   .home-news{ margin-top:8px; }
   .home-news .rel{ background:var(--card); border:1px solid var(--line); border-radius:12px;
@@ -301,7 +313,7 @@
 </style>
 </head>
 <body>
-<div style="background:linear-gradient(160deg,#2a64c0,#0a3478);padding:11px 18px;text-align:center;font-size:.9em"><a href="/" style="color:#fff;font-weight:800;text-decoration:none">🗾 日本地図 都市パズル</a>　<span style="opacity:.92">｜ <a href="/play/" style="color:#fff;text-decoration:none">遊ぶ</a>・<a href="/event/" style="color:#fff;text-decoration:none">対抗戦</a>・<a href="/players/" style="color:#fff;text-decoration:none">ランキング</a>・<a href="/videos/" style="color:#fff;text-decoration:none">プレイ動画</a>・<a href="/news/" style="color:#fff;text-decoration:none">お知らせ</a><br class="nb"><a href="/pref/" style="color:#fff;text-decoration:none">都道府県</a>・<a href="/city/" style="color:#fff;text-decoration:none">主要都市</a>・<a href="/guide/" style="color:#fff;text-decoration:none">観光ガイド</a>・<a href="/ranking/" style="color:#fff;text-decoration:none">豆知識</a></span></div>
+<div style="background:linear-gradient(160deg,#2a64c0,#0a3478);padding:11px 18px;text-align:center;font-size:.9em"><a href="/" style="color:#fff;font-weight:800;text-decoration:none">🗾 日本地図 都市パズル</a>　<span style="opacity:.92">｜ <a href="/play/" style="color:#fff;text-decoration:none">遊ぶ</a>・<a href="/quiz/" style="color:#fff;text-decoration:none">ご当地クイズ</a>・<a href="/event/" style="color:#fff;text-decoration:none">対抗戦</a>・<a href="/players/" style="color:#fff;text-decoration:none">ランキング</a>・<a href="/videos/" style="color:#fff;text-decoration:none">プレイ動画</a>・<a href="/news/" style="color:#fff;text-decoration:none">お知らせ</a><br class="nb"><a href="/pref/" style="color:#fff;text-decoration:none">都道府県</a>・<a href="/city/" style="color:#fff;text-decoration:none">主要都市</a>・<a href="/guide/" style="color:#fff;text-decoration:none">観光ガイド</a>・<a href="/ranking/" style="color:#fff;text-decoration:none">豆知識</a></span></div>
 
 <div class="leaves" aria-hidden="true">
     <img class="leaf" src="assets/japanmap/scatter/p1.jpg" alt="" loading="lazy" decoding="async" style="left:3%;top:2%;width:300px;opacity:0.7;--r:-28deg;--amp:7px;--rd:-3deg;--dur:7.5s;--delay:-0.0s">
@@ -380,6 +392,15 @@
 </header>
 
 <main>
+
+<section class="wrap quiz-entry" aria-labelledby="home-quiz-title">
+  <div class="quiz-card">
+    <p class="quiz-label">無料で遊べる ご当地クイズ</p>
+    <h2 id="home-quiz-title"><span>あなたの地元、</span><span>どれくらい知ってる？</span></h2>
+    <p class="lead">名物・祭り・自然・歴史。アプリの選択式クイズをブラウザでも。<br>47都道府県・5つの難易度から、まずは出身県の「入門」に挑戦。</p>
+    <a class="quiz-link" href="/quiz/">出身県のクイズを選ぶ →</a>
+  </div>
+</section>
 
 <!-- 公式PV（YouTube埋め込み。mp4直置きより軽く、再生数もチャンネルに積まれる） -->
 <!-- 配信者・レビュアー募集（相互宣伝＋無料コード） -->
