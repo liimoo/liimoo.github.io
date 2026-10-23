@@ -29,9 +29,12 @@
           : h.indexOf('play.google.com') >= 0 ? 'android'
           : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
     if(!s) return;
-    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
+    var promo = a.closest('[data-promo-placement]');
+    var placement = promo ? promo.getAttribute('data-promo-placement') : 'page';
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname, placement: placement }); }catch(err){}
   }, true);
 </script>
+<link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
 <title>更新情報・お知らせ｜日本地図 都市パズル</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -94,8 +97,8 @@
         <span class="ver">v2.5.1</span>
         <time class="date" datetime="2026-10-21">2026年10月21日</time>
       </div>
-      <h2>地名の 読みを 直したよ</h2>
-      <ul class="changes"><li>不具合ほうこくより、地名の 読みを 直したよ。西尾市「一色町＝いっしきちょう」「志籠谷町＝しこやちょう」、安城市「里町＝さとちょう」などを 正しく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li></ul>
+      <h2>クリアの お祝いを はなやかに！ 地名の 読みも 直したよ</h2>
+      <ul class="changes"><li>パズルを クリアした ときの お祝いを はなやかに したよ！ 完成した 地図が きらめいて、白と 金の 紙ふぶきが 舞うよ。結果の 画面も 金色の ふちどりで きれいに なったよ。</li><li>ご当地クイズの 結果も はなやかに なったよ！ メダルと 紙ふぶきで お祝いして、正解した 数が ふえて 表示されるよ。全問正解すると とくべつな メダルに なるよ。小さい 画面でも スクロールして 評価や 報告が できるよ。</li><li>不具合ほうこくより、地名の 読みを 直したよ。西尾市「一色町＝いっしきちょう」「志籠谷町＝しこやちょう」、安城市「里町＝さとちょう」などを 正しく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、由利本荘市の 地名の 読みを 直したよ。「矢島町＝やしままち」「新荘字中屋敷＝しんじょうあざなかやしき」「元町字新所＝もとまちあざあらところ」「元町字新町＝もとまちあざあらまち」などを 正しく したよ。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li><li>不具合ほうこくより、ご当地クイズで、神戸市や 大阪市を 正しく えらんでも まちがいに なる 問題を 直したよ。アプリを 一度 とじて、もう一度 おためしください。ご迷惑を おかけしました。教えて くださり ありがとうございます。</li></ul>
     </article>
     <article class="rel">
       <div class="rel-head">
