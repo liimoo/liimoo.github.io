@@ -24,6 +24,8 @@
       && Array.isArray(data.sets) && data.sets.length > 0 && data.sets.every(set =>
         Number.isInteger(set.difficulty) && set.difficulty >= 1 && set.difficulty <= 5
         && typeof set.label === 'string' && typeof set.title === 'string'
+        && (set.description === undefined || (typeof set.description === 'string'
+          && Array.from(set.description).length <= 200))
         && Array.isArray(set.questions) && set.questions.length > 0
         && set.questions.every(q => typeof q.question === 'string' && q.question.length > 0
           && Array.isArray(q.choices) && q.choices.length >= 2
@@ -93,6 +95,7 @@
     show([node('p', 'あなたのご当地力を試そう', 'eyebrow'), title,
       node('p', '選択肢を選ぶだけ。時間制限はありません。', 'muted'), options,
       node('p', `${set.title}・全${set.questions.length}問`, 'quiz-set-summary'),
+      ...(set.description ? [node('p', set.description, 'quiz-set-description')] : []),
       button('クイズを始める', start)], moveFocus ? title : null);
   }
 
