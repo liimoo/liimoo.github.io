@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta name="robots" content="noindex,follow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) — GA4(アクセス解析) ＋ Google広告 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DP16PC4C8J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18330119849');
+  gtag('config', 'G-DP16PC4C8J');
+
+  // ストアへ出ていくクリックを数える。
+  // ⚠ これが無いと「LP → ストア」の歩留まりが一切分からない。着地ページごとの
+  //   良し悪しを比べられず、SNSの誘導先を勘で決めることになる（実際そうなっていた）。
+  // ⚠ GA4 の拡張計測(outbound click)任せにしない。イベント名が page ごとに
+  //   混ざって比較しづらいので、store_click として明示的に送る。
+  // ⚠ キャプチャ段階(true)で拾う。途中で伝播を止める実装があっても取りこぼさない。
+  // ⚠ 同じタブで遷移するが、gtag は sendBeacon で送るので離脱しても届く。
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(!t || !t.closest) return;
+    var a = t.closest('a[href]');
+    if(!a) return;
+    var h = a.hostname || '';
+    var s = h.indexOf('apps.apple.com') >= 0 ? 'ios'
+          : h.indexOf('play.google.com') >= 0 ? 'android'
+          : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
+    if(!s) return;
+    var promo = a.closest('[data-promo-placement]');
+    var placement = promo ? promo.getAttribute('data-promo-placement') : 'page';
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname, placement: placement }); }catch(err){}
+  }, true);
+</script>
+<link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
+<title>共有されたご当地クイズ | 日本地図 都市パズル</title>
+<meta name="description" content="友達が遊んだご当地クイズに挑戦。選択式の問題をブラウザで遊べます。">
+<link rel="canonical" href="https://japan-map.app/quiz/shared.html">
+<meta property="og:title" content="共有されたご当地クイズ | 日本地図 都市パズル">
+<meta property="og:description" content="友達が遊んだご当地クイズに挑戦。選択式の問題をブラウザで遊べます。">
+<meta property="og:type" content="website"><meta property="og:url" content="https://japan-map.app/quiz/shared.html">
+<meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/quiz/quiz.css?v=20261022-dark">
+</head><body>
+<header class="site-header"><div class="container"><a class="brand" href="/">🗾 日本地図 都市パズル</a>
+<nav aria-label="サイトメニュー"><a href="/quiz/">ご当地クイズ</a> <a href="/play/">地図パズル</a> <a href="/event/">対抗戦</a></nav></div></header>
+<main class="container"><nav class="breadcrumb"><a href="/quiz/">ご当地クイズ</a></nav>
+<header class="hero"><h1 id="shared-title">共有されたご当地クイズ</h1><p id="shared-note" role="status"></p></header>
+<section id="quiz-player" hidden></section>
+<template id="quiz-result-promo"><aside class="jm-app-promo jm-app-promo--compact" data-promo-placement="quiz_shared_result" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">次はアプリで、地図にも挑戦。</p><p class="jm-app-promo-description">地図から答えるご当地クイズや市区町村パズルも。毎月1日〜25日は都道府県対抗戦を開催。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside><p class="muted">Web版の解答結果は、アプリの記録・ランキング・対抗戦には反映されません。</p></template>
+<aside class="jm-app-promo" data-promo-placement="quiz_shared" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">次はアプリで、地図にも挑戦。</p><p class="jm-app-promo-description">地図から答えるご当地クイズや市区町村パズルも。毎月1日〜25日は都道府県対抗戦を開催。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside><p class="muted">Web版の解答結果は、アプリの記録・ランキング・対抗戦には反映されません。</p>
+<noscript><p>クイズを遊ぶにはJavaScriptを有効にしてください。</p></noscript>
+<script src="/quiz/shared.js?v=20261025-v253" defer></script></main>
+<footer class="site-footer"><div class="container"><a href="/">日本地図 都市パズル</a> · <a href="/quiz/">47都道府県のクイズ</a></div></footer>
+</body></html>

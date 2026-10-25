@@ -77,7 +77,7 @@
 
   function chooseDifficulty(moveFocus = false) {
     state = { phase: 'select', index: 0, answers: [] };
-    const title = heading('難易度を選んで挑戦');
+    const title = heading(data.shared ? '共有されたクイズに挑戦' : '難易度を選んで挑戦');
     const options = node('div', undefined, 'quiz-levels');
     options.setAttribute('role', 'group');
     options.setAttribute('aria-label', '難易度');
