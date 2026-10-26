@@ -29,7 +29,9 @@
           : h.indexOf('play.google.com') >= 0 ? 'android'
           : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
     if(!s) return;
-    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname }); }catch(err){}
+    var promo = a.closest('[data-promo-placement]');
+    var placement = promo ? promo.getAttribute('data-promo-placement') : 'home_hero';
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname, placement: placement }); }catch(err){}
   }, true);
 </script>
 <link rel="preload" as="image" href="assets/japanmap/logo.webp" type="image/webp" fetchpriority="high">
@@ -38,30 +40,31 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>日本地図 都市パズル｜市区町村も完璧！全国1,741市区町村ぜんぶ遊べる地理パズル</title>
-<meta name="description" content="『日本地図 都市パズル』は、日本全国1,741の市区町村すべてが遊べる地理パズル。市区町村まで完璧！推しの街の今日の運勢を占う『街占い』、全国のプレイヤーと応援・お祝いを送り合える『みんなの声』も。親子で・受験対策にも。">
+<meta name="description" content="日本全国1,741市区町村で遊べる日本地図パズル。47都道府県のご当地クイズで、名物・歴史・地理も楽しく発見。無料のブラウザ版と、今日の5問・全国せいは・ランキングが楽しめるアプリ版を紹介します。">
 
 <link rel="canonical" href="https://japan-map.app/">
+<link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
 
 <!-- OGP / Twitter Card -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="日本地図 都市パズル 都道府県も市区町村も完璧！">
-<meta property="og:description" content="『日本地図 都市パズル』は日本全国1,741市区町村すべてが遊べる地理パズル。街占い・みんなの声で毎日たのしい。">
+<meta property="og:description" content="パズルとクイズで、日本をもっと好きになる。1,741市区町村の地図パズルと、47都道府県の名物・歴史・地理を楽しむご当地クイズ。">
 <meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
 <meta property="og:url" content="https://japan-map.app/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="日本地図 都市パズル 都道府県も市区町村も完璧！">
-<meta name="twitter:description" content="『日本地図 都市パズル』は日本全国1,741市区町村すべてが遊べる地理パズル。街占い・みんなの声で毎日たのしい。">
+<meta name="twitter:description" content="パズルとクイズで、日本をもっと好きになる。1,741市区町村の地図パズルと、47都道府県の名物・歴史・地理を楽しむご当地クイズ。">
 <meta name="twitter:image" content="https://japan-map.app/assets/japanmap/ogp.png">
 
 <!-- 構造化データ（検索での「日本地図」対策） -->
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"日本地図 都市パズル","alternateName":["日本地図都市パズル","日本地図パズル","日本地図 パズル","都道府県パズル","日本地図 都市パズル 都道府県も市区町村も完璧！"],"applicationCategory":"GameApplication","operatingSystem":"iOS, Android, Windows","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"description":"日本全国1,741の市区町村すべてが遊べる地理パズル。市区町村も完璧！","url":"https://japan-map.app/","sameAs":["https://apps.apple.com/jp/app/id6777826991","https://play.google.com/store/apps/details?id=com.le_oram.japanmap","https://store.steampowered.com/app/4966740/"],"image":"https://japan-map.app/assets/japanmap/ogp.png"}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"日本地図 都市パズル","alternateName":["日本地図都市パズル","日本地図パズル","日本地図 パズル","都道府県パズル","日本地図 都市パズル 都道府県も市区町村も完璧！"],"applicationCategory":"GameApplication","operatingSystem":"iOS, Android, Windows","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"description":"日本全国1,741市区町村で遊べる地図パズルと、47都道府県の名物・歴史・地理を学べるご当地クイズ。","url":"https://japan-map.app/","sameAs":["https://apps.apple.com/jp/app/id6777826991","https://play.google.com/store/apps/details?id=com.le_oram.japanmap","https://store.steampowered.com/app/4966740/"],"image":"https://japan-map.app/assets/japanmap/ogp.png"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"日本地図 都市パズル","alternateName":["日本地図都市パズル","日本地図パズル","日本地図 パズル"],"url":"https://japan-map.app/"}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"「日本地図 都市パズル」はどんなアプリ？","acceptedAnswer":{"@type":"Answer","text":"日本全国の都道府県・市区町村を並べて覚える地理パズルアプリです。日本全国から市区町村、山・川モードまで、遊びながら日本地図が身につきます。"}},{"@type":"Question","name":"無料で遊べますか？","acceptedAnswer":{"@type":"Answer","text":"はい。全コース無料で遊べます。買い切りのフル版で広告が消え、「みんなの声」への投稿もできます。"}},{"@type":"Question","name":"市区町村はどこまで収録していますか？","acceptedAnswer":{"@type":"Answer","text":"全国1,741の市区町村すべてを収録しています。政令指定都市は「区」の単位まで細かく遊べます。"}},{"@type":"Question","name":"都道府県や日本全国のパズルもありますか？","acceptedAnswer":{"@type":"Answer","text":"あります。日本全国（47都道府県）のパズルから、各都道府県内の市区町村パズルまで段階的に楽しめます。"}},{"@type":"Question","name":"山や川のパズルもありますか？","acceptedAnswer":{"@type":"Answer","text":"はい。日本の名峰・有名な河川を並べる「山モード・川モード」も収録しています。"}},{"@type":"Question","name":"子どもの地理学習や中学受験に使えますか？","acceptedAnswer":{"@type":"Answer","text":"遊びながら都道府県・市区町村の位置と名前が覚えられるので、小学生の地理学習や中学受験の対策にもおすすめです。ふりがな付きでお子さまでも安心です。"}},{"@type":"Question","name":"iPhoneとAndroidどちらでも遊べますか？","acceptedAnswer":{"@type":"Answer","text":"どちらでも遊べます。App Store / Google Play で「日本地図 都市パズル」と検索してください。記録はクラウドで復元でき、共通ランキングにも参加できます。"}},{"@type":"Question","name":"「街占い」「みんなの声」とは？","acceptedAnswer":{"@type":"Answer","text":"「街占い」は推しの街の今日の運勢と全国順位を毎日占える機能、「みんなの声」は全国のプレイヤーと応援・お祝い・地域紹介コメントを送り合える機能です。"}}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"「日本地図 都市パズル」はどんなアプリ？","acceptedAnswer":{"@type":"Answer","text":"日本全国の都道府県・市区町村を並べて覚える地理パズルアプリです。47都道府県のご当地クイズも収録。地図の位置や形に加え、名物・歴史・自然も遊びながら知ることができます。"}},{"@type":"Question","name":"無料で遊べますか？","acceptedAnswer":{"@type":"Answer","text":"はい。全コース無料で遊べます。買い切りのフル版で広告が消え、「みんなの声」への投稿もできます。"}},{"@type":"Question","name":"市区町村はどこまで収録していますか？","acceptedAnswer":{"@type":"Answer","text":"全国1,741の市区町村すべてを収録しています。政令指定都市は「区」の単位まで細かく遊べます。"}},{"@type":"Question","name":"都道府県や日本全国のパズルもありますか？","acceptedAnswer":{"@type":"Answer","text":"あります。日本全国（47都道府県）のパズルから、各都道府県内の市区町村パズルまで段階的に楽しめます。"}},{"@type":"Question","name":"山や川のパズルもありますか？","acceptedAnswer":{"@type":"Answer","text":"はい。日本の名峰・有名な河川を並べる「山モード・川モード」も収録しています。"}},{"@type":"Question","name":"子どもの地理学習や中学受験に使えますか？","acceptedAnswer":{"@type":"Answer","text":"遊びながら都道府県・市区町村の位置と名前が覚えられるので、小学生の地理学習や中学受験の対策にもおすすめです。ふりがな付きでお子さまでも安心です。"}},{"@type":"Question","name":"iPhoneとAndroidどちらでも遊べますか？","acceptedAnswer":{"@type":"Answer","text":"どちらでも遊べます。App Store / Google Play で「日本地図 都市パズル」と検索してください。記録はクラウドで復元でき、共通ランキングにも参加できます。"}},{"@type":"Question","name":"「街占い」「みんなの声」とは？","acceptedAnswer":{"@type":"Answer","text":"「街占い」は推しの街の今日の運勢と全国順位を毎日占える機能、「みんなの声」は全国のプレイヤーと応援・お祝い・地域紹介コメントを送り合える機能です。"}}]}
 </script>
 
 <style>
@@ -208,6 +211,9 @@
     padding:12px 22px; border-radius:999px; font-weight:800; text-decoration:none; }
   .quiz-entry .quiz-link:hover{ background:var(--blue-deep); }
 
+  .quiz-entry .app-features{text-align:left;margin-top:36px}.quiz-entry .app-features h2{text-align:left;font-size:1.5em}.quiz-entry .eyebrow{color:var(--blue);font-weight:800}.quiz-entry .muted{color:var(--muted);font-size:.86em}
+  .quiz-showcase{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:28px 0}.quiz-showcase figure{margin:0;min-width:0}.quiz-showcase img{display:block;width:min(100%,240px);height:auto;margin:0 auto 18px;border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 32px #0003}.quiz-showcase figcaption strong{display:block;color:var(--blue);margin-bottom:8px}.quiz-showcase figcaption span{display:block;color:var(--muted);font-size:.9em}
+  @media(max-width:600px){.quiz-showcase{grid-template-columns:1fr;gap:28px}.quiz-showcase figure{display:grid;grid-template-columns:42% 1fr;gap:18px;align-items:center}.quiz-showcase img{margin:0}}
   /* ---- 更新情報（トップの抜粋・詳細は /news/） ---- */
   .home-news{ margin-top:8px; }
   .home-news .rel{ background:var(--card); border:1px solid var(--line); border-radius:12px;
@@ -365,8 +371,8 @@
       <p class="sub"><span>都道府県から市区町村まで遊べる、</span><span>日本地図パズルの決定版。</span><span>1,741市区町村を収録。</span></p>
       <img class="stamp" src="assets/japanmap/stamp.png" alt="市区町村も完璧！" width="418" height="149">
     </h1>
-    <p class="tag">市区町村も完璧！ 日本全国すべての街が、<br>一生遊べる地理パズル。</p>
-    <p class="sub">1,741の市区町村を、まるごと収録。</p>
+    <p class="tag">パズルとクイズで、<br>日本をもっと好きになる。</p>
+    <p class="sub">1,741市区町村の地図パズルと、<br>47都道府県の名物・歴史・地理を楽しむご当地クイズ。</p>
     <div class="badges">
       <a class="badge-link" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeでダウンロード">
         <img class="badge-img" src="assets/japanmap/appstore_badge.svg" alt="App Storeで手に入れよう" width="162" height="54">
@@ -387,7 +393,7 @@
         <img class="steam" src="assets/japanmap/steam_logo.svg" alt="Steam" width="66" height="20">
       </a>
     </div>
-    <p style="margin:18px 0 0"><a href="/play/" style="display:inline-block;font-weight:800;background:var(--accent);color:#fff;padding:12px 26px;border-radius:999px;text-decoration:none;box-shadow:0 8px 20px rgba(255,138,61,.35)">🧩 ブラウザで無料であそぶ（全国47都道府県・政令市）</a></p>
+    <p style="margin:18px 0 0"><a href="/play/" style="display:inline-block;font-weight:800;background:var(--accent);color:#fff;padding:12px 26px;border-radius:999px;text-decoration:none;box-shadow:0 8px 20px rgba(255,138,61,.35)">🧩 無料の地図パズルであそぶ</a></p>
   </div>
 </header>
 
@@ -395,11 +401,32 @@
 
 <section class="wrap quiz-entry" aria-labelledby="home-quiz-title">
   <div class="quiz-card">
-    <p class="quiz-label">無料で遊べる ご当地クイズ</p>
+    <p class="quiz-label">都道府県クイズ・ご当地クイズも楽しもう</p>
     <h2 id="home-quiz-title"><span>あなたの地元、</span><span>どれくらい知ってる？</span></h2>
-    <p class="lead">名物・祭り・自然・歴史。アプリの選択式クイズをブラウザでも。<br>47都道府県・5つの難易度から、まずは出身県の「入門」に挑戦。</p>
-    <a class="quiz-link" href="/quiz/">出身県のクイズを選ぶ →</a>
+    <p class="lead">名物・祭り・自然・歴史。地図の形を知ったら、街の魅力も発見しよう。<br>47都道府県・5つの難易度から、まずは出身県の「入門」に挑戦。<br>Webの選択式クイズは無料・登録不要です。</p>
+    <a class="quiz-link" href="/quiz/">無料のご当地クイズで遊ぶ →</a>
   </div>
+<section class="app-features" aria-labelledby="app-features-title">
+<p class="eyebrow">アプリのご当地クイズ</p><h2 id="app-features-title">アプリで広がる、毎日の楽しみ。</h2>
+<p>名物を知る。地図で確かめる。昨日より、少し日本に詳しくなる。</p>
+<div class="quiz-showcase">
+<figure><img src="/assets/japanmap/quiz-marketing/quiz-question.webp" width="720" height="1600" loading="lazy" decoding="async" alt="ご当地クイズの問題と選択肢を表示したアプリ画面"><figcaption><strong>地元の「知ってる！」を試そう</strong><span>全47都道府県、入門から超上級まで。アプリでは地図から答える問題やクイズ作成も。</span></figcaption></figure>
+<figure><img src="/assets/japanmap/quiz-marketing/quiz-daily.webp" width="720" height="1600" loading="lazy" decoding="async" alt="日替わりの公式クイズと挑戦記録が見られる今日の5問の画面"><figcaption><strong>毎日、5問の小さな発見</strong><span>「今日の5問」で気軽に挑戦。まちがえた問題だけを復習して、知識を少しずつ。</span></figcaption></figure>
+<figure><img src="/assets/japanmap/quiz-marketing/quiz-progress.webp" width="720" height="1600" loading="lazy" decoding="async" alt="公式クイズを遊んだ都道府県を色で表示する全国せいはマップ"><figcaption><strong>次は、どの県を知ろう？</strong><span>公式クイズを1セット最後まで遊ぶと、その県に色がつく「全国せいはマップ」。</span></figcaption></figure>
+</div><p class="muted">画像はアプリの画面です。プレイ記録は表示例です。日替わり・全国せいは・復習・結果共有はv2.5.3の機能です。Webでは選択式クイズを遊べます。</p>
+<p>クイズ王・出題王のランキングや、毎月1日〜25日の都道府県対抗戦にも挑戦。結果を画像とリンクで共有すれば、友達も同じクイズの選択式問題をWebで遊べます。</p></section>
+<aside class="jm-app-promo" data-promo-placement="home_quiz_features" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">パズルもクイズも、このアプリで。</p><p class="jm-app-promo-description">日本地図 都市パズルをストアでチェック。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside>
 </section>
 
 <!-- 公式PV（YouTube埋め込み。mp4直置きより軽く、再生数もチャンネルに積まれる） -->
@@ -423,8 +450,8 @@
       <span class="ev-badge">🚩 オンラインイベント</span>
       <h2>都道府県対抗戦</h2>
       <p class="ev-lead">お気に入りの県を、みんなで優勝させよう！</p>
-      <p>住んでいる県などのチームに分かれて、全国のプレイヤーとクリア数を競うイベント。約2週間・毎月くり返し開催予定です。</p>
-      <p class="ev-date">第1回：2026年8月15日〜8月31日（毎月15日〜月末に開催）</p>
+      <p>お気に入りの都道府県を応援し、全国のプレイヤーとポイントを競うイベント。アプリのパズルやご当地クイズでチームに貢献しよう。</p>
+      <p class="ev-date">開催期間：毎月1日〜25日</p>
       <p style="margin:12px 0 0"><a href="/event/" style="display:inline-block;font-weight:800;background:var(--blue);color:#fff;padding:11px 22px;border-radius:999px;text-decoration:none;box-shadow:0 8px 18px rgba(42,100,192,.32)">🏆 結果・順位を見る（あなたの県は今、何位？）→</a></p>
     </div>
   </div>
@@ -732,7 +759,7 @@
 <section class="wrap">
   <h2>よくある質問</h2>
   <div class="faq">
-    <div class="qa"><h3>「日本地図 都市パズル」はどんなアプリ？</h3><p>日本全国の都道府県・市区町村を並べて覚える地理パズルアプリです。日本全国から市区町村、山・川モードまで、遊びながら日本地図が身につきます。</p></div>
+    <div class="qa"><h3>「日本地図 都市パズル」はどんなアプリ？</h3><p>日本全国の都道府県・市区町村を並べて覚える地理パズルアプリです。47都道府県のご当地クイズも収録。地図の位置や形に加え、名物・歴史・自然も遊びながら知ることができます。</p></div>
     <div class="qa"><h3>無料で遊べますか？</h3><p>はい。全コース無料で遊べます。買い切りのフル版で広告が消え、「みんなの声」への投稿もできます。</p></div>
     <div class="qa"><h3>市区町村はどこまで収録していますか？</h3><p>全国1,741の市区町村すべてを収録しています。政令指定都市は「区」の単位まで細かく遊べます。</p></div>
     <div class="qa"><h3>都道府県や日本全国のパズルもありますか？</h3><p>あります。日本全国（47都道府県）のパズルから、各都道府県内の市区町村パズルまで段階的に楽しめます。</p></div>

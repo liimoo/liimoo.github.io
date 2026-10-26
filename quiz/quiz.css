@@ -20,6 +20,10 @@ button{cursor:pointer}
 .eyebrow{font-size:.77rem;letter-spacing:.12em;font-weight:800;color:var(--gold);margin:0 0 8px}
 .lead{color:var(--muted);font-size:1rem;max-width:700px}
 .muted{color:var(--muted);font-size:.92rem}
+.question-preview{margin:28px 0}.question-preview h2,.quiz-howto h2{font-size:1.25rem;margin-top:0}.question-preview li{margin:10px 0}.quiz-howto li{margin:8px 0}
+.app-features{margin:48px 0 20px}.app-features h2{font-size:clamp(1.4rem,4vw,2rem);line-height:1.5;margin:8px 0 14px}
+.quiz-showcase{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:28px 0}.quiz-showcase figure{margin:0;min-width:0}.quiz-showcase img{display:block;width:min(100%,240px);height:auto;margin:0 auto 18px;border:1px solid #536c91;border-radius:18px;box-shadow:0 14px 32px #0006}.quiz-showcase figcaption strong{display:block;font-size:1.05rem;color:var(--gold);margin-bottom:8px}.quiz-showcase figcaption span{display:block;color:var(--muted);font-size:.9rem}
+@media(max-width:600px){.quiz-showcase{grid-template-columns:1fr;gap:32px}.quiz-showcase figure{display:grid;grid-template-columns:42% 1fr;gap:18px;align-items:center}.quiz-showcase img{margin:0}.quiz-showcase figcaption strong{font-size:1rem}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 10px 32px #00000026}
 .section-heading{margin:42px 0 18px;font-size:1.35rem}
 .pref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;margin:20px 0 36px}
