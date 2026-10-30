@@ -145,7 +145,8 @@ async function load(){
   setMsg("読み込み中…");
   let failed = false;
   // アプリとサイトは別々に読む。Cloudflare が落ちてもアプリの数字は出したい。
-  const a = api("app_users", { days }).then(renderApp).catch(e => {
+  const appRequestedAt = new Date();
+  const a = api("app_users", { days }).then(d => renderApp(d, appRequestedAt)).catch(e => {
     failed = true;
     document.getElementById("app_users").innerHTML =
       '<div class="sec-title">📱 アプリの利用者</div><div class="card muted">読み込み失敗: '
@@ -316,32 +317,30 @@ function osList(rows){
   return OS_ORDER.filter(k => seen.has(k));
 }
 
-function renderApp(d){
+function renderApp(d, requestedAt = new Date()){
+  // 取得開始日のJSTを使う。履歴の最終日は欠損時に今日とは限らない。
+  const jst = date => new Date(date.getTime() + 9 * 3600000).toISOString();
+  const today = jst(requestedAt).slice(0, 10);
+  const receivedAt = new Date();
+  const crossedDay = today !== jst(receivedAt).slice(0, 10);
+  const receivedLabel = jst(receivedAt).slice(0, 16).replace("T", " ");
   const now  = (d.now || []).filter(r => OS_ORDER.includes(r.platform));
   const hist = (d.history || []).filter(r => OS_ORDER.includes(r.platform));
   const oss  = osList(now.length ? now : hist);
   const days = [...new Set(hist.map(r => r.d))].sort();
   const at = (day, os, k) => (hist.find(r => r.d === day && r.platform === os) || {})[k] || 0;
-  const today = days.length ? days[days.length - 1] : null;
-  // 記録を始める前の日は dau=0 が入っているが、それは「0人」ではなく「未計測」。
-  // 前日比の相手にすると初日だけ「昨日 0」と嘘をつくので、計測済みの日だけ相手にする。
+  // 過去のゼロには計測開始前の補完行が含まれるため、従来どおり最初の実測から表示。
   const firstDau = days.find(day => oss.some(os => at(day, os, "dau") > 0));
-  const prev = days.length > 1 ? days[days.length - 2] : null;
-  const yday = (prev && firstDau && prev >= firstDau) ? prev : null;
   const S = k => now.reduce((a, r) => a + (r[k] || 0), 0);
 
-  // ① OS別カード：主役は「今日その日に起動した人」。前日比を添える。
+  // 時間別履歴は保存されていないため、途中の今日と昨日終日の増減率は出さない。
   const cards = oss.map(os => {
     const r = now.find(x => x.platform === os) || {};
-    const y = yday ? at(yday, os, "dau") : null;
-    const dv = y ? Math.round((r.dau - y) / y * 100) : null;
-    const arrow = dv === null ? "" :
-      `<span style="color:${dv >= 0 ? "#7fe0a3" : "#e08a8a"}">${dv >= 0 ? "▲" : "▼"}${Math.abs(dv)}%</span>`;
     return `<div class="stat">
       <div class="meta"><b style="display:inline-block;width:9px;height:9px;border-radius:2px;
         background:${OS_COLOR[os]};vertical-align:middle"></b> ${esc(OS_NAME[os])}</div>
       <div class="n" style="color:${OS_COLOR[os]}">${fmt(r.dau)}</div>
-      <div class="meta">昨日 ${y === null ? "—" : fmt(y)} ${arrow}</div>
+      <div class="meta">${esc(today)}（JST・集計途中）</div>
       <div class="meta">7日 ${fmt(r.wau)} ／ 30日 ${fmt(r.mau)} ／ 累計 ${fmt(r.total)}</div>
     </div>`;
   }).join("");
@@ -370,9 +369,9 @@ function renderApp(d){
   const dauBlock = dauDays.length ? `
     <div class="sec-title" style="margin-top:14px">日別の利用者（DAU・OS別）</div>
     <div class="card">
-      <div class="legend">${legend}　<span class="meta">いちばん右（うすい棒）は今日ぶんで、まだ増えます</span></div>
+      <div class="legend">${legend}　<span class="meta">${esc(today)} の棒がある場合は集計途中です（うすい棒）</span></div>
       <div class="chart">${chart(dauDays, "dau", 180)}</div>
-      <div class="meta" style="margin-top:6px">記録を始めた ${esc(dauDays[0])} 以降が出ます。今日ぶんは1時間ごと、前日ぶんは0:05に確定します。</div>
+      <div class="meta" style="margin-top:6px">記録を始めた ${esc(dauDays[0])} 以降が出ます。当日分は毎時、前日分は翌日0:05 JSTに保存する設定です。保存の遅延・欠損があり得ます。保存時刻は記録されていません。</div>
     </div>` : `
     <div class="sec-title" style="margin-top:14px">日別の利用者（DAU・OS別）</div>
     <div class="card muted">まだ記録がありません。</div>`;
@@ -402,12 +401,18 @@ function renderApp(d){
       <tbody>${trs}</tbody>
     </table></div>` : "";
 
+  if (crossedDay) {
+    document.getElementById("app_users").innerHTML = '<div class="card muted">取得中にJSTの日付が変わりました。当日の利用者を確認するには再読み込みしてください。</div>';
+    return;
+  }
   document.getElementById("app_users").innerHTML = `
-    <div class="sec-title">📱 アプリの利用者<span class="meta">　大きい数字＝今日その日にアプリを起動した人</span></div>
+    <div class="sec-title">📱 アプリの利用者<span class="meta">　大きい数字＝取得時点の当日利用者（JST・集計途中）</span></div>
     <div class="card">
+      <div class="meta" style="margin-bottom:10px">画面取得：${esc(receivedLabel)} JST（集計完了時刻ではありません）。再読み込みまで数値は更新されません。<br>
+        昨日の同時刻の履歴がないため、当日と前日終日の増減率は表示しません。過去の日別値は下の表で確認できます。</div>
       <div class="grid">${cards || '<span class="muted">データなし</span>'}</div>
       <div class="grid" style="margin-top:10px">
-        <div class="stat"><div class="meta">今日の合計</div><div class="n">${fmt(S("dau"))}</div></div>
+        <div class="stat"><div class="meta">当日の合計（集計途中）</div><div class="n">${fmt(S("dau"))}</div></div>
         <div class="stat"><div class="meta">30日の合計（MAU）</div><div class="n">${fmt(S("mau"))}</div></div>
         <div class="stat"><div class="meta">累計ユーザー</div><div class="n">${fmt(S("total"))}</div></div>
       </div>
