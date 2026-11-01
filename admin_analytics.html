@@ -87,6 +87,7 @@
   </header>
   <div class="wrap">
     <div id="app_users"></div>
+    <div id="app_versions" aria-live="polite"></div>
     <div id="store"></div>
     <div id="retention"></div>
     <div class="sec-title" style="margin-top:22px">🌐 サイト（japan-map.app）のアクセス</div>
@@ -171,8 +172,58 @@ async function load(){
       '<div class="sec-title" style="margin-top:22px">🏬 ストアのインストール</div>'
       + '<div class="card muted">読み込み失敗: ' + esc(err && err.message ? err.message : err) + '</div>';
   });
-  await Promise.all([a, b, c, e]);
+  const v = loadVersions(days).then(ok => { if (!ok) failed = true; });
+  await Promise.all([a, b, c, e, v]);
   if (!failed) setMsg("");   // 失敗メッセージ(api()が入れた詳細)を消さない
+}
+
+// バージョン別UUは独立して取得。期間変更時に古い応答を表示しない。
+let versionRequest = 0;
+async function loadVersions(days){
+  const request = ++versionRequest;
+  const el = document.getElementById("app_versions");
+  el.innerHTML = '<div class="card muted">バージョン別UUを読み込み中…</div>';
+  try {
+    const data = await api("app_versions", { days });
+    if (request === versionRequest) renderVersions(data);
+    return true;
+  } catch (error) {
+    if (request !== versionRequest) return true;
+    el.innerHTML = '<div class="sec-title">アプリのバージョン別UU</div>'
+      + '<div class="card muted">読み込み失敗: ' + esc(error.message || error) + '</div>';
+    return false;
+  }
+}
+function renderVersions(data){
+  const rows = data.rows || [];
+  const totals = [...(data.version_totals || [])].sort((a, b) => {
+    const unknown = value => !value || value === "unknown";
+    if (unknown(a.version) !== unknown(b.version)) return unknown(a.version) ? 1 : -1;
+    return String(b.version).localeCompare(String(a.version), "en", { numeric: true });
+  });
+  const platforms = ["ios", "android", "steam", "other"];
+  const body = totals.map(total => {
+    const cells = platforms.map(platform => {
+      const match = rows.find(row => row.version === total.version && row.platform === platform);
+      return '<td class="r">' + fmt(match ? match.uu : 0) + '</td>';
+    }).join("");
+    const label = !total.version || total.version === "unknown" ? "不明" : total.version;
+    return '<tr><td>' + esc(label) + '</td>' + cells + '<td class="r"><b>' + fmt(total.uu) + '</b></td></tr>';
+  }).join("");
+  const trackingDate = new Date(data.tracking_started_at);
+  const tracking = data.tracking_started_at && Number.isFinite(trackingDate.getTime())
+    ? new Date(trackingDate.getTime() + 9 * 3600000).toISOString().slice(0, 16).replace("T", " ") + " JST"
+    : "まだ記録がありません";
+  document.getElementById("app_versions").innerHTML = `
+    <div class="sec-title" style="margin-top:22px">アプリのバージョン別UU</div>
+    <div class="card">
+      <div class="meta">対象期間：${esc(data.since)} 〜 ${esc(data.through)}（JST・当日分は集計途中）</div>
+      <div class="stat" style="margin:10px 0"><div class="meta">期間内UU（全バージョンで重複除外）</div><div class="n">${fmt(data.total_uu)}</div></div>
+      ${totals.length ? `<div class="scroll"><table><thead><tr><th>バージョン</th><th class="r">iOS</th><th class="r">Android</th><th class="r">Steam</th><th class="r">その他</th><th class="r">UU</th></tr></thead><tbody>${body}</tbody></table></div>` : '<p class="muted">この期間にはまだ記録がありません。</p>'}
+      <div class="meta" style="margin-top:10px">サーバーへの通信でバージョンを確認できた利用者を、期間内で重複を除いて集計します。ストアのインストール数ではありません。<br>
+        同じ人が期間中に複数のバージョンを使った場合は、それぞれの行で数えます。各行の合計は期間内UUと一致しない場合があります。「不明」はバージョンを取得できなかった記録です。<br>
+        記録開始：${esc(tracking)}。記録開始前の過去の利用状況は復元できません。</div>
+    </div>`;
 }
 
 // ── ストアのインストール数 ──────────────────────────────────────────────
