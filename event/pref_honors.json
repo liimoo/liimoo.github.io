@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-11-02T05:24:24+00:00",
+  "records": [
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "28",
+      "name": "兵庫県",
+      "rank": 1
+    },
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "10",
+      "name": "群馬県",
+      "rank": 2
+    },
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "04",
+      "name": "宮城県",
+      "rank": 3
+    },
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "12",
+      "name": "千葉県",
+      "rank": 4
+    },
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "13",
+      "name": "東京都",
+      "rank": 5
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "12",
+      "name": "千葉県",
+      "rank": 1
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "01",
+      "name": "北海道",
+      "rank": 2
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "10",
+      "name": "群馬県",
+      "rank": 3
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "23",
+      "name": "愛知県",
+      "rank": 4
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "11",
+      "name": "埼玉県",
+      "rank": 5
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "11",
+      "name": "埼玉県",
+      "rank": 1
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "12",
+      "name": "千葉県",
+      "rank": 2
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "14",
+      "name": "神奈川県",
+      "rank": 3
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "07",
+      "name": "福島県",
+      "rank": 4
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "01",
+      "name": "北海道",
+      "rank": 5
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "23",
+      "name": "愛知県",
+      "rank": 1
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "11",
+      "name": "埼玉県",
+      "rank": 2
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "17",
+      "name": "石川県",
+      "rank": 3
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "27",
+      "name": "大阪府",
+      "rank": 4
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "12",
+      "name": "千葉県",
+      "rank": 5
+    }
+  ]
+}
