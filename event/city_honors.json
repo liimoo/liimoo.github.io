@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-11-02T07:52:29+00:00",
+  "records": [
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "04",
+      "pref_name": "宮城県",
+      "name": "東松島市",
+      "city_code": "04214",
+      "rank": 1
+    },
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "10",
+      "pref_name": "群馬県",
+      "name": "みどり市",
+      "city_code": "10212",
+      "rank": 2
+    },
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "28",
+      "pref_name": "兵庫県",
+      "name": "伊丹市",
+      "city_code": "28207",
+      "rank": 3
+    },
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "12",
+      "pref_name": "千葉県",
+      "name": "鎌ケ谷市",
+      "city_code": "12224",
+      "rank": 4
+    },
+    {
+      "season_id": 13,
+      "season_title": "第3回",
+      "ended_at": "2026-10-25T15:00:00+00:00",
+      "pref_code": "13",
+      "pref_name": "東京都",
+      "name": "世田谷区",
+      "city_code": "13112",
+      "rank": 5
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "12",
+      "pref_name": "千葉県",
+      "name": "鎌ケ谷市",
+      "city_code": "12224",
+      "rank": 1
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "01",
+      "pref_name": "北海道",
+      "name": "札幌市",
+      "city_code": "01100",
+      "rank": 2
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "04",
+      "pref_name": "宮城県",
+      "name": "仙台市",
+      "city_code": "04100",
+      "rank": 3
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "11",
+      "pref_name": "埼玉県",
+      "name": "越谷市",
+      "city_code": "11222",
+      "rank": 4
+    },
+    {
+      "season_id": 12,
+      "season_title": "第2回",
+      "ended_at": "2026-09-25T15:00:00+00:00",
+      "pref_code": "22",
+      "pref_name": "静岡県",
+      "name": "浜松市",
+      "city_code": "22130",
+      "rank": 5
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "11",
+      "pref_name": "埼玉県",
+      "name": "越谷市",
+      "city_code": "11222",
+      "rank": 1
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "11",
+      "pref_name": "埼玉県",
+      "name": "草加市",
+      "city_code": "11221",
+      "rank": 2
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "14",
+      "pref_name": "神奈川県",
+      "name": "平塚市",
+      "city_code": "14203",
+      "rank": 3
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "12",
+      "pref_name": "千葉県",
+      "name": "浦安市",
+      "city_code": "12227",
+      "rank": 4
+    },
+    {
+      "season_id": 5,
+      "season_title": "第1回",
+      "ended_at": "2026-08-31T15:00:00+00:00",
+      "pref_code": "01",
+      "pref_name": "北海道",
+      "name": "札幌市",
+      "city_code": "01100",
+      "rank": 5
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "23",
+      "pref_name": "愛知県",
+      "name": "名古屋市",
+      "city_code": "23100",
+      "rank": 1
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "17",
+      "pref_name": "石川県",
+      "name": "穴水町",
+      "city_code": "17461",
+      "rank": 2
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "11",
+      "pref_name": "埼玉県",
+      "name": "草加市",
+      "city_code": "11221",
+      "rank": 3
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "12",
+      "pref_name": "千葉県",
+      "name": "佐倉市",
+      "city_code": "12212",
+      "rank": 4
+    },
+    {
+      "season_id": 4,
+      "season_title": "ベータテスト（おためし）",
+      "ended_at": "2026-08-07T15:00:00+00:00",
+      "pref_code": "27",
+      "pref_name": "大阪府",
+      "name": "藤井寺市",
+      "city_code": "27226",
+      "rank": 5
+    }
+  ]
+}
