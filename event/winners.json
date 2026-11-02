@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-02T01:58:08+00:00",
+  "updated_at": "2026-11-02T06:05:23+00:00",
   "seasons": [
     {
       "id": 13,
@@ -102,7 +102,71 @@
           "code": "04214",
           "pref_code": "04",
           "name": "東松島市",
-          "guide": null
+          "guide": {
+            "key": "higashimatsushima",
+            "name": "東松島市",
+            "pref": "宮城県",
+            "pref_code": "04",
+            "lead": "奥松島の島々と、ブルーインパルスの空が広がるまち。海の景色と縄文の暮らし、震災からの歩みをたどれます。",
+            "hook": "島々を見晴らす海辺のまちは、ブルーインパルスの本拠地です。",
+            "history": "宮戸島の里浜貝塚には、海の恵みを受けて暮らした縄文人の足跡が残ります。出土した土器や漁の道具、魚や動物の骨から、当時の暮らしを知ることができます。2005年4月1日、矢本町と鳴瀬町が合併して東松島市が誕生しました。2011年の東日本大震災では大きな被害を受け、旧野蒜駅舎は震災復興伝承館として記憶と教訓を伝えています。奥松島の海と、松島基地を本拠地とするブルーインパルスの空。自然と人の営みを身近に感じられるまちです。",
+            "spots": [
+              {
+                "name": "大高森",
+                "reading": "おおたかもり",
+                "desc": "宮戸島にある標高105.8メートルの山。山頂から松島湾を見渡す眺めは、松島四大観の「壮観」と呼ばれます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/8/80/Mt._Ootakamori_01.jpg",
+                  "author": "neuropower",
+                  "license": "Public domain",
+                  "page": "https://commons.wikimedia.org/wiki/File:Mt._Ootakamori_01.jpg"
+                }
+              },
+              {
+                "name": "嵯峨渓",
+                "reading": "さがけい",
+                "desc": "宮戸島の東南に広がる海岸。波や風雨が削った崖と奇岩が連なり、穏やかな松島湾とは違う力強い景色を見せます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/3/37/%E5%B5%AF%E5%B3%A8%E6%B8%93Saga-kei_-_panoramio.jpg",
+                  "author": "Satoh Junpei",
+                  "license": "CC BY-SA 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:%E5%B5%AF%E5%B3%A8%E6%B8%93Saga-kei_-_panoramio.jpg"
+                }
+              },
+              {
+                "name": "奥松島縄文村歴史資料館",
+                "reading": "おくまつしまじょうもんむられきししりょうかん",
+                "desc": "里浜貝塚から見つかった土器や漁の道具などを展示。魚や動物の骨も手がかりに、海辺で暮らした縄文人の生活を学べます。",
+                "photo": null
+              },
+              {
+                "name": "東松島市震災復興伝承館",
+                "reading": "ひがしまつしまししんさいふっこうでんしょうかん",
+                "desc": "旧野蒜駅舎を活用した伝承施設。写真や映像で東日本大震災の記憶と教訓を伝え、防災について考えるきっかけになります。",
+                "photo": null
+              },
+              {
+                "name": "滝山公園",
+                "reading": "たきやまこうえん",
+                "desc": "市のほぼ中央にある桜の名所。春にはソメイヨシノや八重桜が彩りを添え、園内には遊具も整えられています。",
+                "photo": null
+              }
+            ],
+            "souvenirs": [
+              {
+                "name": "東松島の海苔",
+                "desc": "市内の浜で養殖される特産品。皇室への献上実績もある海苔は、海辺のまちらしいおみやげです。"
+              },
+              {
+                "name": "のりうどん",
+                "desc": "地元の海苔を生地に練り込んだ名物。うどんと一緒に、海苔の風味を楽しめます。"
+              },
+              {
+                "name": "かぐや姫",
+                "desc": "東松島市で栽培される特産米。海の幸だけでなく、まちの田園が育む味にも注目です。"
+              }
+            ]
+          }
         }
       ]
     },
@@ -206,7 +270,66 @@
           "code": "12224",
           "pref_code": "12",
           "name": "鎌ケ谷市",
-          "guide": null
+          "guide": {
+            "key": "kamagaya",
+            "name": "鎌ケ谷市",
+            "pref": "千葉県",
+            "pref_code": "12",
+            "lead": "梨の実る畑と、江戸時代の馬の牧場の跡が残るまち。小さな大仏さまに会い、公園の緑を歩くと、住宅街の中にも長い歴史が見えてきます。",
+            "hook": "大仏さまの高さは、なんと1.8メートル！",
+            "history": "江戸時代、この地域には幕府の馬を育てる中野牧がありました。馬を追い込んで捕らえる「捕込」や、牧を仕切る土手が今も残っています。1776年には、鎌ケ谷宿の商人が祖先の供養のために大仏を造りました。江戸時代の終わりには梨の栽培も始まり、歴史と果樹園が身近にあるまちへとつながっています。",
+            "spots": [
+              {
+                "name": "鎌ケ谷大仏",
+                "reading": "かまがやだいぶつ",
+                "desc": "1776年に造られた、高さ1.8メートルの釈迦如来の像。鎌ケ谷宿の商人が祖先を供養するために建てました。大仏という名前から想像するよりも小さな姿に、親しみを感じられます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Kamagaya-daibutsu.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+                  "author": "Mayuno",
+                  "license": "CC BY-SA 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:Kamagaya-daibutsu.jpg"
+                }
+              },
+              {
+                "name": "貝柄山公園",
+                "reading": "かいがらやまこうえん",
+                "desc": "水鳥の泳ぐ池を囲む、緑豊かな公園。池のまわりを歩きながら、春の桜など季節ごとに変わる景色を楽しめます。まち歩きの途中に、ほっとひと休みしたくなる場所です。",
+                "photo": null
+              },
+              {
+                "name": "鎌ケ谷市制記念公園",
+                "reading": "かまがやしせいきねんこうえん",
+                "desc": "蒸気機関車と飛行機の展示が目を引く公園です。遊具や桜の木があり、管理事務所の展望台からは近くを走る鉄道の車両も見られます。乗り物と緑を一緒に楽しめます。",
+                "photo": null
+              },
+              {
+                "name": "下総小金中野牧跡（捕込）",
+                "reading": "しもうさこがねなかのまきあと とっこめ",
+                "desc": "江戸幕府の馬を育てた中野牧の史跡。捕込は、放し飼いの馬を追い込み、捕らえて選び分けた場所です。残る土手から、かつて馬が暮らしていた風景を想像できます。",
+                "photo": null
+              },
+              {
+                "name": "鎌ケ谷市郷土資料館",
+                "reading": "かまがやしきょうどしりょうかん",
+                "desc": "鎌ケ谷の歴史や民俗、自然を伝える資料館です。地域の資料を集めて保存し、展示を通して紹介しています。公園や史跡を歩く前後に訪れると、まちの見え方が少し変わりそうです。",
+                "photo": null
+              }
+            ],
+            "souvenirs": [
+              {
+                "name": "鎌ケ谷の梨",
+                "desc": "江戸時代末期から栽培されてきた特産品。幸水や豊水、あきづきなど、品種による味わいの違いも楽しみです。収穫の季節には市内の直売所をのぞいてみましょう。"
+              },
+              {
+                "name": "梨のサイダー",
+                "desc": "鎌ケ谷産の梨を使った、ご当地の炭酸飲料。果汁入りのさわやかな一杯で、特産の梨をいつもと違う形で楽しめます。"
+              },
+              {
+                "name": "貝がら山",
+                "desc": "きんかんや栗を使った、地元の和菓子。甘さを控えめに仕上げた味わいが特徴で、公園と同じ響きの名前も旅の思い出になりそうです。"
+              }
+            ]
+          }
         }
       ]
     },
@@ -305,7 +428,82 @@
           "code": "11222",
           "pref_code": "11",
           "name": "越谷市",
-          "guide": null
+          "guide": {
+            "key": "koshigaya",
+            "name": "越谷市",
+            "pref": "埼玉県",
+            "pref_code": "11",
+            "lead": "宿場町の面影と、広々とした水辺が出会うまち。日本庭園や古社を歩き、伝統のだるまや手焼きせんべいにも出会えます。",
+            "hook": "江戸から日光へ向かう旅人が休んだ、3番目の宿場町です。",
+            "history": "江戸時代、越谷は日光街道で江戸から数えて3番目の宿場「越ヶ谷宿」としてにぎわいました。徳川家康も鷹狩りに訪れ、当地の御殿に泊まったと伝わります。旧街道沿いには今も蔵や古民家が残り、旅人を迎えたまちの面影をたどれます。だるまやひな人形、手焼きせんべい、桐箱づくりも受け継がれてきました。一方、レイクタウンには大相模調節池を囲む水辺の風景が広がり、歴史ある街並みとは違う表情を見せてくれます。",
+            "spots": [
+              {
+                "name": "久伊豆神社（越ヶ谷）",
+                "reading": "ひさいずじんじゃ こしがや",
+                "desc": "古くから地域の信仰を集める神社。境内には県の天然記念物に指定された藤があり、春には花が参拝者を迎えます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Koshigaya_Hisaizu_Shrine_Honden_1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+                  "author": "京浜にけ",
+                  "license": "CC BY-SA 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:Koshigaya_Hisaizu_Shrine_Honden_1.JPG"
+                }
+              },
+              {
+                "name": "花田苑",
+                "reading": "はなたえん",
+                "desc": "池のまわりを歩いて楽しむ日本庭園。木橋や茶室、築山が配され、歩くたびに違う景色に出会えます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/0/07/%E8%B6%8A%E8%B0%B7_%E8%8A%B1%E7%94%B0%E8%8B%91_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+                  "author": "Gentle_Heart",
+                  "license": "CC BY 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:%E8%B6%8A%E8%B0%B7_%E8%8A%B1%E7%94%B0%E8%8B%91_-_panoramio.jpg"
+                }
+              },
+              {
+                "name": "キャンベルタウン野鳥の森",
+                "reading": "きゃんべるたうんやちょうのもり",
+                "desc": "オーストラリアの姉妹都市との交流から生まれた施設。野鳥やエミュー、ワラビーを通して、遠い国の自然に親しめます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/5/5a/%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%99%E3%83%AB%E3%82%BF%E3%82%A6%E3%83%B3%E9%87%8E%E9%B3%A5%E3%81%AE%E6%A3%AE_-_panoramio_-_Gentle_Heart.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+                  "author": "Gentle_Heart",
+                  "license": "CC BY 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%99%E3%83%AB%E3%82%BF%E3%82%A6%E3%83%B3%E9%87%8E%E9%B3%A5%E3%81%AE%E6%A3%AE_-_panoramio_-_Gentle_Heart.jpg"
+                }
+              },
+              {
+                "name": "旧日光街道 越ヶ谷宿",
+                "reading": "きゅうにっこうかいどう こしがやしゅく",
+                "desc": "江戸時代に旅人が行き交った宿場町。旧街道沿いに残る蔵や古民家を眺めながら、かつてのにぎわいを想像できます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/1/15/%E6%97%A7%E6%97%A5%E5%85%89%E8%A1%97%E9%81%93%E8%B6%8A%E3%83%B6%E8%B0%B7%E5%AE%BF%E3%83%BB%E5%86%8D%E7%94%9F%E5%8F%A4%E6%B0%91%E5%AE%B6%E3%80%8C%E3%81%AF%E3%81%8B%E3%82%8A%E5%B1%8B%E3%80%8D.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+                  "author": "Souka Kinmei",
+                  "license": "CC BY 4.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:%E6%97%A7%E6%97%A5%E5%85%89%E8%A1%97%E9%81%93%E8%B6%8A%E3%83%B6%E8%B0%B7%E5%AE%BF%E3%83%BB%E5%86%8D%E7%94%9F%E5%8F%A4%E6%B0%91%E5%AE%B6%E3%80%8C%E3%81%AF%E3%81%8B%E3%82%8A%E5%B1%8B%E3%80%8D.jpg"
+                }
+              },
+              {
+                "name": "大相模調節池",
+                "reading": "おおさがみちょうせつち",
+                "desc": "レイクタウンに広がる水辺。洪水を調節する役目を持ちながら、ふだんは散歩や水上の活動を楽しむ憩いの場です。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Koshigaya_LakeTown_Pond_1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+                  "author": "あばさー",
+                  "license": "Public domain",
+                  "page": "https://commons.wikimedia.org/wiki/File:Koshigaya_LakeTown_Pond_1.JPG"
+                }
+              }
+            ],
+            "souvenirs": [
+              {
+                "name": "越谷だるま",
+                "desc": "色白で鼻が高く、やさしい顔立ちが特徴の張子だるま。願いを込めて飾る、まちの伝統工芸品です。"
+              },
+              {
+                "name": "越谷手焼きせんべい",
+                "desc": "米の風味としょうゆの香ばしさが楽しめる名物。天日干しや手焼きの技を受け継ぎ、お店ごとの味があります。"
+              }
+            ]
+          }
         }
       ]
     },

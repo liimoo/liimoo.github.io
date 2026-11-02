@@ -1,0 +1,96 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) — GA4(アクセス解析) ＋ Google広告 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DP16PC4C8J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18330119849');
+  gtag('config', 'G-DP16PC4C8J');
+
+  // ストアへ出ていくクリックを数える。
+  // ⚠ これが無いと「LP → ストア」の歩留まりが一切分からない。着地ページごとの
+  //   良し悪しを比べられず、SNSの誘導先を勘で決めることになる（実際そうなっていた）。
+  // ⚠ GA4 の拡張計測(outbound click)任せにしない。イベント名が page ごとに
+  //   混ざって比較しづらいので、store_click として明示的に送る。
+  // ⚠ キャプチャ段階(true)で拾う。途中で伝播を止める実装があっても取りこぼさない。
+  // ⚠ 同じタブで遷移するが、gtag は sendBeacon で送るので離脱しても届く。
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(!t || !t.closest) return;
+    var a = t.closest('a[href]');
+    if(!a) return;
+    var h = a.hostname || '';
+    var s = h.indexOf('apps.apple.com') >= 0 ? 'ios'
+          : h.indexOf('play.google.com') >= 0 ? 'android'
+          : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
+    if(!s) return;
+    var promo = a.closest('[data-promo-placement]');
+    var placement = promo ? promo.getAttribute('data-promo-placement') : 'page';
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname, placement: placement }); }catch(err){}
+  }, true);
+</script>
+<link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
+<title>越谷市の観光ガイド｜歴史・観光スポット・お土産｜日本地図 都市パズル</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="description" content="越谷市（埼玉県）の観光ガイド。久伊豆神社（越ヶ谷）・花田苑・キャンベルタウン野鳥の森などの見どころ、街の歴史、おすすめのお土産を写真つきで紹介します。旅行の下調べや自由研究にどうぞ。">
+<link rel="canonical" href="https://japan-map.app/guide/koshigaya/">
+<meta property="og:title" content="越谷市の観光ガイド｜歴史・観光スポット・お土産｜日本地図 都市パズル"><meta property="og:description" content="越谷市（埼玉県）の観光ガイド。久伊豆神社（越ヶ谷）・花田苑・キャンベルタウン野鳥の森などの見どころ、街の歴史、おすすめのお土産を写真つきで紹介します。旅行の下調べや自由研究にどうぞ。">
+<meta property="og:type" content="article"><meta property="og:url" content="https://japan-map.app/guide/koshigaya/">
+<meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<style>
+:root{color-scheme:light dark;--ink:#0f1b33;--sub:#4a5878;--page:#f4f8ff;--line:#dbe4f2;
+  --blue:#2e78d2;--blue-deep:#0a3a86;--card:#fff;--accent:#ff8a3d;--gold:#e0a400;}
+@media(prefers-color-scheme:dark){:root{--ink:#eaf1ff;--sub:#a9b8d6;--page:#0b1428;--line:#22304e;--card:#131f38;}}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  background:var(--page);color:var(--ink);line-height:1.9;-webkit-text-size-adjust:100%}
+a{color:var(--blue)}img{max-width:100%}
+.top{background:linear-gradient(160deg,var(--blue),var(--blue-deep));padding:14px 18px}
+.top a{color:#fff;text-decoration:none;font-weight:800}
+.wrap{max-width:820px;margin:0 auto;padding:20px 18px 44px}
+.crumb{font-size:.85em;color:var(--sub);margin:6px 0 10px}.crumb a{color:var(--sub)}
+h1{font-size:1.6em;margin:.2em 0 .3em;line-height:1.35}
+h2{font-size:1.22em;margin:1.7em 0 .5em;border-left:5px solid var(--blue);padding-left:.5em}
+h3{font-size:1.05em;margin:.2em 0 .3em}
+.lead{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:.4em 0 0}
+.hist{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.spot{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:14px 0}
+.spot img{width:100%;height:auto;display:block;aspect-ratio:16/9;object-fit:cover;background:rgba(46,120,210,.08)}
+.spot .body{padding:13px 16px}
+.rd{color:var(--sub);font-size:.82em;margin-left:.5em;font-weight:400}
+.credit{font-size:.72em;color:var(--sub);padding:6px 16px 0}
+.credit a{color:var(--sub)}
+.sv{list-style:none;padding:0;margin:.4em 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.sv li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.95em}
+.sv b{display:block;color:var(--blue)}
+.playbtns{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0 4px}
+.pbtn{display:inline-block;background:linear-gradient(160deg,var(--accent),var(--gold));color:#231400;
+  font-weight:800;text-decoration:none;border-radius:999px;padding:11px 18px;font-size:.95em;
+  box-shadow:0 4px 12px rgba(224,164,0,.28)}
+.note{color:var(--sub);font-size:.86em;margin:.6em 0}
+.idxgrid{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.idxgrid a{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:12px;color:var(--ink)}
+.idxgrid small{color:var(--sub)}
+.nb{display:none}@media(max-width:560px){.nb{display:inline}}
+footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
+</style><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://japan-map.app/"},{"@type":"ListItem","position":2,"name":"観光ガイド","item":"https://japan-map.app/guide/"},{"@type":"ListItem","position":3,"name":"越谷市","item":"https://japan-map.app/guide/koshigaya/"}]}</script>
+</head><body>
+<div class="top"><a href="/">🗾 日本地図 都市パズル</a>　<span style="opacity:.9;font-size:.86em">｜ <a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></span></div>
+<div class="wrap"><nav class="crumb"><a href="/">ホーム</a> › <a href="/guide/">観光ガイド</a> › <a href="/guide/pref/saitama/">埼玉県</a> › 越谷市</nav><h1>越谷市の観光ガイド</h1><div class="lead">宿場町の面影と、広々とした水辺が出会うまち。日本庭園や古社を歩き、伝統のだるまや手焼きせんべいにも出会えます。</div><h2>越谷市の歴史</h2><div class="hist">江戸時代、越谷は日光街道で江戸から数えて3番目の宿場「越ヶ谷宿」としてにぎわいました。徳川家康も鷹狩りに訪れ、当地の御殿に泊まったと伝わります。旧街道沿いには今も蔵や古民家が残り、旅人を迎えたまちの面影をたどれます。だるまやひな人形、手焼きせんべい、桐箱づくりも受け継がれてきました。一方、レイクタウンには大相模調節池を囲む水辺の風景が広がり、歴史ある街並みとは違う表情を見せてくれます。</div><h2>おすすめの観光スポット</h2><div class="spot"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Koshigaya_Hisaizu_Shrine_Honden_1.JPG?utm_source=commons.wikimedia.org&amp;utm_campaign=imageinfo&amp;utm_content=original" alt="久伊豆神社（越ヶ谷）の写真" loading="lazy"><div class="body"><h3>久伊豆神社（越ヶ谷）<span class="rd">ひさいずじんじゃ こしがや</span></h3><p>古くから地域の信仰を集める神社。境内には県の天然記念物に指定された藤があり、春には花が参拝者を迎えます。</p></div><div class="credit">📷 京浜にけ／CC BY-SA 3.0（<a href="https://commons.wikimedia.org/wiki/File:Koshigaya_Hisaizu_Shrine_Honden_1.JPG" target="_blank" rel="noopener nofollow">Wikimedia Commons</a>）</div></div><div class="spot"><img src="https://upload.wikimedia.org/wikipedia/commons/0/07/%E8%B6%8A%E8%B0%B7_%E8%8A%B1%E7%94%B0%E8%8B%91_-_panoramio.jpg?utm_source=commons.wikimedia.org&amp;utm_campaign=imageinfo&amp;utm_content=original" alt="花田苑の写真" loading="lazy"><div class="body"><h3>花田苑<span class="rd">はなたえん</span></h3><p>池のまわりを歩いて楽しむ日本庭園。木橋や茶室、築山が配され、歩くたびに違う景色に出会えます。</p></div><div class="credit">📷 Gentle_Heart／CC BY 3.0（<a href="https://commons.wikimedia.org/wiki/File:%E8%B6%8A%E8%B0%B7_%E8%8A%B1%E7%94%B0%E8%8B%91_-_panoramio.jpg" target="_blank" rel="noopener nofollow">Wikimedia Commons</a>）</div></div><div class="spot"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5a/%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%99%E3%83%AB%E3%82%BF%E3%82%A6%E3%83%B3%E9%87%8E%E9%B3%A5%E3%81%AE%E6%A3%AE_-_panoramio_-_Gentle_Heart.jpg?utm_source=commons.wikimedia.org&amp;utm_campaign=imageinfo&amp;utm_content=original" alt="キャンベルタウン野鳥の森の写真" loading="lazy"><div class="body"><h3>キャンベルタウン野鳥の森<span class="rd">きゃんべるたうんやちょうのもり</span></h3><p>オーストラリアの姉妹都市との交流から生まれた施設。野鳥やエミュー、ワラビーを通して、遠い国の自然に親しめます。</p></div><div class="credit">📷 Gentle_Heart／CC BY 3.0（<a href="https://commons.wikimedia.org/wiki/File:%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%99%E3%83%AB%E3%82%BF%E3%82%A6%E3%83%B3%E9%87%8E%E9%B3%A5%E3%81%AE%E6%A3%AE_-_panoramio_-_Gentle_Heart.jpg" target="_blank" rel="noopener nofollow">Wikimedia Commons</a>）</div></div><div class="spot"><img src="https://upload.wikimedia.org/wikipedia/commons/1/15/%E6%97%A7%E6%97%A5%E5%85%89%E8%A1%97%E9%81%93%E8%B6%8A%E3%83%B6%E8%B0%B7%E5%AE%BF%E3%83%BB%E5%86%8D%E7%94%9F%E5%8F%A4%E6%B0%91%E5%AE%B6%E3%80%8C%E3%81%AF%E3%81%8B%E3%82%8A%E5%B1%8B%E3%80%8D.jpg?utm_source=commons.wikimedia.org&amp;utm_campaign=imageinfo&amp;utm_content=original" alt="旧日光街道 越ヶ谷宿の写真" loading="lazy"><div class="body"><h3>旧日光街道 越ヶ谷宿<span class="rd">きゅうにっこうかいどう こしがやしゅく</span></h3><p>江戸時代に旅人が行き交った宿場町。旧街道沿いに残る蔵や古民家を眺めながら、かつてのにぎわいを想像できます。</p></div><div class="credit">📷 Souka Kinmei／CC BY 4.0（<a href="https://commons.wikimedia.org/wiki/File:%E6%97%A7%E6%97%A5%E5%85%89%E8%A1%97%E9%81%93%E8%B6%8A%E3%83%B6%E8%B0%B7%E5%AE%BF%E3%83%BB%E5%86%8D%E7%94%9F%E5%8F%A4%E6%B0%91%E5%AE%B6%E3%80%8C%E3%81%AF%E3%81%8B%E3%82%8A%E5%B1%8B%E3%80%8D.jpg" target="_blank" rel="noopener nofollow">Wikimedia Commons</a>）</div></div><div class="spot"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Koshigaya_LakeTown_Pond_1.JPG?utm_source=commons.wikimedia.org&amp;utm_campaign=imageinfo&amp;utm_content=original" alt="大相模調節池の写真" loading="lazy"><div class="body"><h3>大相模調節池<span class="rd">おおさがみちょうせつち</span></h3><p>レイクタウンに広がる水辺。洪水を調節する役目を持ちながら、ふだんは散歩や水上の活動を楽しむ憩いの場です。</p></div><div class="credit">📷 あばさー／Public domain（<a href="https://commons.wikimedia.org/wiki/File:Koshigaya_LakeTown_Pond_1.JPG" target="_blank" rel="noopener nofollow">Wikimedia Commons</a>）</div></div><h2>越谷市のお土産</h2><ul class="sv"><li><b>越谷だるま</b>色白で鼻が高く、やさしい顔立ちが特徴の張子だるま。願いを込めて飾る、まちの伝統工芸品です。</li><li><b>越谷手焼きせんべい</b>米の風味としょうゆの香ばしさが楽しめる名物。天日干しや手焼きの技を受け継ぎ、お店ごとの味があります。</li></ul><h2>越谷市を地図でおぼえる</h2><p>『日本地図 都市パズル』では、埼玉県の市区町村や町名をパズルで遊びながらおぼえられます。ブラウザ版はインストール不要です。</p><div class="playbtns"><a class="pbtn" href="/play/pref-saitama/">🧩 埼玉県の市区町村パズルで遊ぶ</a><a class="pbtn" href="/play/japan/">🧩 全国47都道府県のパズルで遊ぶ</a></div><p class="note">くわしい市区町村の一覧は <a href="/pref/saitama.html">埼玉県のページ</a>をご覧ください。</p><h2>ほかの街の観光ガイド</h2><ul class="idxgrid"><li><a href="/guide/saitama/">さいたま市</a></li><li><a href="/guide/toyama/">富山市</a></li><li><a href="/guide/kanazawa/">金沢市</a></li><li><a href="/guide/fukui/">福井市</a></li><li><a href="/guide/kofu/">甲府市</a></li><li><a href="/guide/nagano/">長野市</a></li><li><a href="/guide/gifu/">岐阜市</a></li><li><a href="/guide/hamamatsu/">浜松市</a></li></ul><aside class="jm-app-promo" data-promo-placement="guide_city" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">越谷市の位置を、遊んで覚えよう</p><p class="jm-app-promo-description">旅で気になった街を、アプリの地図パズルでも楽しめます。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside></div><footer>© 日本地図 都市パズル ／ <a href="/">トップへ</a>・<a href="/guide/">観光ガイド一覧</a>・<a href="/pref/">都道府県一覧</a><br><span style="font-size:.9em">写真は Wikimedia Commons より（各写真に作者・ライセンスを表示）</span></footer></body></html>

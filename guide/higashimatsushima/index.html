@@ -1,0 +1,96 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) — GA4(アクセス解析) ＋ Google広告 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DP16PC4C8J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18330119849');
+  gtag('config', 'G-DP16PC4C8J');
+
+  // ストアへ出ていくクリックを数える。
+  // ⚠ これが無いと「LP → ストア」の歩留まりが一切分からない。着地ページごとの
+  //   良し悪しを比べられず、SNSの誘導先を勘で決めることになる（実際そうなっていた）。
+  // ⚠ GA4 の拡張計測(outbound click)任せにしない。イベント名が page ごとに
+  //   混ざって比較しづらいので、store_click として明示的に送る。
+  // ⚠ キャプチャ段階(true)で拾う。途中で伝播を止める実装があっても取りこぼさない。
+  // ⚠ 同じタブで遷移するが、gtag は sendBeacon で送るので離脱しても届く。
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(!t || !t.closest) return;
+    var a = t.closest('a[href]');
+    if(!a) return;
+    var h = a.hostname || '';
+    var s = h.indexOf('apps.apple.com') >= 0 ? 'ios'
+          : h.indexOf('play.google.com') >= 0 ? 'android'
+          : h.indexOf('store.steampowered.com') >= 0 ? 'steam' : '';
+    if(!s) return;
+    var promo = a.closest('[data-promo-placement]');
+    var placement = promo ? promo.getAttribute('data-promo-placement') : 'page';
+    try{ gtag('event', 'store_click', { store: s, page_path: location.pathname, placement: placement }); }catch(err){}
+  }, true);
+</script>
+<link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
+<title>東松島市の観光ガイド｜歴史・観光スポット・お土産｜日本地図 都市パズル</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="description" content="東松島市（宮城県）の観光ガイド。大高森・嵯峨渓・奥松島縄文村歴史資料館などの見どころ、街の歴史、おすすめのお土産を写真つきで紹介します。旅行の下調べや自由研究にどうぞ。">
+<link rel="canonical" href="https://japan-map.app/guide/higashimatsushima/">
+<meta property="og:title" content="東松島市の観光ガイド｜歴史・観光スポット・お土産｜日本地図 都市パズル"><meta property="og:description" content="東松島市（宮城県）の観光ガイド。大高森・嵯峨渓・奥松島縄文村歴史資料館などの見どころ、街の歴史、おすすめのお土産を写真つきで紹介します。旅行の下調べや自由研究にどうぞ。">
+<meta property="og:type" content="article"><meta property="og:url" content="https://japan-map.app/guide/higashimatsushima/">
+<meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<style>
+:root{color-scheme:light dark;--ink:#0f1b33;--sub:#4a5878;--page:#f4f8ff;--line:#dbe4f2;
+  --blue:#2e78d2;--blue-deep:#0a3a86;--card:#fff;--accent:#ff8a3d;--gold:#e0a400;}
+@media(prefers-color-scheme:dark){:root{--ink:#eaf1ff;--sub:#a9b8d6;--page:#0b1428;--line:#22304e;--card:#131f38;}}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  background:var(--page);color:var(--ink);line-height:1.9;-webkit-text-size-adjust:100%}
+a{color:var(--blue)}img{max-width:100%}
+.top{background:linear-gradient(160deg,var(--blue),var(--blue-deep));padding:14px 18px}
+.top a{color:#fff;text-decoration:none;font-weight:800}
+.wrap{max-width:820px;margin:0 auto;padding:20px 18px 44px}
+.crumb{font-size:.85em;color:var(--sub);margin:6px 0 10px}.crumb a{color:var(--sub)}
+h1{font-size:1.6em;margin:.2em 0 .3em;line-height:1.35}
+h2{font-size:1.22em;margin:1.7em 0 .5em;border-left:5px solid var(--blue);padding-left:.5em}
+h3{font-size:1.05em;margin:.2em 0 .3em}
+.lead{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:.4em 0 0}
+.hist{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.spot{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:14px 0}
+.spot img{width:100%;height:auto;display:block;aspect-ratio:16/9;object-fit:cover;background:rgba(46,120,210,.08)}
+.spot .body{padding:13px 16px}
+.rd{color:var(--sub);font-size:.82em;margin-left:.5em;font-weight:400}
+.credit{font-size:.72em;color:var(--sub);padding:6px 16px 0}
+.credit a{color:var(--sub)}
+.sv{list-style:none;padding:0;margin:.4em 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.sv li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.95em}
+.sv b{display:block;color:var(--blue)}
+.playbtns{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0 4px}
+.pbtn{display:inline-block;background:linear-gradient(160deg,var(--accent),var(--gold));color:#231400;
+  font-weight:800;text-decoration:none;border-radius:999px;padding:11px 18px;font-size:.95em;
+  box-shadow:0 4px 12px rgba(224,164,0,.28)}
+.note{color:var(--sub);font-size:.86em;margin:.6em 0}
+.idxgrid{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.idxgrid a{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:12px;color:var(--ink)}
+.idxgrid small{color:var(--sub)}
+.nb{display:none}@media(max-width:560px){.nb{display:inline}}
+footer{text-align:center;color:var(--sub);font-size:.85em;padding:24px}
+</style><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://japan-map.app/"},{"@type":"ListItem","position":2,"name":"観光ガイド","item":"https://japan-map.app/guide/"},{"@type":"ListItem","position":3,"name":"東松島市","item":"https://japan-map.app/guide/higashimatsushima/"}]}</script>
+</head><body>
+<div class="top"><a href="/">🗾 日本地図 都市パズル</a>　<span style="opacity:.9;font-size:.86em">｜ <a href="/play/">遊ぶ</a>・<a href="/event/">対抗戦</a>・<a href="/players/">ランキング</a>・<a href="/videos/">プレイ動画</a>・<a href="/news/">お知らせ</a><br class="nb"><a href="/pref/">都道府県</a>・<a href="/city/">主要都市</a>・<a href="/guide/">観光ガイド</a>・<a href="/ranking/">豆知識</a></span></div>
+<div class="wrap"><nav class="crumb"><a href="/">ホーム</a> › <a href="/guide/">観光ガイド</a> › <a href="/guide/pref/miyagi/">宮城県</a> › 東松島市</nav><h1>東松島市の観光ガイド</h1><div class="lead">奥松島の島々と、ブルーインパルスの空が広がるまち。海の景色と縄文の暮らし、震災からの歩みをたどれます。</div><h2>東松島市の歴史</h2><div class="hist">宮戸島の里浜貝塚には、海の恵みを受けて暮らした縄文人の足跡が残ります。出土した土器や漁の道具、魚や動物の骨から、当時の暮らしを知ることができます。2005年4月1日、矢本町と鳴瀬町が合併して東松島市が誕生しました。2011年の東日本大震災では大きな被害を受け、旧野蒜駅舎は震災復興伝承館として記憶と教訓を伝えています。奥松島の海と、松島基地を本拠地とするブルーインパルスの空。自然と人の営みを身近に感じられるまちです。</div><h2>おすすめの観光スポット</h2><div class="spot"><img src="https://upload.wikimedia.org/wikipedia/commons/8/80/Mt._Ootakamori_01.jpg" alt="大高森の写真" loading="lazy"><div class="body"><h3>大高森<span class="rd">おおたかもり</span></h3><p>宮戸島にある標高105.8メートルの山。山頂から松島湾を見渡す眺めは、松島四大観の「壮観」と呼ばれます。</p></div><div class="credit">📷 neuropower／Public domain（<a href="https://commons.wikimedia.org/wiki/File:Mt._Ootakamori_01.jpg" target="_blank" rel="noopener nofollow">Wikimedia Commons</a>）</div></div><div class="spot"><img src="https://upload.wikimedia.org/wikipedia/commons/3/37/%E5%B5%AF%E5%B3%A8%E6%B8%93Saga-kei_-_panoramio.jpg" alt="嵯峨渓の写真" loading="lazy"><div class="body"><h3>嵯峨渓<span class="rd">さがけい</span></h3><p>宮戸島の東南に広がる海岸。波や風雨が削った崖と奇岩が連なり、穏やかな松島湾とは違う力強い景色を見せます。</p></div><div class="credit">📷 Satoh Junpei／CC BY-SA 3.0（<a href="https://commons.wikimedia.org/wiki/File:%E5%B5%AF%E5%B3%A8%E6%B8%93Saga-kei_-_panoramio.jpg" target="_blank" rel="noopener nofollow">Wikimedia Commons</a>）</div></div><div class="spot"><div class="body"><h3>奥松島縄文村歴史資料館<span class="rd">おくまつしまじょうもんむられきししりょうかん</span></h3><p>里浜貝塚から見つかった土器や漁の道具などを展示。魚や動物の骨も手がかりに、海辺で暮らした縄文人の生活を学べます。</p></div></div><div class="spot"><div class="body"><h3>東松島市震災復興伝承館<span class="rd">ひがしまつしまししんさいふっこうでんしょうかん</span></h3><p>旧野蒜駅舎を活用した伝承施設。写真や映像で東日本大震災の記憶と教訓を伝え、防災について考えるきっかけになります。</p></div></div><div class="spot"><div class="body"><h3>滝山公園<span class="rd">たきやまこうえん</span></h3><p>市のほぼ中央にある桜の名所。春にはソメイヨシノや八重桜が彩りを添え、園内には遊具も整えられています。</p></div></div><h2>東松島市のお土産</h2><ul class="sv"><li><b>東松島の海苔</b>市内の浜で養殖される特産品。皇室への献上実績もある海苔は、海辺のまちらしいおみやげです。</li><li><b>のりうどん</b>地元の海苔を生地に練り込んだ名物。うどんと一緒に、海苔の風味を楽しめます。</li><li><b>かぐや姫</b>東松島市で栽培される特産米。海の幸だけでなく、まちの田園が育む味にも注目です。</li></ul><h2>東松島市を地図でおぼえる</h2><p>『日本地図 都市パズル』では、宮城県の市区町村や町名をパズルで遊びながらおぼえられます。ブラウザ版はインストール不要です。</p><div class="playbtns"><a class="pbtn" href="/play/pref-miyagi/">🧩 宮城県の市区町村パズルで遊ぶ</a><a class="pbtn" href="/play/japan/">🧩 全国47都道府県のパズルで遊ぶ</a></div><p class="note">くわしい市区町村の一覧は <a href="/pref/miyagi.html">宮城県のページ</a>をご覧ください。</p><h2>ほかの街の観光ガイド</h2><ul class="idxgrid"><li><a href="/guide/sendai/">仙台市</a></li><li><a href="/guide/maebashi/">前橋市</a></li><li><a href="/guide/saitama/">さいたま市</a></li><li><a href="/guide/koshigaya/">越谷市</a></li><li><a href="/guide/chiba/">千葉市</a></li><li><a href="/guide/kamagaya/">鎌ケ谷市</a></li><li><a href="/guide/shinjuku/">新宿区</a></li><li><a href="/guide/kawasaki/">川崎市</a></li></ul><aside class="jm-app-promo" data-promo-placement="guide_city" aria-label="日本地図 都市パズルのストア案内">
+<picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp">
+<img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy" decoding="async"></picture>
+<p class="jm-app-promo-title">東松島市の位置を、遊んで覚えよう</p><p class="jm-app-promo-description">旅で気になった街を、アプリの地図パズルでも楽しめます。</p>
+<div class="jm-app-promo-stores">
+<a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991" aria-label="App Storeで見る">
+<img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap" aria-label="Google Playで見る">
+<img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy" decoding="async"></a>
+<a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/" aria-label="Steamで見る（PC版）">
+<img src="/assets/japanmap/steam_logo.svg" alt="Steam" width="100" height="30" loading="lazy" decoding="async"></a>
+</div></aside></div><footer>© 日本地図 都市パズル ／ <a href="/">トップへ</a>・<a href="/guide/">観光ガイド一覧</a>・<a href="/pref/">都道府県一覧</a><br><span style="font-size:.9em">写真は Wikimedia Commons より（各写真に作者・ライセンスを表示）</span></footer></body></html>

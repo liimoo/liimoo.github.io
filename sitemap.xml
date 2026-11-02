@@ -3,7 +3,7 @@
   <url><loc>https://japan-map.app/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://japan-map.app/pref/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/city/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://japan-map.app/guide/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://japan-map.app/guide/</loc><lastmod>2026-11-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/play/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/press/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -216,7 +216,7 @@
   <url><loc>https://japan-map.app/guide/pref/aichi/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/akita/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/aomori/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://japan-map.app/guide/pref/chiba/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://japan-map.app/guide/pref/chiba/</loc><lastmod>2026-11-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/ehime/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/fukui/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/fukuoka/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -236,7 +236,7 @@
   <url><loc>https://japan-map.app/guide/pref/kumamoto/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/kyoto/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/mie/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://japan-map.app/guide/pref/miyagi/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://japan-map.app/guide/pref/miyagi/</loc><lastmod>2026-11-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/miyazaki/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/nagano/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/nagasaki/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -247,7 +247,7 @@
   <url><loc>https://japan-map.app/guide/pref/okinawa/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/osaka/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/saga/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://japan-map.app/guide/pref/saitama/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://japan-map.app/guide/pref/saitama/</loc><lastmod>2026-11-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/shiga/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/shimane/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/guide/pref/shizuoka/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -329,4 +329,7 @@
   <url><loc>https://japan-map.app/play/sendai/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/play/shizuoka/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://japan-map.app/play/yokohama/</loc><lastmod>2026-10-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://japan-map.app/guide/higashimatsushima/</loc><lastmod>2026-11-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://japan-map.app/guide/kamagaya/</loc><lastmod>2026-11-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://japan-map.app/guide/koshigaya/</loc><lastmod>2026-11-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
 </urlset>
