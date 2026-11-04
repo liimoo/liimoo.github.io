@@ -128,7 +128,7 @@ test('real-region sample supports short multi-contact matches',async()=>{
 });
 test('asymmetric angular contact causes individual stamina damage',()=>{
  let a=launch(createMatch(long,square),{x:0,y:-1},1);
- a={...a,bodies:a.bodies.map((b,i)=>({...b,x:i?15:-15,y:i?8:-8,vx:0,vy:i?-60:60,spin:i?-2:2,angle:i?.5:.2}))};
+ a={...a,bodies:a.bodies.map((b,i)=>({...b,x:i?15:-15,y:i?8:-8,vx:i?-40:40,vy:0,angle:i?0:.2}))};
  const b=step(a,1/120);
  assert.ok(b.impacts.length>0);
  assert.ok(Math.abs(b.bodies[0].energy-b.bodies[1].energy)>.001);
@@ -172,12 +172,32 @@ test('passive stamina reaching zero ends the match with an empty losing gauge',(
  assert.ok(b.bodies[1].energy>0);
 });
 
-test('rotation recovery is gradual and zero-speed centre remains finite',()=>{
+test('opposite and zero rotation recover in the launch direction without a stall',()=>{
  const a=launch(createMatch(square,long),{x:0,y:-1},.5);
- const b=step({...a,bodies:a.bodies.map((body,i)=>({...body,
-  x:i?120:0,y:0,vx:0,vy:0,spin:i?13:-13}))},1/120);
- assert.ok(b.bodies[0].spin>-13 && b.bodies[0].spin<-10);
- assert.ok(b.bodies[1].spin<13 && b.bodies[1].spin>10);
- assert.ok(b.bodies.every(body=>Number.isFinite(body.vx)&&Number.isFinite(body.vy)));
- assert.ok(Math.hypot(b.bodies[0].vx,b.bodies[0].vy)>0);
+ for(const initial of [0,-13]) {
+  const input={...a,bodies:a.bodies.map((body,i)=>({...body,
+   x:i?120:0,y:0,vx:0,vy:0,spin:i?-initial:initial}))};
+  const snapshot=structuredClone(input),b=step(input,1/120);
+  assert.deepEqual(input,snapshot);
+  assert.ok(b.bodies[0].spin>=8 && b.bodies[1].spin<=-8);
+  assert.ok(b.bodies.every(body=>Number.isFinite(body.vx)&&Number.isFinite(body.vy)));
+ }
+});
+test('every live top keeps rotating through contacts across all region pairs',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const regions=JSON.parse(await readFile(new URL('../regions.json',import.meta.url),'utf8'));
+ for(let p=0;p<regions.length;p++) for(let c=0;c<regions.length;c++)
+ for(const angle of [-.6,0,.6]) {
+  let a=launch(createMatch(regions[p],regions[c],p*31+c+1),
+   {x:Math.sin(angle),y:-Math.cos(angle)},.7);
+  for(let f=0;f<5500&&a.phase==='active';f++) {
+   a=step(a,1/120);
+   for(const b of a.bodies) {
+    if(b.energy<=0) assert.equal(b.spin,0);
+    else assert.ok(b.spin*Math.sign(b.cruiseSpin)>=8 && Math.abs(b.spin)<=24,
+     `${b.region.name} stalled against ${regions[c].name} at ${a.elapsed}s: ${b.spin}`);
+   }
+  }
+  assert.equal(a.phase,'finished');
+ }
 });

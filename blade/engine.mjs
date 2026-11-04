@@ -82,6 +82,14 @@ function collision(a,b) {
  return {normal,depth,point:{x:(pa.x+pb.x)/2,y:(pa.y+pb.y)/2}};
 }
 
+function sustainedSpin(body,spin,energy) {
+ // Preserve launch direction through repeated impacts while stamina remains.
+ // Collision torque still determines damage; the arcade floor prevents stalled shoving.
+ if(energy<=0) return 0;
+ const direction=Math.sign(body.cruiseSpin);
+ return direction*clamp(spin*direction,8,24);
+}
+
 function resolve(a,b,hit) {
  const {normal:n,depth,point:p}=hit;
  const ra=subtract(p,a),rb=subtract(p,b);
@@ -104,7 +112,7 @@ function resolve(a,b,hit) {
   const energy=Math.max(0,v.energy-drain);
   return {...v,x:v.x+sign*n.x*correction,y:v.y+sign*n.y*correction,
    vx:vx*scale,vy:vy*scale,
-   spin:energy>0?clamp(v.spin+angularChange,-24,24):0,energy};
+   spin:sustainedSpin(v,v.spin+angularChange,energy),energy};
  });
 }
 
@@ -112,7 +120,7 @@ function move(b,dt) {
  // Arcade bowl: stamina is endurance, not a multiplier on visible rotation.
  const energy=Math.max(0,b.energy-dt*.035);
  const recovery=1-Math.exp(-4*dt);
- const spin=energy>0?clamp(b.spin+(b.cruiseSpin-b.spin)*recovery,-24,24):0;
+ const spin=sustainedSpin(b,b.spin+(b.cruiseSpin-b.spin)*recovery,energy);
  const bowl=2.8,damping=Math.exp(-.13*dt);
  const vx=(b.vx-b.x*bowl*dt)*damping,vy=(b.vy-b.y*bowl*dt)*damping;
  const speed=Math.hypot(vx,vy);
