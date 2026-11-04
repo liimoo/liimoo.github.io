@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>都市ブレード〈試作版〉｜地図の形でコマバトル</title>
+<meta name="description" content="あなたの街が、コマになる。実際の地域の輪郭で戦う無料ブラウザゲーム「都市ブレード」の試作版。好きな地域を選んでCPUと対戦しよう。">
+<meta name="theme-color" content="#091525"><link rel="icon" href="/favicon.ico">
+<link rel="canonical" href="https://japan-map.app/blade/">
+<meta property="og:title" content="都市ブレード｜あなたの街が、コマになる。">
+<meta property="og:description" content="引いて、はなして、地図で勝負。無料のWeb試作版。">
+<meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
+<meta property="og:url" content="https://japan-map.app/blade/">
+<link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DP16PC4C8J"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());gtag('config','G-DP16PC4C8J');
+document.addEventListener('click',function(e){var a=e.target.closest('a[href]');if(!a)return;var store=a.hostname==='apps.apple.com'?'ios':a.hostname==='play.google.com'?'android':a.hostname==='store.steampowered.com'?'steam':'';if(store)gtag('event','store_click',{store:store,page_path:location.pathname,placement:'blade_footer'});});
+</script>
+</head>
+<body>
+<header class="site-head"><a href="/">日本地図 都市パズル <span>／ PLAY LAB</span></a><a href="/play/list/">地図パズルへ ↗</a></header>
+<main>
+<section class="intro"><div><p class="eyebrow"><span class="live-dot"></span> BROWSER EXPERIMENT / 01</p><h1>都市<span>ブレード</span><small>試作版</small></h1><p class="tagline">あなたの街が、コマになる。</p></div><p class="intro-note">地図を選ぶ。ねらう。ぶつかる。<br>形の違いを楽しむ、ちいさな地理バトル。</p></section>
+<div class="game-layout">
+<section class="arena-panel" aria-label="対戦エリア" id="battle">
+<a class="mobile-select" href="#choose-region">地域を選ぶ ↓</a>
+<div class="scoreboard"><div class="fighter player"><span>YOU</span><strong id="player-name">読み込み中</strong><div class="energy"><i id="player-energy"></i></div></div><div class="clock"><span id="time">45</span><small>SECONDS</small></div><div class="fighter cpu"><span>CPU</span><strong id="cpu-name">—</strong><div class="energy"><i id="cpu-energy"></i></div></div></div>
+<div class="arena-wrap"><canvas id="arena" width="600" height="600" aria-label="地図コマの対戦場。下の角度・強さと発射ボタンでも操作できます。"></canvas><div class="arena-caption" id="arena-caption">青い地図を手前に引いて、はなそう</div><div id="result" class="result" hidden><p id="result-kicker">BATTLE RESULT</p><h2 id="result-title"></h2><p id="result-detail"></p><button id="again" class="primary">もう一度、勝負する <span>↻</span></button><button id="share" class="text-button">結果を共有</button><span id="share-status" role="status"></span></div><div id="pause-cover" class="result" hidden><p>ひとやすみ</p><h2>一時停止中</h2><button id="resume" class="primary">対戦にもどる ▶</button></div></div>
+<div class="arena-toolbar"><p id="status" role="status" aria-live="polite">地図を読み込んでいます…</p><div><button id="pause" aria-label="一時停止" disabled>Ⅱ</button><button id="sound" aria-pressed="false">音 OFF</button></div></div>
+<div class="launch-controls"><label>ねらう角度 <output id="angle-value">0°</output><input id="angle" type="range" min="-65" max="65" value="0"></label><label>発射の強さ <output id="power-value">75%</output><input id="power" type="range" min="20" max="100" value="75"></label><button id="launch" class="primary" disabled>発射する <span>↗</span></button></div>
+<p class="control-note">引っ張る操作の代わりに、上の調整と発射ボタンでも遊べます。</p>
+</section>
+<aside class="setup-panel" id="choose-region"><div class="section-heading"><div><span class="step">01 / SELECT</span><h2>あなたの地域</h2></div><span class="chip">10地域</span></div><div id="regions" class="region-grid" aria-label="使う地域を選ぶ"></div><div class="selection-note"><span id="region-kind">地図のかたち</span><p id="region-hint">読み込み中…</p><a id="region-link" href="/play/list/">この地域のパズルも遊ぶ ↗</a></div><div class="opponent-row"><div><span class="step">02 / OPPONENT</span><p>相手は <strong id="opponent-name">—</strong></p></div><button id="shuffle" aria-label="CPUの地域を変更" disabled>↻ 変更</button></div><a class="mobile-select" href="#battle">対戦にもどる ↑</a><p class="prototype-note">Web限定の試作です。アプリの記録や対抗戦ポイントには反映されません。</p></aside>
+</div>
+<section class="howto"><div><span class="step">HOW TO PLAY</span><h2>地図の形が、勝負を変える。</h2></div><div class="rules"><article><b>01</b><h3>引いて、はなす</h3><p>青い地図を引っ張ると、反対方向へ発射。向きと強さを調整しよう。</p></article><article><b>02</b><h3>ぶつかって、はじく</h3><p>相手を場外へ出すか、先に回転を止めれば勝ち。45秒で未決着なら引き分け。</p></article><article><b>03</b><h3>ほかの街でもう一戦</h3><p>大きさと重さはそろえています。輪郭や発射の違いを試してみよう。</p></article></div><details><summary>試作版の地図とルールについて</summary><p>市区町村・都道府県の地図データをもとにしています。小さな島や飛び地を省き、主な陸地を簡略化しています。細いくぼみは衝突判定では外側の輪郭にまとめています。実際の面積・人口・地域の優劣を表すゲームではありません。発射後は自動で対戦が進みます。</p><p>地図出典：<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_1.html">国土交通省 国土数値情報（行政区域）</a>を加工（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a>）。</p><p>ページを離れると対戦は一時停止します。戦績のサーバー保存やオンライン対戦はありません。</p></details></section>
+<aside class="jm-app-promo" data-promo-placement="blade_footer" aria-label="日本地図都市パズルのストア案内"><picture class="jm-app-promo-brand"><source srcset="/assets/japanmap/logo.webp" type="image/webp"><img class="jm-app-promo-logo" src="/assets/japanmap/logo.png" alt="日本地図 都市パズル" width="1280" height="560" loading="lazy"></picture><p class="jm-app-promo-title">気になる街を、もっと知ろう。</p><p class="jm-app-promo-description">アプリでは市区町村パズルやご当地クイズも楽しめます。<br>都市ブレードは、このWebページ限定の試作です。</p><div class="jm-app-promo-stores"><a class="jm-app-promo-badge" href="https://apps.apple.com/jp/app/id6777826991"><img src="/assets/japanmap/appstore_badge.svg" alt="App Storeでダウンロード" width="131" height="48" loading="lazy"></a><a class="jm-app-promo-badge" href="https://play.google.com/store/apps/details?id=com.le_oram.japanmap"><img src="/assets/japanmap/googleplay_badge_hero.png" alt="Google Playで手に入れよう" width="162" height="48" loading="lazy"></a><a class="jm-app-promo-badge jm-app-promo-steam" href="https://store.steampowered.com/app/4966740/"><img src="/assets/japanmap/steam_logo.svg" alt="Steamで見る" width="100" height="30" loading="lazy"></a></div></aside>
+<footer><a href="/">日本地図 都市パズル</a><span>© LIMO · PLAY LAB</span></footer>
+<noscript><p class="error">このゲームにはJavaScriptが必要です。ブラウザの設定で有効にしてください。</p></noscript>
+</main><script type="module" src="./app.mjs"></script>
+</body></html>
