@@ -1,21 +1,57 @@
 const COLORS=['#71e6df','#f6ce80'];
-export function createFinishEffect(match,reduced=false) {
+export function createFinishEffect(match,reduced=false,previousBodies=match.bodies) {
  const {winner,reason}=match.result;
  const losers=reason==='time'?[]:winner==='draw'?[0,1]:[winner==='player'?1:0];
- return {losers,reduced,age:0,duration:(reduced||!losers.length)? .35:1.15,done:false};
+ const burstAt=reason==='ringout'?.4:.65;
+ const origins=match.bodies.map((body,i)=>({...body,spin:previousBodies[i].spin??body.cruiseSpin??0}));
+ const fx={losers,origins,reason,burstAt,reduced,age:0,
+  duration:(reduced||!losers.length)?.35:burstAt+1.05,done:false};
+ return !reduced&&reason==='ringout'&&!losers.some(i=>canExplode(fx,i))?{...fx,duration:.55}:fx;
 }
 export function advanceFinishEffect(fx,dt) {
  if(!Number.isFinite(dt)||dt<=0||fx.done)return fx;
  const age=Math.min(fx.duration,fx.age+dt);
  return {...fx,age,done:age>=fx.duration};
 }
+export function finishBody(fx,index,body) {
+ if(!fx||fx.reduced)return body;
+ if(!fx.losers.includes(index))return {...body,angle:body.angle+(body.cruiseSpin??0)*fx.age*.6};
+ const origin=fx.origins[index];
+ if(fx.reason==='ringout') {
+  const t=Math.min(fx.age,fx.burstAt),distance=Math.hypot(origin.x,origin.y)||1;
+  return {...body,x:origin.x+(origin.x/distance*115+(origin.vx??0)*.2)*t,
+   y:origin.y+(origin.y/distance*115+(origin.vy??0)*.2)*t,
+   angle:origin.angle+origin.spin*t};
+ }
+ const t=Math.min(fx.age,.45),duration=.45;
+ // Integrate spin * (1-t/duration)^2, then hold completely still before bursting.
+ return {...body,angle:origin.angle+origin.spin*(t-t*t/duration+t*t*t/(3*duration*duration))};
+}
+export function canExplode(fx,index) {
+ if(!fx||fx.reduced||!fx.losers.includes(index))return false;
+ const body=finishBody({...fx,age:fx.burstAt},index,fx.origins[index]);
+ const c=Math.cos(body.angle),s=Math.sin(body.angle);
+ let points=body.region.points.map(([x,y])=>({x:body.x+32*(x*c-y*s),y:body.y+32*(x*s+y*c)}));
+ // Clip the displayed outline against the canvas, not just a circular bounding radius.
+ for(const [axis,edge,sign] of [['x',-220,1],['x',220,-1],['y',-220,1],['y',220,-1]]) {
+  const clipped=[];
+  for(let i=0;i<points.length;i++) {
+   const a=points[i],b=points[(i+1)%points.length];
+   const insideA=(a[axis]-edge)*sign>=0,insideB=(b[axis]-edge)*sign>=0;
+   if(insideA)clipped.push(a);
+   if(insideA!==insideB){const t=(edge-a[axis])/(b[axis]-a[axis]);clipped.push({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});}
+  }
+  points=clipped;
+ }
+ return points.length>=3;
+}
 export function hiddenByFinish(fx,index) {
- return Boolean(fx&&!fx.reduced&&fx.age>=.1&&fx.losers.includes(index));
+ return Boolean(fx&&!fx.reduced&&fx.age>=fx.burstAt&&fx.losers.includes(index));
 }
 export function finishShake(fx) {
- if(!fx||fx.reduced||!fx.losers.length)return {x:0,y:0};
- const strength=5*Math.max(0,1-Math.max(0,fx.age-.1)/.3);
- return {x:Math.sin(fx.age*137)*strength,y:Math.sin(fx.age*173)*strength*.7};
+ if(!fx||fx.reduced||fx.age<fx.burstAt||!fx.losers.some(i=>canExplode(fx,i)))return {x:0,y:0};
+ const age=fx.age-fx.burstAt,strength=5*Math.max(0,1-age/.3);
+ return {x:Math.sin(age*137)*strength,y:Math.sin(age*173)*strength*.7};
 }
 function polygon(ctx,points) {
  ctx.beginPath();points.forEach((p,i)=>{const x=p[0]*32,y=p[1]*32;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.closePath();
@@ -38,12 +74,13 @@ function fragment(ctx,body,index,age,color) {
 export function drawFinishEffect(ctx,fx,bodies) {
  if(!fx)return;
  for(const index of fx.losers) {
-  const body=bodies[index],color=COLORS[index],age=Math.max(0,fx.age-.1);
+  if(!fx.reduced&&(fx.age<fx.burstAt||!canExplode(fx,index)))continue;
+  const body=finishBody({...fx,age:fx.burstAt},index,bodies[index]),color=COLORS[index],age=Math.max(0,fx.age-fx.burstAt);
   ctx.save();ctx.translate(body.x,body.y);
   if(fx.reduced) {
    ctx.globalAlpha=.35*(1-fx.age/fx.duration);ring(ctx,42,color,3);ctx.restore();continue;
   }
-  if(fx.age<.1) {
+  if(age<.07) {
    ctx.rotate(body.angle);polygon(ctx,body.region.points);ctx.fillStyle='#fff4d6';ctx.fill();
   } else {
    ctx.globalAlpha=Math.max(0,1-age/1.05);

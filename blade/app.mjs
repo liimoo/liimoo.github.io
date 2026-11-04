@@ -1,4 +1,4 @@
-import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishShake,drawFinishEffect} from './finish-effects.mjs';
+import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs';
 import {createMatch,launch,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
@@ -38,11 +38,11 @@ canvas.addEventListener('pointermove',e=>{if(aim?.pointerId===e.pointerId)aim={.
 canvas.addEventListener('pointerup',e=>{if(aim?.pointerId!==e.pointerId)return;const a=aim,p=pointer(e),v={x:a.start.x-p.x,y:a.start.y-p.y},length=Math.hypot(v.x,v.y);aim=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);if(length>7)fire(v,Math.min(1,Math.max(.2,length/85)));});
 for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{aim=null;});
 function updateHud(){if(!match)return;$('time').textContent=String(Math.max(0,Math.ceil(MATCH_SECONDS-match.elapsed))).padStart(2,'0');for(let i=0;i<2;i++)$(i?'cpu-energy':'player-energy').style.transform=`scaleX(${match.bodies[i].energy})`;}
-function beginFinish(){
- finishEffect=createFinishEffect(match,reduced);$('pause').disabled=true;aim=null;
- $('status').textContent=match.result.winner==='draw'?'決着！':'決着！ 地図が砕け散る！';
- $('arena-caption').textContent=match.result.winner==='draw'?'DRAW':match.result.winner==='player'?'YOU WIN!':'CPU WINS!';
- if(finishEffect.losers.length){tone(110,.4);tone(1000,.13);}
+function beginFinish(previousBodies){
+ finishEffect=createFinishEffect(match,reduced,previousBodies);$('pause').disabled=true;aim=null;
+ $('status').textContent=match.result.reason==='time'?'決着！ 時間切れ':match.result.reason==='ringout'?'決着！ 場外へ飛ばされました':'決着！ ゲージ切れで回転が止まります';
+ $('arena-caption').textContent=match.result.reason==='time'?'時間切れ':match.result.reason==='ringout'?'場外！':'ゲージ切れ → 回転停止';
+ if(finishEffect.reason==='ringout')tone(450,.25);
 }
 function finished(){const {winner,reason}=match.result;const name=regions[selected].name,other=regions[opponent].name;
  $('result-title').textContent=winner==='player'?'あなたの勝ち！':winner==='cpu'?'CPUの勝ち！':'引き分け！';
@@ -68,7 +68,7 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
  if(!match)return;
  for(const hit of match.impacts){const opacity=Math.max(0,1-(hit.age+(finishEffect?.age??0))/.45);ctx.save();ctx.globalAlpha=opacity;circle(hit.x,hit.y,6+hit.age*90);ctx.lineWidth=2;ctx.strokeStyle='#ffedb1';ctx.stroke();for(let k=0;k<6;k++){const a=k*Math.PI/3;ctx.beginPath();ctx.moveTo(hit.x+Math.cos(a)*(8+hit.age*40),hit.y+Math.sin(a)*(8+hit.age*40));ctx.lineTo(hit.x+Math.cos(a)*(13+hit.age*70),hit.y+Math.sin(a)*(13+hit.age*70));ctx.stroke();}ctx.restore();}
  for(let i=1;i>=0;i--){if(hiddenByFinish(finishEffect,i))continue;const original=match.bodies[i];
- const b=finishEffect&&!finishEffect.reduced&&!finishEffect.losers.includes(i)?{...original,angle:original.angle+original.cruiseSpin*finishEffect.age*.6}:original;
+ const b=finishBody(finishEffect,i,original);
  ctx.save();if(finishEffect?.reduced&&finishEffect.losers.includes(i))ctx.globalAlpha=Math.max(0,1-finishEffect.age/finishEffect.duration);ctx.translate(b.x,b.y);circle(2,8,28);ctx.fillStyle='#0005';ctx.shadowColor='#0008';ctx.shadowBlur=14;ctx.fill();ctx.shadowBlur=0;
  if(match.phase==='active'){ctx.save();ctx.rotate(b.angle);ctx.strokeStyle=colors[i]+'44';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,36,0,Math.PI*.8);ctx.stroke();ctx.beginPath();ctx.arc(0,0,39,Math.PI,Math.PI*1.4);ctx.stroke();ctx.restore();}
  ctx.save();ctx.rotate(b.angle);ctx.translate(0,3);path(b.region.points,BODY_RADIUS);ctx.fillStyle=i?'#8d6637':'#287b80';ctx.fill();ctx.translate(0,-3);path(b.region.points,BODY_RADIUS);const top=ctx.createLinearGradient(-25,-25,25,25);top.addColorStop(0,i?'#fff2c9':'#b8fff5');top.addColorStop(1,colors[i]);ctx.fillStyle=top;ctx.fill();ctx.lineWidth=1;ctx.strokeStyle=i?'#fff4d6':'#ddfff7';ctx.stroke();circle(0,0,4);ctx.fillStyle='#17374a';ctx.fill();circle(0,0,1.6);ctx.fillStyle='#ebffff';ctx.fill();ctx.restore();
@@ -78,8 +78,14 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
  if(match.phase==='ready'){const b=match.bodies[0];let dx,dy,power;if(aim){dx=aim.start.x-aim.end.x;dy=aim.start.y-aim.end.y;power=Math.min(1,Math.hypot(dx,dy)/85);}else{const a=Number($('angle').value)*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=Number($('power').value)/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(b.x+ux*38,b.y+uy*38);ctx.lineTo(end.x,end.y);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(end.x-ux*8-uy*5,end.y-uy*8+ux*5);ctx.lineTo(end.x,end.y);ctx.lineTo(end.x-ux*8+uy*5,end.y-uy*8-ux*5);ctx.stroke();}
 }
 function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
- if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){match=step(match,1/120);accumulator-=1/120;if(match.phase==='finished'){beginFinish();accumulator=0;break;}}const fresh=match.impacts.find(p=>p.age<.015);if(match.phase==='active'&&fresh&&match.elapsed-lastHit>.12){tone(180,.045);lastHit=match.elapsed;}updateHud();}
- if(finishEffect&&!finishEffect.done&&!document.hidden){finishEffect=advanceFinishEffect(finishEffect,dt);if(finishEffect.done)finished();}
+ if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){const previousBodies=match.bodies;match=step(match,1/120);accumulator-=1/120;if(match.phase==='finished'){beginFinish(previousBodies);accumulator=0;break;}}const fresh=match.impacts.find(p=>p.age<.015);if(match.phase==='active'&&fresh&&match.elapsed-lastHit>.12){tone(180,.045);lastHit=match.elapsed;}updateHud();}
+ if(finishEffect&&!finishEffect.done&&!document.hidden){
+  const previousAge=finishEffect.age;finishEffect=advanceFinishEffect(finishEffect,dt);
+  if(previousAge<finishEffect.burstAt&&finishEffect.age>=finishEffect.burstAt&&finishEffect.losers.some(i=>canExplode(finishEffect,i))){
+   tone(110,.4);tone(1000,.13);$('status').textContent='決着！ 地図が砕け散る！';
+  }
+  if(finishEffect.done)finished();
+ }
  draw(t);requestAnimationFrame(tick);
 }
 function resize(){canvas.width=canvas.height=Math.round(canvas.getBoundingClientRect().width*Math.min(devicePixelRatio||1,2));}

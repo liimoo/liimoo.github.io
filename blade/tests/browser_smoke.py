@@ -51,7 +51,7 @@ async def main():
             assert await page.locator('#result').is_hidden(), 'allow the defeat animation before overlay'
             assert await page.locator('#launch').is_disabled()
             assert await page.locator('#shuffle').is_disabled()
-            await page.wait_for_timeout(300)
+            await page.wait_for_timeout(800)
             await page.locator('#arena').screenshot(path=f'/tmp/blade-shatter-{width}.png')
             await page.wait_for_function('!document.getElementById("result").hidden', timeout=3000)
             assert await page.locator('#pause').is_disabled()
