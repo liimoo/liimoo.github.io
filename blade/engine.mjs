@@ -49,7 +49,7 @@ export function launch(match, direction, power) {
  return {...match,phase:'active',bodies:match.bodies.map((b,i)=>({...b,
   vx:i?Math.sin(cpuAngle)*190:aim.x*(80+strength*160),
   vy:i?Math.cos(cpuAngle)*190:aim.y*(80+strength*160),
-  spin:i?-13:12+strength*3,energy:1}))};
+  spin:i?-13:12+strength*3,cruiseSpin:i?-13:12+strength*3,energy:1}))};
 }
 
 function vertices(b) {
@@ -102,22 +102,30 @@ function resolve(a,b,hit) {
   // Off-centre hits destabilize each shape differently; equal mass does not mean equal damage.
   const drain=Math.min(.18,impulse*.00012+Math.abs(angularChange)*.012);
   const energy=Math.max(0,v.energy-drain);
-  const staminaScale=v.energy>EPSILON?Math.sqrt(energy/v.energy):0;
   return {...v,x:v.x+sign*n.x*correction,y:v.y+sign*n.y*correction,
    vx:vx*scale,vy:vy*scale,
-   spin:clamp(v.spin+angularChange,-24,24)*staminaScale,energy};
+   spin:energy>0?clamp(v.spin+angularChange,-24,24):0,energy};
  });
 }
 
 function move(b,dt) {
- // A shallow bowl floor accelerates tops toward its centre; there is no wall.
- const bowl=2.8;
- const vx=b.vx-b.x*bowl*dt,vy=b.vy-b.y*bowl*dt;
- const speed=Math.hypot(vx,vy),limit=speed>340?340/speed:1;
- const damping=Math.exp(-.13*dt),energy=Math.max(0,b.energy-dt*.035);
- const spin=b.spin*Math.exp(-.013*dt)*(b.energy>EPSILON?Math.sqrt(energy/b.energy):0);
- return {...b,vx:vx*limit*damping,vy:vy*limit*damping,
-  x:b.x+vx*limit*dt,y:b.y+vy*limit*dt,
+ // Arcade bowl: stamina is endurance, not a multiplier on visible rotation.
+ const energy=Math.max(0,b.energy-dt*.035);
+ const recovery=1-Math.exp(-4*dt);
+ const spin=energy>0?clamp(b.spin+(b.cruiseSpin-b.spin)*recovery,-24,24):0;
+ const bowl=2.8,damping=Math.exp(-.13*dt);
+ const vx=(b.vx-b.x*bowl*dt)*damping,vy=(b.vy-b.y*bowl*dt)*damping;
+ const speed=Math.hypot(vx,vy);
+ // Smooth low-speed assistance keeps collisions from leaving inert tops together.
+ // No teleport, wall bounce or boost to already fast launches.
+ const assist=energy>0?Math.max(0,40-speed)*(1-Math.exp(-2*dt)):0;
+ const distance=Math.hypot(b.x,b.y);
+ const dx=speed>EPSILON?vx/speed:distance>EPSILON?-b.x/distance:1;
+ const dy=speed>EPSILON?vy/speed:distance>EPSILON?-b.y/distance:0;
+ const nextX=vx+dx*assist,nextY=vy+dy*assist;
+ const limit=Math.min(1,340/Math.max(EPSILON,Math.hypot(nextX,nextY)));
+ return {...b,vx:nextX*limit,vy:nextY*limit,
+  x:b.x+nextX*limit*dt,y:b.y+nextY*limit*dt,
   angle:(b.angle+spin*dt)%(Math.PI*2),spin,energy};
 }
 

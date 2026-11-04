@@ -91,17 +91,27 @@ test('ordinary launch angles permit multiple seconds of play instead of instant 
 test('real-region sample supports short multi-contact matches',async()=>{
  const {readFile}=await import('node:fs/promises');
  const regions=JSON.parse(await readFile(new URL('../regions.json',import.meta.url),'utf8'));
- const durations=[];
- let contacts=0;
+ const durations=[],gaps=[];
+ let contacts=0,lateFrames=0,lateSpinning=0;
  for(let n=0;n<100;n++) {
   const angle=((n*137.5%80)-40)*Math.PI/180;
   let a=launch(createMatch(regions[n%regions.length],regions[(n*7+3)%regions.length],n+1),
    {x:Math.sin(angle),y:-Math.cos(angle)},.3+(n*19%70)/100);
+  let lastContact=0,maxGap=0;
   for(let f=0;f<5500&&a.phase==='active';f++) {
    a=step(a,1/120);
-   if(a.impacts.some(p=>p.age===0)) contacts++;
+   if(a.impacts.some(p=>p.age===0)) {
+    contacts++;
+    maxGap=Math.max(maxGap,a.elapsed-lastContact);
+    lastContact=a.elapsed;
+   }
+   for(const body of a.bodies) if(body.energy>0 && body.energy<.25) {
+    lateFrames++;
+    if(Math.abs(body.spin)>=7) lateSpinning++;
+   }
   }
   assert.equal(a.phase,'finished'); durations.push(a.elapsed);
+  gaps.push(Math.max(maxGap,a.elapsed-lastContact));
   if(a.result.reason==='spin') {
    const losers=a.result.winner==='draw'?a.bodies:
     [a.bodies[a.result.winner==='cpu'?0:1]];
@@ -109,9 +119,12 @@ test('real-region sample supports short multi-contact matches',async()=>{
   }
  }
  durations.sort((a,b)=>a-b);
+ gaps.sort((a,b)=>a-b);
+ assert.ok(gaps[90]<4,`Long contact-free orbit: ${gaps[90]}`);
  assert.ok(durations[50]>8 && durations[50]<25,`Median duration ${durations[50]}`);
  assert.ok(durations[10]>4,`Too many instant losses: ${durations[10]}`);
  assert.ok(contacts>500,`Insufficient repeated contact: ${contacts}`);
+ assert.ok(lateFrames>0 && lateSpinning/lateFrames>.9,'Endgame rotation must remain lively');
 });
 test('asymmetric angular contact causes individual stamina damage',()=>{
  let a=launch(createMatch(long,square),{x:0,y:-1},1);
@@ -121,11 +134,22 @@ test('asymmetric angular contact causes individual stamina damage',()=>{
  assert.ok(Math.abs(b.bodies[0].energy-b.bodies[1].energy)>.001);
  assert.ok(b.bodies.every(v=>v.energy<1 && v.energy>=0));
 });
-test('visual rotation slows as passive stamina drains',()=>{
+test('low stamina preserves visible rotation until exhaustion',()=>{
+ const a=launch(createMatch(square,long),{x:0,y:-1},.5);
+ const b=step({...a,bodies:a.bodies.map((body,i)=>({...body,
+  x:i?120:-120,y:0,vx:0,vy:0,energy:.005}))},.1);
+ assert.equal(b.phase,'active');
+ assert.ok(b.bodies.every(body=>Math.abs(body.spin)>=10));
+ assert.ok(b.bodies.every(body=>body.energy>0 && body.energy<.005));
+});
+test('nearly stopped tops recover rotation and travel while stamina remains',()=>{
  let a=launch(createMatch(square,long),{x:0,y:-1},.5);
- a={...a,bodies:a.bodies.map((b,i)=>({...b,x:i?120:-120,y:0,vx:0,vy:0,energy:.05}))};
- const b=step(a,.1);
- assert.ok(Math.abs(b.bodies[0].spin)<Math.abs(a.bodies[0].spin)*.98);
+ a={...a,bodies:a.bodies.map((b,i)=>({...b,x:i?120:-120,y:0,
+  vx:0,vy:0,spin:0,energy:.3}))};
+ for(let frame=0;frame<30;frame++) a=step(a,1/120);
+ assert.equal(a.phase,'active');
+ assert.ok(a.bodies.every(b=>Math.abs(b.spin)>7));
+ assert.ok(a.bodies.every(b=>Math.hypot(b.vx,b.vy)>70));
 });
 
 test('remaining stamina prevents defeat even when rotation stops or reverses',()=>{
@@ -144,5 +168,16 @@ test('passive stamina reaching zero ends the match with an empty losing gauge',(
   x:i?120:-120,y:0,vx:0,vy:0,energy:i?.8:.001}))},.1);
  assert.deepEqual(b.result,{winner:'cpu',reason:'spin'});
  assert.equal(b.bodies[0].energy,0);
+ assert.equal(b.bodies[0].spin,0);
  assert.ok(b.bodies[1].energy>0);
+});
+
+test('rotation recovery is gradual and zero-speed centre remains finite',()=>{
+ const a=launch(createMatch(square,long),{x:0,y:-1},.5);
+ const b=step({...a,bodies:a.bodies.map((body,i)=>({...body,
+  x:i?120:0,y:0,vx:0,vy:0,spin:i?13:-13}))},1/120);
+ assert.ok(b.bodies[0].spin>-13 && b.bodies[0].spin<-10);
+ assert.ok(b.bodies[1].spin<13 && b.bodies[1].spin>10);
+ assert.ok(b.bodies.every(body=>Number.isFinite(body.vx)&&Number.isFinite(body.vy)));
+ assert.ok(Math.hypot(b.bodies[0].vx,b.bodies[0].vy)>0);
 });
