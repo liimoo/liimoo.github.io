@@ -102,6 +102,11 @@ test('real-region sample supports short multi-contact matches',async()=>{
    if(a.impacts.some(p=>p.age===0)) contacts++;
   }
   assert.equal(a.phase,'finished'); durations.push(a.elapsed);
+  if(a.result.reason==='spin') {
+   const losers=a.result.winner==='draw'?a.bodies:
+    [a.bodies[a.result.winner==='cpu'?0:1]];
+   assert.ok(losers.every(body=>body.energy===0),'Defeated body must have an empty gauge');
+  }
  }
  durations.sort((a,b)=>a-b);
  assert.ok(durations[50]>8 && durations[50]<25,`Median duration ${durations[50]}`);
@@ -121,4 +126,23 @@ test('visual rotation slows as passive stamina drains',()=>{
  a={...a,bodies:a.bodies.map((b,i)=>({...b,x:i?120:-120,y:0,vx:0,vy:0,energy:.05}))};
  const b=step(a,.1);
  assert.ok(Math.abs(b.bodies[0].spin)<Math.abs(a.bodies[0].spin)*.98);
+});
+
+test('remaining stamina prevents defeat even when rotation stops or reverses',()=>{
+ for(const spin of [0,.01,-.05]) {
+  const a=launch(createMatch(square,long),{x:0,y:-1},.5);
+  const b=step({...a,bodies:a.bodies.map((body,i)=>({...body,
+   x:i?120:-120,y:0,vx:0,vy:0,spin,energy:i?.8:.4}))},.1);
+  assert.equal(b.phase,'active');
+  assert.equal(b.result,null);
+  assert.ok(b.bodies.every(body=>body.energy>0));
+ }
+});
+test('passive stamina reaching zero ends the match with an empty losing gauge',()=>{
+ const a=launch(createMatch(square,long),{x:0,y:-1},.5);
+ const b=step({...a,bodies:a.bodies.map((body,i)=>({...body,
+  x:i?120:-120,y:0,vx:0,vy:0,energy:i?.8:.001}))},.1);
+ assert.deepEqual(b.result,{winner:'cpu',reason:'spin'});
+ assert.equal(b.bodies[0].energy,0);
+ assert.ok(b.bodies[1].energy>0);
 });

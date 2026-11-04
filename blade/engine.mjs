@@ -123,8 +123,8 @@ function move(b,dt) {
 
 function outcome(bodies,elapsed) {
  const outside=bodies.map(b=>Math.hypot(b.x,b.y)>ARENA_RADIUS+8);
- const stopped=bodies.map(b=>b.energy<=0 || Math.abs(b.spin)<.1);
- const loser=outside.some(Boolean)?outside:stopped;
+ const exhausted=bodies.map(b=>b.energy<=0);
+ const loser=outside.some(Boolean)?outside:exhausted;
  if(loser.some(Boolean)) return {winner:loser[0]&&loser[1]?'draw':loser[0]?'cpu':'player',reason:outside.some(Boolean)?'ringout':'spin'};
  return elapsed>=MATCH_SECONDS?{winner:'draw',reason:'time'}:null;
 }
