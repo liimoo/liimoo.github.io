@@ -2,8 +2,6 @@
 
 公開URL: https://japan-map.app/blade/
 
-HTML仕様書: https://japan-map.app/blade/spec.html （`spec.html`）。物理計算・勝敗・演出を変更した際は、該当する説明と更新日・確認した実装も更新する。
-
 ## 内容
 
 - 10地域（5都道府県・5市）の実輪郭を使う、CPUとの見下ろし型コマ対戦。
