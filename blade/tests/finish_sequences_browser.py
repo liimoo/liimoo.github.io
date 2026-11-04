@@ -42,6 +42,15 @@ export function step(match,dt) {{
                 await page.locator('#arena').screenshot(path=f'/tmp/blade-sequence-{reason}.png')
             await page.wait_for_function('!document.getElementById("result").hidden',timeout=3000)
             assert await page.locator('#result-title').inner_text()==('引き分け！' if reason=='time' else 'CPUの勝ち！')
+            style=await page.locator('#result').evaluate('(el)=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).backdropFilter})')
+            assert style['background']=='rgba(0, 0, 0, 0)' and style['blur']=='none'
+            before=await page.locator('#arena').evaluate('(el)=>el.toDataURL()')
+            await page.wait_for_timeout(400)
+            after=await page.locator('#arena').evaluate('(el)=>el.toDataURL()')
+            assert before!=after, 'survivor must keep moving after the dialog appears'
+            count=await page.evaluate("window.dataLayer.filter(e=>e[0]==='event'&&e[1]==='blade_finish').length")
+            assert count==1, 'finish callback must run once'
+            await page.locator('#arena').screenshot(path=f'/tmp/blade-winner-{reason}-{x}.png')
             await page.locator('#again').click()
             assert await page.locator('#launch').is_enabled()
             assert not errors,errors

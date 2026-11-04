@@ -79,12 +79,12 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
 }
 function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
  if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){const previousBodies=match.bodies;match=step(match,1/120);accumulator-=1/120;if(match.phase==='finished'){beginFinish(previousBodies);accumulator=0;break;}}const fresh=match.impacts.find(p=>p.age<.015);if(match.phase==='active'&&fresh&&match.elapsed-lastHit>.12){tone(180,.045);lastHit=match.elapsed;}updateHud();}
- if(finishEffect&&!finishEffect.done&&!document.hidden){
-  const previousAge=finishEffect.age;finishEffect=advanceFinishEffect(finishEffect,dt);
+ if(finishEffect&&!document.hidden){
+  const previousAge=finishEffect.age,wasDone=finishEffect.done;finishEffect=advanceFinishEffect(finishEffect,dt);
   if(previousAge<finishEffect.burstAt&&finishEffect.age>=finishEffect.burstAt&&finishEffect.losers.some(i=>canExplode(finishEffect,i))){
    tone(110,.4);tone(1000,.13);$('status').textContent='決着！ 地図が砕け散る！';
   }
-  if(finishEffect.done)finished();
+  if(!wasDone&&finishEffect.done)finished();
  }
  draw(t);requestAnimationFrame(tick);
 }

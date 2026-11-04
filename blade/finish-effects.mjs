@@ -3,19 +3,26 @@ export function createFinishEffect(match,reduced=false,previousBodies=match.bodi
  const {winner,reason}=match.result;
  const losers=reason==='time'?[]:winner==='draw'?[0,1]:[winner==='player'?1:0];
  const burstAt=reason==='ringout'?.4:.65;
- const origins=match.bodies.map((body,i)=>({...body,spin:previousBodies[i].spin??body.cruiseSpin??0}));
- const fx={losers,origins,reason,burstAt,reduced,age:0,
+ const origins=match.bodies.map((body,i)=>({...body,spin:(losers.includes(i)?previousBodies[i].spin:body.spin)??body.cruiseSpin??0}));
+ const fx={losers,origins,reason,burstAt,reduced,age:0,motionAge:0,
   duration:(reduced||!losers.length)?.35:burstAt+1.05,done:false};
  return !reduced&&reason==='ringout'&&!losers.some(i=>canExplode(fx,i))?{...fx,duration:.55}:fx;
 }
 export function advanceFinishEffect(fx,dt) {
- if(!Number.isFinite(dt)||dt<=0||fx.done)return fx;
+ if(!Number.isFinite(dt)||dt<=0)return fx;
  const age=Math.min(fx.duration,fx.age+dt);
- return {...fx,age,done:age>=fx.duration};
+ return {...fx,age,motionAge:fx.motionAge+dt,done:age>=fx.duration};
 }
 export function finishBody(fx,index,body) {
  if(!fx||fx.reduced)return body;
- if(!fx.losers.includes(index))return {...body,angle:body.angle+(body.cruiseSpin??0)*fx.age*.6};
+ if(!fx.losers.includes(index)) {
+  const origin=fx.origins[index],t=fx.motionAge,decay=Math.exp(-2*t);
+  const targetX=fx.losers.length?0:(index?55:-55),targetY=65;
+  const glide=(position,velocity,target)=>target+(position-target+((velocity??0)+2*(position-target))*t)*decay;
+  const idleSpin=Math.sign(origin.spin)*3;
+  return {...body,x:glide(origin.x,origin.vx,targetX),y:glide(origin.y,origin.vy,targetY),
+   angle:origin.angle+idleSpin*t+(origin.spin-idleSpin)*(1-Math.exp(-.25*t))/.25};
+ }
  const origin=fx.origins[index];
  if(fx.reason==='ringout') {
   const t=Math.min(fx.age,fx.burstAt),distance=Math.hypot(origin.x,origin.y)||1;

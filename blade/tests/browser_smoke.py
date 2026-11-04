@@ -55,6 +55,11 @@ async def main():
             await page.locator('#arena').screenshot(path=f'/tmp/blade-shatter-{width}.png')
             await page.wait_for_function('!document.getElementById("result").hidden', timeout=3000)
             assert await page.locator('#pause').is_disabled()
+            arena_box=await page.locator('#arena').bounding_box()
+            result_box=await page.locator('#result').bounding_box()
+            assert result_box['y']-arena_box['y']<arena_box['height']*.05
+            assert result_box['height']<arena_box['height']*.55
+            await page.locator('.arena-wrap').screenshot(path=f'/tmp/blade-result-{width}.png')
             await page.locator('#again').click()
             assert await page.locator('#time').inner_text() == '45'
             assert await page.locator('#launch').is_enabled()

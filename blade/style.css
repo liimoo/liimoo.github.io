@@ -2,3 +2,14 @@
 @media(min-width:1000px){.arena-wrap{max-width:540px}}@media(max-width:850px){.game-layout{grid-template-columns:1fr}.setup-panel{padding:20px}.region-grid{grid-template-columns:repeat(5,1fr)}.selection-note p{min-height:0}.intro-note{display:none}.selection-note{margin-bottom:10px}.rules{gap:20px}.arena-panel{max-width:640px;width:100%;margin:auto}}@media(max-width:480px){main{padding:0 12px}.site-head{padding:15px 16px}.site-head span{display:none}.site-head{font-size:10px}.intro{margin:23px 7px 20px}h1{font-size:34px}h1 small{margin-left:9px;font-size:10px}.tagline{font-size:12px}.eyebrow{font-size:8px}.scoreboard{padding:15px 18px 5px}.fighter strong{font-size:17px}.launch-controls{grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px 6px}.launch-controls .primary{grid-column:1/-1;justify-content:center}.arena-toolbar{padding:9px 15px}.arena-toolbar p{font-size:10px}.arena-caption{font-size:10px;bottom:8px}.region-grid{grid-template-columns:repeat(2,1fr)}.region-card{display:grid;grid-template-columns:45px 1fr;column-gap:8px;align-items:center}.region-card svg{grid-row:1/3;margin:0;height:36px}.region-card strong{font-size:11px}.region-card small{font-size:8px}.result{inset:10% 7%;padding:16px}.result h2{font-size:27px}.rules{grid-template-columns:1fr;gap:10px}.rules article{padding-top:12px}.rules h3{display:inline;margin-left:12px}.rules p{margin:7px 0 12px}.howto{margin-top:30px}.control-note{font-size:9px;margin-left:16px}.clock>span{font-size:26px}}
 
 .mobile-select{display:none}#battle,#choose-region{scroll-margin-top:14px}@media(max-width:850px){.mobile-select{display:block;text-align:center;font-size:12px;padding:10px;border-bottom:1px solid var(--line)}}
+
+/* Result stays above the winning map; the pause overlay keeps its solid backdrop. */
+#result{inset:3% 5% auto;padding:10px 8px;background:transparent;backdrop-filter:none;border:0;border-radius:0;box-shadow:none;text-shadow:0 2px 5px #061322,0 0 12px #061322}
+#result>p:first-child{font-size:9px;letter-spacing:2px;margin:0}
+#result h2{font-size:28px;margin:2px 0;line-height:1.3}
+#result #result-detail{font-size:11px;line-height:1.5;margin:4px 0 9px}
+.result-actions{display:flex;align-items:center;justify-content:center;gap:8px}
+#result .primary{font-size:12px;padding:9px 12px;margin:0;text-shadow:none}
+#result .text-button{font-size:11px;padding:8px;color:#e3f4ff}
+#result #share-status{font-size:10px;margin-top:5px}
+@media(max-width:480px){#result{inset:2% 3% auto;padding:6px 4px}#result h2{font-size:24px}#result .primary{font-size:11px;padding:8px 10px;gap:7px}#result .text-button{padding:7px 4px}}

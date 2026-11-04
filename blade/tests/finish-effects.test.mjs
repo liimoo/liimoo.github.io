@@ -93,3 +93,33 @@ test('ringout flies outward and explodes only while visible',()=>{
   if(x===250)assert.ok(fx.duration<.6);
  }
 });
+test('survivor carries terminal velocity and rotation into a smooth victory glide',()=>{
+ const survivor={...bodies[0],x:80,y:-30,vx:90,vy:-40,spin:11};
+ const m={...match(),bodies:[survivor,bodies[1]]};
+ const fx=createFinishEffect(m);
+ const start=finishBody(fx,0,survivor),dt=.00001;
+ const next=finishBody(advanceFinishEffect(fx,dt),0,survivor);
+ assert.equal(start.x,survivor.x);assert.equal(start.y,survivor.y);
+ assert.ok(Math.abs((next.x-start.x)/dt-survivor.vx)<.01);
+ assert.ok(Math.abs((next.y-start.y)/dt-survivor.vy)<.01);
+ assert.ok(Math.abs((next.angle-start.angle)/dt-survivor.spin)<.01);
+ const settled=finishBody(advanceFinishEffect(fx,10),0,survivor);
+ assert.ok(Math.abs(settled.x)<1 && Math.abs(settled.y-65)<1);
+});
+test('survivor keeps moving after result appears without changing terminal physics',()=>{
+ const m=match(),snapshot=structuredClone(m),fx=createFinishEffect(m);
+ const shown=advanceFinishEffect(fx,fx.duration);
+ const later=advanceFinishEffect(shown,.3);
+ assert.equal(shown.done,true);assert.equal(later.done,true);
+ assert.equal(shown.age,later.age);
+ assert.notEqual(finishBody(shown,0,m.bodies[0]).angle,finishBody(later,0,m.bodies[0]).angle);
+ assert.deepEqual(m,snapshot);
+});
+
+test('timeout survivors settle separately and reduced motion stays still',()=>{
+ const m=match('draw','time'),fx=advanceFinishEffect(createFinishEffect(m),10);
+ const left=finishBody(fx,0,m.bodies[0]),right=finishBody(fx,1,m.bodies[1]);
+ assert.ok(right.x-left.x>100);
+ const reduced=advanceFinishEffect(createFinishEffect(match(),true),10);
+ assert.deepEqual(finishBody(reduced,0,bodies[0]),bodies[0]);
+});
