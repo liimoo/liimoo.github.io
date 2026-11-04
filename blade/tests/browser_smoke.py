@@ -47,7 +47,13 @@ async def main():
             await page.wait_for_timeout(400)
             assert await page.locator('#time').inner_text() == time
             await page.locator('#resume').click()
-            await page.wait_for_function('!document.getElementById("result").hidden', timeout=48000)
+            await page.wait_for_function('document.getElementById("status").textContent.startsWith("決着！")', timeout=48000)
+            assert await page.locator('#result').is_hidden(), 'allow the defeat animation before overlay'
+            assert await page.locator('#launch').is_disabled()
+            assert await page.locator('#shuffle').is_disabled()
+            await page.wait_for_timeout(300)
+            await page.locator('#arena').screenshot(path=f'/tmp/blade-shatter-{width}.png')
+            await page.wait_for_function('!document.getElementById("result").hidden', timeout=3000)
             assert await page.locator('#pause').is_disabled()
             await page.locator('#again').click()
             assert await page.locator('#time').inner_text() == '45'
@@ -56,6 +62,17 @@ async def main():
             assert not errors, errors
             print(f'{width}px: selection, launch, pause, finish, replay, layout PASS')
             await page.close()
+        page = await browser.new_page(reduced_motion='reduce')
+        await page.route('**/googletagmanager.com/**', lambda route: route.abort())
+        await page.goto(BASE + '/blade/')
+        await page.locator('.region-card').last.wait_for()
+        await page.locator('#launch').click()
+        await page.wait_for_function('document.getElementById("status").textContent.startsWith("決着！")', timeout=48000)
+        await page.wait_for_function('!document.getElementById("result").hidden', timeout=1000)
+        await page.locator('#again').click()
+        assert await page.locator('#launch').is_enabled()
+        await page.close()
+        print('Reduced motion: short finish and replay PASS')
         page = await browser.new_page()
         await page.route('**/regions.json', lambda route: route.fulfill(status=503, body='Unavailable'))
         await page.goto(BASE + '/blade/')

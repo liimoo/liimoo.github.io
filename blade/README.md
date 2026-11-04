@@ -5,6 +5,7 @@
 ## 内容
 
 - 10地域（5都道府県・5市）の実輪郭を使う、CPUとの見下ろし型コマ対戦。
+- 決着時は敗者の地図が破片・火花・衝撃波で砕け、約1秒後に結果表示。動きを減らす設定では短いフェードのみ。
 - 地域選択、ドラッグ／タッチ発射、角度・強さによるボタン発射、一時停止、再戦、結果共有。
 - 回転スタミナのゲージがゼロ、または場外で決着。ゲージが残る間は回転速度だけで敗北しない。45秒は安全上限で、通常はそれより早く決着する。
 - アプリ・対抗戦の記録とは独立。バックエンド・ログイン・オンライン対戦なし。
@@ -25,7 +26,7 @@
 リポジトリのルートから:
 
 ```sh
-node --test --experimental-test-coverage blade/tests/engine.test.mjs
+node --test --experimental-test-coverage blade/tests/*.test.mjs
 python3 -m http.server 8766 --bind 127.0.0.1
 # 別ターミナル（Python Playwright + Chromiumの導入済み環境）
 python3 blade/tests/browser_smoke.py http://127.0.0.1:8766
