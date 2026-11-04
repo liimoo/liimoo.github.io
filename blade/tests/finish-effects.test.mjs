@@ -123,3 +123,19 @@ test('timeout survivors settle separately and reduced motion stays still',()=>{
  const reduced=advanceFinishEffect(createFinishEffect(match(),true),10);
  assert.deepEqual(finishBody(reduced,0,bodies[0]),bodies[0]);
 });
+
+test('survivor slows monotonically and stops rotating after four seconds',()=>{
+ for(const spin of [-24,-8,0,8,24]){
+  const body={...bodies[0],spin},m={...match(),bodies:[body,bodies[1]]};
+  const fx=createFinishEffect(m),angle=t=>finishBody(advanceFinishEffect(fx,t),0,body).angle;
+  let previous=Math.abs(spin)+.001;
+  for(const t of [0,.5,1,2,3,3.9,4]){
+   const speed=(angle(t+.00001)-angle(t))/.00001;
+   assert.ok(Math.abs(speed)<=previous+.00001);
+   assert.ok(speed*spin>=0);
+   previous=Math.abs(speed);
+  }
+  assert.equal(angle(4),angle(180));
+  assert.ok(Math.abs((angle(4)-angle(3.999))/.001)<.001);
+ }
+});

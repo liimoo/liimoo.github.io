@@ -19,9 +19,10 @@ export function finishBody(fx,index,body) {
   const origin=fx.origins[index],t=fx.motionAge,decay=Math.exp(-2*t);
   const targetX=fx.losers.length?0:(index?55:-55),targetY=65;
   const glide=(position,velocity,target)=>target+(position-target+((velocity??0)+2*(position-target))*t)*decay;
-  const idleSpin=Math.sign(origin.spin)*3;
+  // Ease rotation to a complete stop in four seconds, preserving initial spin.
+  const stopTime=4,spinTime=Math.min(t,stopTime);
   return {...body,x:glide(origin.x,origin.vx,targetX),y:glide(origin.y,origin.vy,targetY),
-   angle:origin.angle+idleSpin*t+(origin.spin-idleSpin)*(1-Math.exp(-.25*t))/.25};
+   angle:origin.angle+origin.spin*(spinTime-spinTime*spinTime/stopTime+spinTime**3/(3*stopTime**2))};
  }
  const origin=fx.origins[index];
  if(fx.reason==='ringout') {
