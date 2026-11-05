@@ -83,3 +83,79 @@
 #stage-controls .stage-launch:hover{transform:none}
 #stage-controls .stage-launch:active:enabled{transform:translateY(2px)}
 .team-battle .arena-caption{display:none}
+
+/* Keep selection controls in one viewport; only the geography list scrolls. */
+body[data-screen=select]{overflow:hidden}
+body[data-screen=select] #choose-region{position:fixed;inset:8px;z-index:10;width:auto;max-width:1100px;height:calc(100vh - 16px);height:calc(100dvh - 16px);margin:auto;padding:12px;display:flex;flex-direction:column;gap:8px;overflow:hidden;border-radius:16px}
+#choose-region>.selection-topbar,#choose-region>.selection-tabs,#choose-region>#team-roster,#choose-region>#team-selection-status,#choose-region>.selection-actions,#choose-region>#selection-info{flex:0 0 auto}
+.selection-topbar{display:flex;align-items:center;gap:12px;min-width:0}
+#choose-region #title-back{margin:0;flex-shrink:0;padding:8px}
+.selection-topbar .section-heading{flex:1;min-width:0;margin:0;gap:8px}
+.selection-topbar h2{font-size:18px;margin:0;line-height:1.4}
+.selection-topbar .step{display:none}
+#choose-region .selection-tabs{gap:8px;margin:0}
+#choose-region .selection-tabs button{padding:7px 10px;min-height:40px;line-height:1.4}
+#choose-region #team-roster{margin:0;gap:6px}
+#choose-region .team-slot{padding:6px;min-height:38px;line-height:1.4;font-size:12px}
+#choose-region #team-selection-status{font-size:11px;line-height:1.4;margin:0;color:var(--gold)}
+#choose-region .map-picker{flex:1 1 0;min-height:0;height:auto;margin:0;grid-template-columns:180px minmax(0,1fr)}
+#choose-region .picker-sidebar{min-height:0;overscroll-behavior:contain}
+#choose-region .picker-main{min-height:0;grid-template-rows:auto minmax(0,1fr) auto auto}
+#choose-region .picker-map-heading{padding:6px 12px 0}
+#choose-region .picker-map-heading h3{font-size:19px;line-height:1.3;margin:0}
+#choose-region #selection-map{padding:4px 12px}
+#choose-region #map-caption{font-size:10px;line-height:1.35;margin:3px 8px}
+#choose-region #selected-region-detail{display:flex;align-items:center;gap:8px;padding:5px 12px;min-width:0}
+#choose-region #selected-region-detail h3{font-size:16px;line-height:1.35;margin:0;overflow-wrap:anywhere}
+#choose-region #selected-region-detail>small{flex-shrink:0}
+#choose-region #selected-region-detail p{display:none}
+.selection-actions{display:flex;align-items:center;gap:10px;min-width:0}
+.selection-actions .opponent-row{min-width:0;flex:1;gap:8px}
+.selection-actions .opponent-row p{font-size:11px;line-height:1.4;margin:0;min-width:0;overflow-wrap:anywhere}
+.selection-actions .opponent-row button{flex-shrink:0;padding:8px;font-size:11px;min-height:40px}
+#choose-region .selection-actions #confirm-match{width:auto;margin:0;min-height:44px;flex:0 0 auto;padding:10px 16px}
+#choose-region #selection-info{padding:5px 10px;border-radius:8px;font-size:11px;background:var(--panel)}
+#selection-info>summary{padding:3px;min-height:24px}
+#choose-region #selection-info[open]{position:absolute;inset:55px 12px 66px;z-index:12;overflow-y:auto;overscroll-behavior:contain;background:#102139;box-shadow:0 8px 40px #0009;padding:0 12px 12px;border-color:#52708f}
+#selection-info[open]>summary{position:sticky;top:0;z-index:1;background:#102139;padding:12px 0;border-bottom:1px solid var(--line)}
+#selection-info[open]>summary::after{content:' × 閉じる';float:right;color:var(--cyan)}
+@media(max-width:600px){
+ body[data-screen=select] #choose-region{inset:4px;height:calc(100vh - 8px);height:calc(100dvh - 8px);padding:8px;gap:6px;border-radius:12px}
+ .selection-topbar{gap:4px}.selection-topbar h2{font-size:15px}.selection-topbar .chip{display:none}
+ #choose-region #title-back{font-size:11px;padding:6px}
+ #choose-region .selection-tabs button{font-size:12px;padding:6px;min-height:36px}
+ #choose-region .team-slot{font-size:10px;padding:5px 3px;min-height:36px}
+ #choose-region #team-selection-status{font-size:10px}
+ #choose-region .map-picker{grid-template-columns:104px minmax(0,1fr)}
+ #choose-region .picker-sidebar{padding:5px}
+ #choose-region .prefecture-card,#choose-region #regions .region-card{min-height:70px;padding:8px 3px}
+ #choose-region .prefecture-card strong,#choose-region #regions .region-card strong{font-size:12px}
+ #choose-region .picker-map-heading{padding:5px 7px 0}
+ #choose-region .picker-map-heading h3{font-size:17px}
+ #choose-region #selection-map{padding:3px 6px}
+ #choose-region #selected-region-detail{gap:5px;padding:4px 7px}
+ #choose-region #selected-region-detail h3{font-size:14px}
+ #choose-region #map-caption{font-size:9px;margin:3px 5px}
+ .selection-actions{gap:6px}
+ .selection-actions .opponent-row{gap:4px}
+ .selection-actions .opponent-row p{font-size:9px}
+ .selection-actions .opponent-row button{font-size:10px;padding:7px 5px;max-width:72px;line-height:1.3}
+ #choose-region .selection-actions #confirm-match{font-size:12px;padding:10px;gap:6px}
+ #choose-region #selection-info{padding:3px 8px}
+ #choose-region #selection-info[open]{inset:45px 8px 62px}
+}
+@media(max-height:500px) and (min-width:601px){
+ body[data-screen=select] #choose-region{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;gap:6px;padding:8px}
+ #choose-region .selection-topbar{grid-column:1;grid-row:1}
+ #choose-region .selection-tabs{grid-column:2;grid-row:1}
+ #choose-region #team-roster{grid-column:1;grid-row:2}
+ #choose-region #team-selection-status{grid-column:2;grid-row:2;align-self:center}
+ #choose-region .map-picker{grid-column:1/-1;grid-row:3;grid-template-columns:180px minmax(0,1fr)}
+ #choose-region .selection-actions{grid-column:1/-1;grid-row:4;padding-right:150px}
+ #choose-region #selection-info:not([open]){position:absolute;right:8px;bottom:14px;width:145px;font-size:10px}
+ #choose-region .picker-map-heading{display:flex;align-items:center;gap:8px}
+ #choose-region .picker-map-heading h3{font-size:16px}
+ #choose-region #map-caption{display:none}
+ #choose-region #selected-region-detail{padding:2px 12px}
+}
+#choose-region #prefecture-back{position:sticky;top:0;z-index:3;min-height:40px;margin-bottom:6px;box-shadow:0 2px 5px #38536b40}

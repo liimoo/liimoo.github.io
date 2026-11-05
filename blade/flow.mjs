@@ -13,6 +13,16 @@ function preview(region,side){
 }
 export function mountFlow({regions,getSelection,select,startBattle,leave,setMode=()=>{},removeTeam}){
  let screen='title',side='player',timer=null,picker=null;
+ const selection=$('choose-region'),topbar=document.createElement('div'),actions=document.createElement('div');
+ topbar.className='selection-topbar';topbar.append($('title-back'),selection.querySelector('.section-heading'));
+ actions.className='selection-actions';actions.append(selection.querySelector('.opponent-row'),$('confirm-match'));
+ const info=document.createElement('details');info.id='selection-info';
+ const summary=document.createElement('summary');summary.textContent='説明・編成を確認';
+ info.append(summary,selection.querySelector('.selection-scope'),$('match-preview'),selection.querySelector('.selection-note'),selection.querySelector('.prototype-note'));
+ info.addEventListener('toggle',()=>{summary.textContent=info.open?'都市選択に戻る':'説明・編成を確認';for(const child of selection.children)if(child!==info)child.inert=info.open;});
+ info.addEventListener('keydown',event=>{if(event.key==='Escape'&&info.open){event.preventDefault();info.open=false;summary.focus({preventScroll:true});}});
+ selection.prepend(topbar);selection.append(actions,info);
+
  const teamMode=()=>getSelection().mode==='team';
  const roster=name=>getSelection()[name==='player'?'playerTeam':'cpuTeam']||[];
  const validTeam=items=>validRoster(regions,items);
@@ -25,12 +35,13 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
  function refreshRoster(){
   const team=teamMode();document.querySelector('#vs-screen>.step').textContent=team?'EXHIBITION / 3 vs 3 (県対抗)':'EXHIBITION / 1 vs 1';$('team-roster').hidden=!team;$('team-selection-status').hidden=!team;
   $('selection-heading').textContent=team?'県の3都市を選ぼう':'地域を選ぼう';
-  $('select-player').textContent=team?'あなたの3都市':'あなたの地域';$('select-cpu').textContent=team?'CPUの3都市':'CPUの地域';
-  document.querySelector('.selection-scope').textContent=team?'1チームは同じ都道府県の3都市です。別の県の都市を選ぶと、そのチームの選択をやり直します。':'全国の都道府県・市区町村から選べます。左の都道府県から、使う地域を選ぼう。';
+  $('select-player').textContent=team?`あなた ${roster('player').length}/3都市`:'あなたの地域';$('select-cpu').textContent=team?`CPU ${roster('cpu').length}/3都市`:'CPUの地域';
+  info.querySelector('.selection-scope').textContent=team?'1チームは同じ都道府県の3都市です。別の県の都市を選ぶと、そのチームの選択をやり直します。':'全国の都道府県・市区町村から選べます。左の都道府県から、使う地域を選ぼう。';
   const indices=roster(side),fragment=document.createDocumentFragment();
   for(let slot=0;slot<3;slot++){const index=indices[slot],button=document.createElement('button');button.type='button';button.className='team-slot';button.disabled=index===undefined;button.textContent=index===undefined?`${slot+1}. 都市を選択`:`${slot+1}. ${regions[index].name} ×`;if(index!==undefined){button.setAttribute('aria-label',`${regions[index].name}をチームから外す`);button.addEventListener('click',()=>{(removeTeam||select)(index,side);refresh();});}fragment.append(button);}
   $('team-roster').replaceChildren(fragment);
   $('team-selection-status').textContent=`${side==='player'?'あなた':'CPU'}：${indices.length}/3都市${indices.length===3?'。変更するときは先に1都市を外してください。':''}`;
+  $('confirm-match').textContent='この編成で対戦 →';
   $('confirm-match').disabled=team&&(!validTeam(roster('player'))||!validTeam(roster('cpu')));
  }
  const screens={title:$('title-screen'),select:$('choose-region'),vs:$('vs-screen'),battle:$('battle')};
@@ -58,7 +69,8 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   if(next!=='battle')leave();
   screen=next;
   for(const [name,element] of Object.entries(screens))element.hidden=name!==next;
-  document.body.dataset.screen=next;
+  document.body.dataset.screen=next;info.open=false;
+  for(const element of document.querySelectorAll('main > :not(.game-layout),.site-head'))element.inert=next==='select';
   if(next==='select'||next==='vs')refresh();
   if(next==='battle')startBattle();
   const focus={title:'mode-heading',select:'selection-heading',vs:'vs-heading',battle:'battle'}[next];
