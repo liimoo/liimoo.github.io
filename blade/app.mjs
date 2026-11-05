@@ -1,9 +1,9 @@
-import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-bowl';
+import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-basin';
 import {mountFlow} from './flow.mjs?v=20261105-viewport';
 import {chooseCity,defaultTeam} from './team-roster.mjs?v=20261105-team-panel';
-import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-bowl';
+import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-basin';
 import {createBladeAudio} from './audio.mjs?v=20261105-critical-clear';
-import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-bowl';
+import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-basin';
 import {createMatch,createTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-team-panel';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
@@ -136,8 +136,8 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
   const alpha=finishEffect?.reduced&&finishEffect.losers.includes(i)?Math.max(0,1-finishEffect.age/finishEffect.duration):1;
   drawTop(ctx,b,{color,cpu,bounce:bounce/5,reduced,alpha});
   ctx.save();ctx.translate(b.x,b.y+floorOffset(b));
-  if(match.phase==='active'&&!original.eliminated){ctx.save();ctx.translate(0,-10-bounce);ctx.rotate(b.angle);ctx.strokeStyle=color+'55';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,36,0,Math.PI*.8);ctx.stroke();ctx.restore();}
-  ctx.save();ctx.translate(0,44);ctx.scale(1,1/VIEW_TILT);ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#0a2031';ctx.strokeText(b.region.name,0,0);ctx.fillStyle=color;ctx.fillText(b.region.name,0,0);ctx.restore();
+  if(match.phase==='active'&&!original.eliminated){ctx.save();ctx.translate(0,-10-bounce);ctx.rotate(b.angle);ctx.strokeStyle=color+'22';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,36,0,Math.PI*.8);ctx.stroke();ctx.restore();}
+  ctx.save();ctx.translate(0,44);ctx.scale(1,1/VIEW_TILT);ctx.font='8px sans-serif';ctx.textAlign='center';ctx.lineWidth=2.5;ctx.strokeStyle='#0a2031';ctx.strokeText(b.region.name,0,0);ctx.fillStyle=color;ctx.fillText(b.region.name,0,0);ctx.restore();
   if(match.phase==='ready'&&i===(mode==='team'?launchCity:0)){const pulse=reduced?1:1+Math.sin(t*.003)*.04;circle(0,0,43*pulse);ctx.setLineDash([3,5]);ctx.strokeStyle='#71e6df90';ctx.stroke();ctx.setLineDash([]);}ctx.restore();
  }
  drawCriticalFlashes();

@@ -1,4 +1,4 @@
-import {projectPoint,VIEW_TILT,floorOffset} from './depth-view.mjs?v=20261105-bowl';
+import {projectPoint,VIEW_TILT,floorOffset} from './depth-view.mjs?v=20261105-basin';
 const COLORS=['#71e6df','#f6ce80'];
 export function createFinishEffect(match,reduced=false,previousBodies=match.bodies) {
  const {winner,reason}=match.result;

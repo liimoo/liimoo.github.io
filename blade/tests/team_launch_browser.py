@@ -28,10 +28,12 @@ async def main():
    assert await page.locator('#angle').input_value()=='-40'
    assert await page.locator('#power').input_value()=='30'
    await page.locator('#arena').scroll_into_view_if_needed()
-   center=await page.evaluate("async()=>{const m=await import('/blade/depth-view.mjs');return m.projectPoint({x:-72,y:95},10*m.VIEW_TILT)}")
+   center=await page.evaluate("async()=>{const m=await import('/blade/depth-view.mjs');return m.projectPoint({x:-72,y:95})}")
    r=await page.locator('#arena').bounding_box();x=r['x']+r['width']*((220+center['x'])/440);y=r['y']+r['height']*((220+center['y'])/440)
-   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-20,y+25);await page.mouse.up()
-   assert 20<=int(await page.locator('#angle').input_value())<=45
+   end=await page.evaluate("async()=>{const m=await import('/blade/depth-view.mjs');return m.projectPoint({x:-92,y:125})}")
+   end_x=r['x']+r['width']*((220+end['x'])/440);end_y=r['y']+r['height']*((220+end['y'])/440)
+   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(end_x,end_y);await page.mouse.up()
+   assert abs(int(await page.locator('#angle').input_value())-34)<=1
    assert '50° / 100%' in await page.locator('#launch-cities button[data-city="2"]').inner_text()
    await page.wait_for_timeout(150)
    assert await page.locator('#launch').is_visible()

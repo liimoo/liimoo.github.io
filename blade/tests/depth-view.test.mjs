@@ -9,9 +9,9 @@ function context(){
  return {ctx,calls};
 }
 test('projection preserves x and reverses ground points across the arena',()=>{
- assert.equal(VIEW_TILT,.78);
+ assert.equal(VIEW_TILT,.70);
  for(const x of [-220,0,220])for(const y of [-220,0,220]){const point=screenToWorld(projectPoint({x,y}));assert.equal(point.x,x);assert.ok(Math.abs(point.y-y)<1e-10);}
- assert.deepEqual(projectPoint({x:10,y:100},8),{x:10,y:(100+floorOffset({x:10,y:100}))*.78-8});
+ assert.deepEqual(projectPoint({x:10,y:100},8),{x:10,y:(100+floorOffset({x:10,y:100}))*.70-8});
 });
 test('arena depth and rotating tops issue finite balanced drawing operations without mutating bodies',()=>{
  const {ctx,calls}=context(),before=JSON.stringify(body);
@@ -31,10 +31,10 @@ test('reduced motion removes impact bounce and drawing is deterministic',()=>{
 });
 
 test('bowl floor is deepest centrally, meets the rim, and stays level outside',()=>{
- assert.equal(floorOffset({x:0,y:0}),38);
+ assert.equal(floorOffset({x:0,y:0}),30);
  assert.equal(floorOffset({x:180,y:0}),0);
  assert.equal(floorOffset({x:200,y:50}),0);
- assert.equal(floorOffset({x:90,y:0}),28.5);
+ assert.equal(floorOffset({x:90,y:0}),28.125);
  for(let x=-220;x<=220;x+=22)for(let y=-220;y<=220;y+=11){
   const point=screenToWorld(projectPoint({x,y}));assert.ok(Math.abs(point.y-y)<1e-9);
  }
