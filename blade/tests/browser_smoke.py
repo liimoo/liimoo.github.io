@@ -2,6 +2,7 @@
 import asyncio
 import sys
 from playwright.async_api import async_playwright
+from browser_flow_helpers import enter_selection, start_battle, replay_battle
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8766'
 
@@ -14,20 +15,21 @@ async def main():
             page.on('pageerror', lambda error: errors.append(str(error)))
             await page.route('**/googletagmanager.com/**', lambda route: route.abort())
             await page.goto(BASE + '/blade/')
-            await page.locator('.region-card').last.wait_for()
+            await enter_selection(page)
             assert await page.locator('.region-card').count() == 10
-            assert await page.locator('#player-name').inner_text() == '大阪市'
-            assert (await page.locator('#player-grit').inner_text()).startswith('底力 ')
+            assert '大阪市' in await page.locator('#match-preview .player').inner_text()
             assert await page.locator('.region-stat').count() == 30
             assert '攻撃力' in await page.locator('.region-card').first.inner_text()
             assert await page.locator('.region-card meter').count() == 30
-            assert (await page.locator('#player-spin-power').inner_text()).startswith('回転力 ')
             assert 'ゲージが少ないほど' in await page.locator('#grit-help').inner_text()
-            assert await page.locator('#cpu-name').inner_text() != '大阪市'
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             await page.get_by_role('button', name='横浜市を選ぶ').click()
-            assert await page.locator('#player-name').inner_text() == '横浜市'
+            assert '横浜市' in await page.locator('#match-preview .player').inner_text()
             await page.locator('#shuffle').click()
+            await start_battle(page)
+            assert await page.locator('#player-name').inner_text() == '横浜市'
+            assert (await page.locator('#player-grit').inner_text()).startswith('底力 ')
+            assert (await page.locator('#player-spin-power').inner_text()).startswith('回転力 ')
             await page.locator('#battle').scroll_into_view_if_needed()
             # A tap near the edge must not launch; cancellation must not launch either.
             await page.locator('#arena').scroll_into_view_if_needed()
@@ -66,7 +68,7 @@ async def main():
             assert result_box['y']-arena_box['y']<arena_box['height']*.05
             assert result_box['height']<arena_box['height']*.55
             await page.locator('.arena-wrap').screenshot(path=f'/tmp/blade-result-{width}.png')
-            await page.locator('#again').click()
+            await replay_battle(page)
             assert await page.locator('#time').inner_text() == '45'
             assert await page.locator('#launch').is_enabled()
             await page.screenshot(path=f'/tmp/blade-{width}.png', full_page=True)
@@ -76,19 +78,20 @@ async def main():
         page = await browser.new_page(reduced_motion='reduce')
         await page.route('**/googletagmanager.com/**', lambda route: route.abort())
         await page.goto(BASE + '/blade/')
-        await page.locator('.region-card').last.wait_for()
+        await enter_selection(page)
+        await start_battle(page)
         await page.locator('#launch').click()
         await page.wait_for_function('document.getElementById("status").textContent.startsWith("決着！")', timeout=48000)
         await page.wait_for_function('!document.getElementById("result").hidden', timeout=1000)
-        await page.locator('#again').click()
+        await replay_battle(page)
         assert await page.locator('#launch').is_enabled()
         await page.close()
         print('Reduced motion: short finish and replay PASS')
         page = await browser.new_page()
         await page.route('**/regions.json', lambda route: route.fulfill(status=503, body='Unavailable'))
         await page.goto(BASE + '/blade/')
-        await page.wait_for_function('document.getElementById("status").textContent.includes("読み込めません")')
-        assert await page.locator('#launch').is_disabled()
+        await page.wait_for_function('document.getElementById("load-error").textContent.includes("読み込めません")')
+        assert await page.locator('#start-exhibition').is_disabled()
         print('Map failure: readable error and disabled controls PASS')
         await browser.close()
 

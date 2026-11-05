@@ -3,6 +3,7 @@ import asyncio
 import sys
 from pathlib import Path
 from playwright.async_api import async_playwright
+from browser_flow_helpers import enter_selection, start_battle, replay_battle
 BASE = sys.argv[1] if len(sys.argv)>1 else 'http://127.0.0.1:8766'
 async def main():
     source=(Path(__file__).parents[1]/'engine.mjs').read_text().replace('export function step(match,dt)', 'function actualStep(match,dt)')
@@ -25,7 +26,8 @@ export function step(match,dt) {{
             await page.route('**/audio.mjs*',lambda route:route.fulfill(content_type='text/javascript',body="window.cues=[];export const createBladeAudio=()=>({stop(){},disable(){},async enable(){return true},play(cue,options){window.cues.push({cue,options})}});"))
             await page.route('**/googletagmanager.com/**',lambda route:route.abort())
             await page.goto(BASE+'/blade/')
-            await page.locator('.region-card').last.wait_for()
+            await enter_selection(page)
+            await start_battle(page)
             await page.locator('#launch').click()
             await page.wait_for_function('document.getElementById("status").textContent.startsWith("決着！")')
             assert await page.locator('#result').is_hidden()
@@ -55,7 +57,7 @@ export function step(match,dt) {{
             count=await page.evaluate("window.dataLayer.filter(e=>e[0]==='event'&&e[1]==='blade_finish').length")
             assert count==1, 'finish callback must run once'
             await page.locator('#arena').screenshot(path=f'/tmp/blade-winner-{reason}-{x}.png')
-            await page.locator('#again').click()
+            await replay_battle(page)
             assert await page.locator('#launch').is_enabled()
             assert not errors,errors
             print(f'{reason} x={x}: cause, sequence, result, replay PASS')

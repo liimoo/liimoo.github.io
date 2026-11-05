@@ -1,9 +1,10 @@
+import {mountFlow} from './flow.mjs?v=20261105-screens';
 import {createBladeAudio} from './audio.mjs?v=20261105-final-hit';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-overkill';
 import {createMatch,launch,step,regionStats,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-overkill';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
-let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,lastHit=-1,finishEffect=null;
+let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastHit=-1,finishEffect=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const colors=['#71e6df','#f6ce80'];
 const gameAudio=createBladeAudio();
@@ -20,15 +21,15 @@ function reset(){
  }
  $('region-hint').textContent=regions[selected].hint;$('region-link').href=regions[selected].url;
  $('status').textContent='地域を選んだら、青い地図を引いて発射。';$('arena-caption').textContent='青い地図を手前に引いて、はなそう';$('share-status').textContent='';
- document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===selected)));controls(false);updateHud();draw(0);
+ document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===selected)));controls(false);updateHud();resize();draw(0);flow?.refresh();
 }
-function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power'))el.disabled=active;}
-function fire(direction,power){if(!match||match.phase!=='ready')return;match=launch(match,direction,power);aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{region:regions[selected].id,opponent:regions[opponent].id});}
+function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power,#battle-back'))el.disabled=active;}
+function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=launch(match,direction,power);aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{region:regions[selected].id,opponent:regions[opponent].id});}
 function fireFromControls(){const a=Number($('angle').value)*Math.PI/180;fire({x:Math.sin(a),y:-Math.cos(a)},Number($('power').value)/100);}
 $('launch').addEventListener('click',fireFromControls);
 for(const id of ['angle','power'])$(id).addEventListener('input',()=>{$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});
-$('shuffle').addEventListener('click',()=>{opponent=(opponent+1)%regions.length;if(opponent===selected)opponent=(opponent+1)%regions.length;reset();});
-$('again').addEventListener('click',reset);
+$('shuffle').addEventListener('click',()=>{const candidates=regions.map((_,i)=>i).filter(i=>i!==selected&&i!==opponent);opponent=candidates[Math.floor(Math.random()*candidates.length)]??(selected+1)%regions.length;flow?.refresh();gameAudio.play('select');});
+$('again').addEventListener('click',()=>flow?.show('vs'));
 $('sound').addEventListener('click',async()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').textContent=sound?'音 ON':'音 OFF';if(sound){const enabled=await gameAudio.enable();if(enabled&&sound)gameAudio.play('select');}else gameAudio.disable();});
 function setPause(value){aim=null;if(match?.phase!=='active')return;paused=value;if(value)gameAudio.stop();accumulator=0;last=0;$('pause-cover').hidden=!paused;$('pause').setAttribute('aria-label',paused?'対戦を再開':'一時停止');$('pause').textContent=paused?'▶':'Ⅱ';}
 $('pause').addEventListener('click',()=>setPause(!paused));$('resume').addEventListener('click',()=>setPause(false));
@@ -36,7 +37,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){gameAudio.
 window.addEventListener('blur',()=>{gameAudio.stop();setPause(true);});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&match?.phase==='active'){e.preventDefault();setPause(!paused);}});
 function pointer(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*440-220,y:(e.clientY-r.top)/r.height*440-220};}
-canvas.addEventListener('pointerdown',e=>{if(!match||match.phase!=='ready'||!e.isPrimary)return;const p=pointer(e),b=match.bodies[0];if(Math.hypot(p.x-b.x,p.y-b.y)>BODY_RADIUS+18)return;aim={pointerId:e.pointerId,start:p,end:p};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointerdown',e=>{if(flow?.screen!=='battle'||!match||match.phase!=='ready'||!e.isPrimary)return;const p=pointer(e),b=match.bodies[0];if(Math.hypot(p.x-b.x,p.y-b.y)>BODY_RADIUS+18)return;aim={pointerId:e.pointerId,start:p,end:p};canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener('pointermove',e=>{if(aim?.pointerId===e.pointerId)aim={...aim,end:pointer(e)};});
 canvas.addEventListener('pointerup',e=>{if(aim?.pointerId!==e.pointerId)return;const a=aim,p=pointer(e),v={x:a.start.x-p.x,y:a.start.y-p.y},length=Math.hypot(v.x,v.y);aim=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);if(length>7)fire(v,Math.min(1,Math.max(.2,length/85)));});
 for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{aim=null;});
@@ -89,12 +90,12 @@ function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
   }
   if(!wasDone&&finishEffect.done)finished();
  }
- draw(t);requestAnimationFrame(tick);
+ if(flow?.screen==='battle')draw(t);requestAnimationFrame(tick);
 }
-function resize(){canvas.width=canvas.height=Math.round(canvas.getBoundingClientRect().width*Math.min(devicePixelRatio||1,2));}
+function resize(){const width=canvas.getBoundingClientRect().width;if(width>0)canvas.width=canvas.height=Math.round(width*Math.min(devicePixelRatio||1,2));}
 new ResizeObserver(resize).observe(canvas);
 async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const response=await fetch('./regions.json');if(!response.ok)throw new Error('Map load failed');regions=await response.json();if(!Array.isArray(regions)||regions.length<2)throw new Error('Invalid maps');
- for(const [i,r] of regions.entries()){if(!Array.isArray(r.points)||r.points.length<3||!r.url.startsWith('/play/'))throw new Error('Invalid map');const b=document.createElement('button');b.className='region-card';b.type='button';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',`${r.name}を選ぶ`);const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','-1.1 -1.1 2.2 2.2');svg.setAttribute('aria-hidden','true');const polygon=document.createElementNS(svg.namespaceURI,'polygon');polygon.setAttribute('points',r.points.map(p=>p.join(',')).join(' '));svg.append(polygon);const name=document.createElement('strong');name.textContent=r.name;const label=document.createElement('small');label.textContent=r.kind==='市'?r.prefecture:'都道府県';b.append(svg,name,label);
+ for(const [i,r] of regions.entries()){if(!Array.isArray(r.points)||r.points.length<3||!r.url.startsWith('/play/'))throw new Error('Invalid map');const b=document.createElement('button');b.className='region-card';b.dataset.index=String(i);b.type='button';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',`${r.name}を選ぶ`);const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','-1.1 -1.1 2.2 2.2');svg.setAttribute('aria-hidden','true');const polygon=document.createElementNS(svg.namespaceURI,'polygon');polygon.setAttribute('points',r.points.map(p=>p.join(',')).join(' '));svg.append(polygon);const name=document.createElement('strong');name.textContent=r.name;const label=document.createElement('small');label.textContent=r.kind==='市'?r.prefecture:'都道府県';b.append(svg,name,label);
  const stats=regionStats(r),panel=document.createElement('span');panel.className='region-stats';
  for(const [title,value,max] of [['攻撃力',50,100],['回転力',stats.spinPower,100],['底力',stats.grit,100]]){
   const row=document.createElement('span');row.className='region-stat';
@@ -103,7 +104,13 @@ async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const re
   if(max){const meter=document.createElement('meter');meter.min=title==='攻撃力'?1:0;meter.max=max;meter.value=value;meter.setAttribute('aria-label',`${r.name}の${title}`);row.append(meter);}
   panel.append(row);
  }
- b.append(panel);b.addEventListener('click',()=>{selected=i;if(opponent===i)opponent=(i+1)%regions.length;reset();gameAudio.play('select');});$('regions').append(b);}
- selected=Math.max(0,regions.findIndex(r=>r.id==='city-osaka'));opponent=0;reset();resize();requestAnimationFrame(tick);
- }catch(error){$('status').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('region-hint').textContent='通信環境をご確認ください。';$('arena-caption').textContent='読み込みエラー';console.error('City Blade initialization failed:',error);}}
+ b.append(panel);$('regions').append(b);}
+ selected=Math.max(0,regions.findIndex(r=>r.id==='city-osaka'));opponent=0;
+ flow=mountFlow({regions,getSelection:()=>({selected,opponent}),select:(index,side)=>{
+  if(side==='cpu'){opponent=index;if(selected===index)selected=(index+1)%regions.length;}
+  else{selected=index;if(opponent===index)opponent=(index+1)%regions.length;}
+  gameAudio.play('select');
+ },startBattle:reset,leave:()=>{gameAudio.stop();match=null;finishEffect=null;aim=null;paused=false;accumulator=0;last=0;controls(false);$('result').hidden=true;$('pause-cover').hidden=true;}});
+ $('start-exhibition').disabled=false;$('shuffle').disabled=false;resize();requestAnimationFrame(tick);
+ }catch(error){$('load-error').hidden=false;$('load-error').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('status').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('region-hint').textContent='通信環境をご確認ください。';$('arena-caption').textContent='読み込みエラー';console.error('City Blade initialization failed:',error);}}
 init();
