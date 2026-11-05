@@ -18,6 +18,7 @@ async def main():
             assert await page.locator('.region-card').count() == 10
             assert await page.locator('#player-name').inner_text() == '大阪市'
             assert (await page.locator('#player-grit').inner_text()).startswith('底力 ')
+            assert (await page.locator('#player-spin-power').inner_text()).startswith('回転力 ')
             assert 'ゲージが少ないほど' in await page.locator('#grit-help').inner_text()
             assert await page.locator('#cpu-name').inner_text() != '大阪市'
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')

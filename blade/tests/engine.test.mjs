@@ -240,3 +240,43 @@ test('grit reduces own contact torque and increases opponent stamina damage with
  for(let i=0;i<2;i++) for(const key of ['vx','vy','x','y']) assert.equal(a.bodies[i][key],b.bodies[i][key]);
  assert.deepEqual(high,snapshot);
 });
+
+test('spin power derives from compactness and validates overrides independently of grit',()=>{
+ assert.equal(regionStats(square).spinPower,79);
+ assert.ok(regionStats(square).spinPower>regionStats(long).spinPower);
+ assert.equal(regionStats({...square,points:square.points.map(([x,y])=>[x*9,y*9])}).spinPower,79);
+ for(const spinPower of [0,50,100]) {
+  assert.equal(regionStats({...square,grit:0,spinPower}).spinPower,spinPower);
+  assert.equal(createMatch({...square,spinPower},long).bodies[0].spinPower,spinPower);
+ }
+ for(const spinPower of [-1,101,NaN,Infinity,'50',null])
+  assert.throws(()=>regionStats({...square,grit:0,spinPower}),/spinPower/i);
+});
+test('spin power reduces only passive stamina consumption while free motion stays identical',()=>{
+ const outputs=[0,50,100].map(spinPower=>{
+  const match=launch(createMatch({...square,spinPower}, {...long,spinPower}),{x:0,y:-1},.7);
+  const input={...match,bodies:match.bodies.map((b,i)=>({...b,x:i?120:-120,y:0,vx:0,vy:0,energy:.5}))};
+  const snapshot=structuredClone(input),out=step(input,.1);
+  assert.deepEqual(input,snapshot);
+  assert.equal(out.impacts.length,0);
+  for(const body of out.bodies)
+   assert.ok(Math.abs(body.energy-(.5-.1*.035*(1-.30*spinPower/100)))<1e-12);
+  return out;
+ });
+ for(const out of outputs) for(let i=0;i<2;i++)
+  for(const key of ['x','y','vx','vy','spin','angle','cruiseSpin'])
+   assert.equal(out.bodies[i][key],outputs[0].bodies[i][key]);
+});
+test('spin power does not directly alter contact damage, torque or knockback',()=>{
+ const outputs=[0,100].map(spinPower=>{
+  const input=gritContact(0);
+  return step({...input,bodies:input.bodies.map(b=>({...b,spinPower}))},1/120);
+ });
+ assert.ok(outputs.every(out=>out.impacts.length>0));
+ for(let i=0;i<2;i++) {
+  for(const key of ['x','y','vx','vy','spin','angle'])
+   assert.equal(outputs[0].bodies[i][key],outputs[1].bodies[i][key]);
+  const damage=outputs.map((out,index)=>.3-(1/120)*.035*(index?.7:1)-out.bodies[i].energy);
+  assert.ok(Math.abs(damage[0]-damage[1])<1e-12);
+ }
+});

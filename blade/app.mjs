@@ -1,5 +1,5 @@
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261104-winner-stop';
-import {createMatch,launch,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-grit-quadratic';
+import {createMatch,launch,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-spin-power';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,audio=null,lastHit=-1,finishEffect=null;
@@ -15,7 +15,10 @@ function reset(){
  $('result').hidden=true;$('pause-cover').hidden=true;$('pause').disabled=true;$('pause').textContent='Ⅱ';
  $('player-name').textContent=regions[selected].name;$('cpu-name').textContent=regions[opponent].name;$('opponent-name').textContent=regions[opponent].name;
  $('region-kind').textContent=regions[selected].kind==='市'?`${regions[selected].prefecture} / 市のかたち`:'都道府県のかたち';
- for(const [i,side] of ['player','cpu'].entries())$(`${side}-grit`).textContent=`底力 ${match.bodies[i].grit} / 100`;
+ for(const [i,side] of ['player','cpu'].entries()){
+  $(`${side}-grit`).textContent=`底力 ${match.bodies[i].grit} / 100`;
+  $(`${side}-spin-power`).textContent=`回転力 ${match.bodies[i].spinPower} / 100`;
+ }
  $('region-hint').textContent=regions[selected].hint;$('region-link').href=regions[selected].url;
  $('status').textContent='地域を選んだら、青い地図を引いて発射。';$('arena-caption').textContent='青い地図を手前に引いて、はなそう';$('share-status').textContent='';
  document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===selected)));controls(false);updateHud();draw(0);

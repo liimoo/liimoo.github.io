@@ -29,14 +29,21 @@ function regionShape(region) {
  return polygon.map(p=>({x:p.x/maxRadius*BODY_RADIUS,y:p.y/maxRadius*BODY_RADIUS}));
 }
 
+function statOverride(region,key,fallback) {
+ if(region[key]===undefined) return fallback;
+ if(!Number.isFinite(region[key])||region[key]<0||region[key]>100) throw new Error(`Invalid ${key}`);
+ return region[key];
+}
+
 export function regionStats(region) {
  const shape=regionShape(region);
- if(region.grit!==undefined) {
-  if(!Number.isFinite(region.grit)||region.grit<0||region.grit>100) throw new Error('Invalid grit');
-  return {grit:region.grit};
- }
  const shapeInertia=shape.reduce((sum,p)=>sum+dot(p,p),0)/shape.length*.6;
- return {grit:Math.round(clamp((shapeInertia-180)/(BODY_RADIUS**2*.6-180),0,1)*100)};
+ const area=Math.abs(shape.reduce((sum,p,i)=>sum+cross(p,shape[(i+1)%shape.length]),0))/2;
+ const perimeter=shape.reduce((sum,p,i)=>sum+Math.hypot(p.x-shape[(i+1)%shape.length].x,p.y-shape[(i+1)%shape.length].y),0);
+ return {
+  grit:statOverride(region,'grit',Math.round(clamp((shapeInertia-180)/(BODY_RADIUS**2*.6-180),0,1)*100)),
+  spinPower:statOverride(region,'spinPower',Math.round(clamp(4*Math.PI*area/perimeter**2,0,1)*100))
+ };
 }
 
 export function combatBonuses(body) {
@@ -45,8 +52,8 @@ export function combatBonuses(body) {
 }
 
 function body(region, side) {
- const shape=regionShape(region),{grit}=regionStats(region);
- return { region, shape, side, mass:1, radius:BODY_RADIUS, inertia:400, grit,
+ const shape=regionShape(region),{grit,spinPower}=regionStats(region);
+ return { region, shape, side, mass:1, radius:BODY_RADIUS, inertia:400, grit, spinPower,
   x:0, y:side==='player'?95:-95, vx:0, vy:0, angle:0, spin:0, energy:1 };
 }
 
@@ -137,7 +144,7 @@ function resolve(a,b,hit) {
 
 function move(b,dt) {
  // Arcade bowl: stamina is endurance, not a multiplier on visible rotation.
- const energy=Math.max(0,b.energy-dt*.035);
+ const energy=Math.max(0,b.energy-dt*.035*(1-.30*b.spinPower/100));
  const recovery=1-Math.exp(-4*dt);
  const spin=sustainedSpin(b,b.spin+(b.cruiseSpin-b.spin)*recovery,energy);
  const bowl=2.8,damping=Math.exp(-.13*dt);

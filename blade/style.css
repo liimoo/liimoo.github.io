@@ -15,3 +15,5 @@
 @media(max-width:480px){#result{inset:2% 3% auto;padding:6px 4px}#result h2{font-size:24px}#result .primary{font-size:11px;padding:8px 10px;gap:7px}#result .text-button{padding:7px 4px}}
 
 .fighter .grit-stat{display:block;font-size:11px;color:var(--gold);letter-spacing:0;margin:3px 0}#grit-help{font-size:11px;line-height:1.7;color:var(--gold)}
+
+#spin-help{font-size:11px;line-height:1.7;color:var(--cyan)}
