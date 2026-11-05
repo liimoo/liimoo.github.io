@@ -6,7 +6,7 @@ function fixture(overrides={}) {
   const sources=[],requests=[],warnings=[];let clock=1000;
   const context={state:'suspended',destination:{},resume:async()=>{context.state='running';},
     decodeAudioData:async()=>({}),createGain:()=>({gain:{value:0},connect(){}}),
-    createBufferSource:()=>{const s={connect(){},start(){s.started=true;},stop(){s.stopped=true;s.onended?.();},disconnect(){}};sources.push(s);return s;}};
+    createBufferSource:()=>{const s={playbackRate:{value:1},connect(){},start(){s.started=true;},stop(){s.stopped=true;s.onended?.();},disconnect(){}};sources.push(s);return s;}};
   const audio=createBladeAudio({contextFactory:()=>context,fetch:async url=>{requests.push(String(url));return {ok:true,arrayBuffer:async()=>new ArrayBuffer(1)};},now:()=>clock,warn:(...x)=>warnings.push(x),...overrides});
   return {audio,context,sources,requests,warnings,tick:ms=>{clock+=ms;}};
 }
@@ -82,4 +82,10 @@ test('critical chime bypasses normal hit cooldown and obeys mute',async()=>{
 test('critical asset has an independent cache version',()=>{
  assert.equal(new URL(CUES.critical).searchParams.get('v'),'20261105-critical-clear');
  assert.equal(new URL(CUES.hit).search,'');
+});
+
+test('friendly critical is bright and enemy critical is low pitched without changing hit audio',async()=>{
+ const f=fixture();await f.audio.enable();
+ await f.audio.play('critical');await f.audio.play('critical',{enemy:true});await f.audio.play('hit');
+ assert.deepEqual(f.sources.map(s=>s.playbackRate.value),[1.12,.65,1]);
 });

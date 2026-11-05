@@ -25,7 +25,7 @@ async def main():
             await page.route('**/googletagmanager.com/**',lambda r:r.abort())
             # Force several physics substeps per frame: events must not be lost.
             await page.add_init_script('const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>raf(t=>setTimeout(()=>cb(performance.now()),65));')
-            await page.add_init_script("window.criticalLabels=[];const original=CanvasRenderingContext2D.prototype.fillText;CanvasRenderingContext2D.prototype.fillText=function(text,...args){if(text==='クリティカル！')window.criticalLabels.push({text,args,time:performance.now()});return original.call(this,text,...args);};")
+            await page.add_init_script("window.criticalLabels=[];const original=CanvasRenderingContext2D.prototype.fillText;CanvasRenderingContext2D.prototype.fillText=function(text,...args){if(['会心の一撃！','痛恨の一撃！'].includes(text))window.criticalLabels.push({text,args,time:performance.now()});return original.call(this,text,...args);};")
             await page.goto('http://127.0.0.1:8766/blade/')
             await enter_selection(page)
             await start_battle(page)

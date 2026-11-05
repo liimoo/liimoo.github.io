@@ -25,7 +25,7 @@ async def main():
           const start=AudioBufferSourceNode.prototype.start;
           AudioBufferSourceNode.prototype.start=function(...args){const result=start.apply(this,args);window.audioStarts.push(bufferUrls.get(this.buffer));return result;};
           const fillText=CanvasRenderingContext2D.prototype.fillText;
-          CanvasRenderingContext2D.prototype.fillText=function(text,...args){if(text==='クリティカル！')window.criticalLabels.push({text,args,time:performance.now()});return fillText.call(this,text,...args);};
+          CanvasRenderingContext2D.prototype.fillText=function(text,...args){if(['会心の一撃！','痛恨の一撃！'].includes(text))window.criticalLabels.push({text,args,time:performance.now()});return fillText.call(this,text,...args);};
         ''')
         await page.goto('http://127.0.0.1:8766/blade/')
         await enter_selection(page)

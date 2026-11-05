@@ -244,7 +244,7 @@ export function step(match,dt) {
   const critical=criticalCollision(current,bodies,hit,slice);
   bodies=critical.bodies;
   const impactSerial=(current.impactSerial??0)+(hit?1:0);
-  if(hit) impacts=[...impacts.slice(-11),{...hit.point,age:0,id:impactSerial,
+  if(hit) impacts=[...impacts.slice(-11),{...hit.point,age:0,id:impactSerial,participants:[0,1],
    critical:critical.attackers.length>0,criticalAttackers:critical.attackers}];
   const elapsed=current.elapsed+slice,result=outcome(bodies,elapsed);
   current={...current,bodies,impacts,elapsed,result,phase:result?'finished':'active',
@@ -303,7 +303,7 @@ function teamCollisions(current,moved,slice) {
    :criticalCollision({...current,criticalRng:rng,criticalContact:contacts[key]},pair,hit,slice);
   rng=critical.rng;if(!friendly) contacts={...contacts,[key]:critical.contact};
   bodies=bodies.map((v,i)=>i===a?critical.bodies[0]:i===b?critical.bodies[1]:v);
-  if(hit) impacts=[...impacts.slice(-31),{...hit.point,age:0,id:++serial,critical:critical.attackers.length>0,
+  if(hit) impacts=[...impacts.slice(-31),{...hit.point,age:0,id:++serial,participants:[a,b],critical:critical.attackers.length>0,
    criticalAttackers:critical.attackers.map(i=>i===0?a:b),friendly}];
  }
  return {bodies,criticalRng:rng,criticalContacts:contacts,impactSerial:serial,impacts};

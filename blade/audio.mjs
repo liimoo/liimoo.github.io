@@ -52,7 +52,7 @@ export function createBladeAudio(options={}) {
       report('enable',error);return false;
     }
   }
-  async function play(cue,{decisive=false}={}){
+  async function play(cue,{decisive=false,enemy=false}={}){
     if(!enabled||!Object.hasOwn(CUES,cue)||!loads)return false;
     const token=generation;
     try{
@@ -62,6 +62,7 @@ export function createBladeAudio(options={}) {
       if(cue==='hit'&&!decisive&&timestamp-lastHit<HIT_COOLDOWN_MS)return false;
       if(voices.length>=MAX_VOICES)stopSource(voices[0]);
       const source=context.createBufferSource();source.buffer=buffer;
+      if(cue==='critical')source.playbackRate.value=enemy?.65:1.12;
       source.connect(master);source.onended=()=>release(source);
       voices=[...voices,source];
       try{source.start();}catch(error){release(source);throw error;}

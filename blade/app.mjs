@@ -1,10 +1,11 @@
+import {criticalPresentations} from './critical-presentation.mjs?v=20261106-sides';
 import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-basin';
 import {mountFlow} from './flow.mjs?v=20261105-zoom';
 import {chooseCity,defaultTeam} from './team-roster.mjs?v=20261105-team-panel';
 import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-basin';
-import {createBladeAudio} from './audio.mjs?v=20261105-critical-clear';
+import {createBladeAudio} from './audio.mjs?v=20261106-sides';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-basin';
-import {createMatch,createTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-opening';
+import {createMatch,createTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261106-sides';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let arenaLayer=null;
@@ -150,18 +151,21 @@ function collectImpacts(){
   if(hit.id!==undefined?hit.id<=lastImpactId:hit.age!==0)continue;
   if(hit.id!==undefined)lastImpactId=hit.id;
   const critical=hit.criticalAttackers?.length>0;
-  gameAudio.play(critical?'critical':'hit',{decisive:match.phase==='finished'});
-  if(critical)criticalFlashes=[...criticalFlashes,{...hit,age:0}];
+  const presentations=critical?criticalPresentations(hit,match.bodies):[];
+  if(presentations.length){
+   for(const enemy of new Set(presentations.map(p=>p.enemy)))gameAudio.play('critical',{enemy,decisive:match.phase==='finished'});
+   criticalFlashes=[...criticalFlashes,{...hit,presentations,age:0}];
+  }else gameAudio.play('hit',{decisive:match.phase==='finished'});
  }
 }
 function drawCriticalFlashes(){
- for(const flash of criticalFlashes){
+ for(const flash of criticalFlashes)for(const [slot,event] of flash.presentations.entries()){
   const fade=Math.max(0,1-flash.age/CRITICAL_FLASH_SECONDS);
-  ctx.save();ctx.globalAlpha=fade*(reduced?.35:.8);ctx.strokeStyle='#fff3b0';ctx.fillStyle='#fffce3';ctx.lineWidth=2;
-  if(!reduced){ctx.shadowColor='#ffe89a';ctx.shadowBlur=10;}
+  ctx.save();ctx.globalAlpha=fade*(reduced?.35:.8);ctx.strokeStyle=event.color;ctx.fillStyle=event.color;ctx.lineWidth=2;
+  if(!reduced){ctx.shadowColor=event.color;ctx.shadowBlur=10;}
   circle(flash.x,flash.y+floorOffset(flash),reduced?5:5+flash.age*34);ctx.fill();
   if(!reduced)for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;ctx.beginPath();ctx.moveTo(flash.x+Math.cos(a)*8,flash.y+floorOffset(flash)+Math.sin(a)*8);ctx.lineTo(flash.x+Math.cos(a)*(18+flash.age*20),flash.y+floorOffset(flash)+Math.sin(a)*(18+flash.age*20));ctx.stroke();}
-  for(const i of flash.criticalAttackers){
+  for(const i of [event.attacker]){
    if(mode==='team'?teamHidden(teamEffects,i):hiddenByFinish(finishEffect,i))continue;
    const b=mode==='team'?teamBody(teamEffects,i,match.bodies[i]):finishBody(finishEffect,i,match.bodies[i]);ctx.save();ctx.translate(b.x,b.y+floorOffset(b)-10-bodyBounce(b));ctx.rotate(b.angle);path(b.region.points,BODY_RADIUS);ctx.globalAlpha=fade*(reduced?.12:.4);ctx.fill();ctx.restore();
   }
@@ -169,10 +173,28 @@ function drawCriticalFlashes(){
   // Keep the brief glow subtle, but leave enough time to identify the event.
   const labelFade=Math.min(1,(CRITICAL_LABEL_SECONDS-flash.age)/.2);
   const x=Math.max(-155,Math.min(155,flash.x));
-  const y=Math.max(-160,Math.min(155,flash.y+floorOffset(flash)-48))-(reduced?0:Math.min(6,flash.age*12));
+  const y=Math.max(-160,Math.min(155-(flash.presentations.length-1)*52,flash.y+floorOffset(flash)-48))+slot*52-(reduced?0:Math.min(6,flash.age*12));
   ctx.save();ctx.globalAlpha=Math.max(0,labelFade);ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.lineWidth=4;ctx.lineJoin='round';ctx.strokeStyle='#071827';ctx.fillStyle='#fff1a8';
-  ctx.translate(x,y);ctx.scale(1,1/VIEW_TILT);ctx.strokeText('クリティカル！',0,0);ctx.fillText('クリティカル！',0,0);ctx.restore();
+  ctx.lineWidth=4;ctx.lineJoin='round';ctx.strokeStyle='#071827';ctx.fillStyle=event.color;
+  ctx.translate(x,y);ctx.scale(1,1/VIEW_TILT);ctx.strokeText(event.label,0,0);ctx.fillText(event.label,0,0);
+  if(mode==='team'){ctx.font='bold 8px sans-serif';ctx.strokeText(event.city+'の攻撃',0,14,260);ctx.fillText(event.city+'の攻撃',0,14,260);}
+  ctx.restore();
+ }
+}
+function updateCriticalHud(){
+ const bars=[...document.querySelectorAll('.scoreboard .energy')];
+ for(const bar of bars){bar.style.boxShadow='';bar.removeAttribute('data-critical');}
+ if(!match)return;
+ for(const flash of criticalFlashes){
+  if(flash.age>=.55)continue;
+  for(const event of flash.presentations){
+   const target=match.bodies[event.defender];
+   const bar=mode==='team'?document.querySelector(`.battle-member[data-body="${event.defender}"] .energy`):$(`${target.side}-energy`).parentElement;
+   if(!bar)continue;
+   const strength=reduced?2:2+Math.sin(flash.age*30)**2*3;
+   bar.style.boxShadow=`0 0 0 ${strength}px ${event.color}, 0 0 12px ${event.color}`;
+   bar.dataset.critical=event.enemy?'enemy':'player';
+  }
  }
 }
 function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
@@ -186,7 +208,7 @@ function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
   }
   if(!wasDone&&finishEffect.done)finished();
  }
- if(flow?.screen==='battle')draw(t);requestAnimationFrame(tick);
+ updateCriticalHud();if(flow?.screen==='battle')draw(t);requestAnimationFrame(tick);
 }
 function resize(){const width=canvas.getBoundingClientRect().width;if(width>0)canvas.width=canvas.height=Math.round(width*Math.min(devicePixelRatio||1,2));}
 new ResizeObserver(resize).observe(canvas);
