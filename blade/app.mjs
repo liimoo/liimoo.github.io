@@ -1,16 +1,15 @@
+import {createBladeAudio} from './audio.mjs?v=20261105-se';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-overkill';
 import {createMatch,launch,step,regionStats,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-overkill';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
-let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,audio=null,lastHit=-1,finishEffect=null;
+let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,lastHit=-1,finishEffect=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const colors=['#71e6df','#f6ce80'];
-function tone(freq=400,length=.08){
- if(!sound)return;
- try{audio??=new(window.AudioContext||window.webkitAudioContext)();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.frequency.setValueAtTime(freq,audio.currentTime);o.frequency.exponentialRampToValueAtTime(freq*.5,audio.currentTime+length);g.gain.setValueAtTime(.07,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+length);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+length);}catch{sound=false;$('sound').textContent='音 OFF';$('sound').setAttribute('aria-pressed','false');}
-}
+const gameAudio=createBladeAudio();
 function track(name,params={}){if(typeof window.gtag==='function')window.gtag('event',name,{...params,page_path:location.pathname});}
 function reset(){
+ gameAudio.stop();
  match=createMatch(regions[selected],regions[opponent],seed++);finishEffect=null;aim=null;paused=false;accumulator=0;lastHit=-1;
  $('result').hidden=true;$('pause-cover').hidden=true;$('pause').disabled=true;$('pause').textContent='Ⅱ';
  $('player-name').textContent=regions[selected].name;$('cpu-name').textContent=regions[opponent].name;$('opponent-name').textContent=regions[opponent].name;
@@ -24,17 +23,17 @@ function reset(){
  document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===selected)));controls(false);updateHud();draw(0);
 }
 function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power'))el.disabled=active;}
-function fire(direction,power){if(!match||match.phase!=='ready')return;match=launch(match,direction,power);aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';tone(660,.16);track('blade_start',{region:regions[selected].id,opponent:regions[opponent].id});}
+function fire(direction,power){if(!match||match.phase!=='ready')return;match=launch(match,direction,power);aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{region:regions[selected].id,opponent:regions[opponent].id});}
 function fireFromControls(){const a=Number($('angle').value)*Math.PI/180;fire({x:Math.sin(a),y:-Math.cos(a)},Number($('power').value)/100);}
 $('launch').addEventListener('click',fireFromControls);
 for(const id of ['angle','power'])$(id).addEventListener('input',()=>{$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});
 $('shuffle').addEventListener('click',()=>{opponent=(opponent+1)%regions.length;if(opponent===selected)opponent=(opponent+1)%regions.length;reset();});
 $('again').addEventListener('click',reset);
-$('sound').addEventListener('click',()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').textContent=sound?'音 ON':'音 OFF';if(sound)tone();});
-function setPause(value){aim=null;if(match?.phase!=='active')return;paused=value;accumulator=0;last=0;$('pause-cover').hidden=!paused;$('pause').setAttribute('aria-label',paused?'対戦を再開':'一時停止');$('pause').textContent=paused?'▶':'Ⅱ';}
+$('sound').addEventListener('click',async()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').textContent=sound?'音 ON':'音 OFF';if(sound){const enabled=await gameAudio.enable();if(enabled&&sound)gameAudio.play('select');}else gameAudio.disable();});
+function setPause(value){aim=null;if(match?.phase!=='active')return;paused=value;if(value)gameAudio.stop();accumulator=0;last=0;$('pause-cover').hidden=!paused;$('pause').setAttribute('aria-label',paused?'対戦を再開':'一時停止');$('pause').textContent=paused?'▶':'Ⅱ';}
 $('pause').addEventListener('click',()=>setPause(!paused));$('resume').addEventListener('click',()=>setPause(false));
-document.addEventListener('visibilitychange',()=>{if(document.hidden)setPause(true);});
-window.addEventListener('blur',()=>setPause(true));
+document.addEventListener('visibilitychange',()=>{if(document.hidden){gameAudio.stop();setPause(true);}});
+window.addEventListener('blur',()=>{gameAudio.stop();setPause(true);});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&match?.phase==='active'){e.preventDefault();setPause(!paused);}});
 function pointer(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*440-220,y:(e.clientY-r.top)/r.height*440-220};}
 canvas.addEventListener('pointerdown',e=>{if(!match||match.phase!=='ready'||!e.isPrimary)return;const p=pointer(e),b=match.bodies[0];if(Math.hypot(p.x-b.x,p.y-b.y)>BODY_RADIUS+18)return;aim={pointerId:e.pointerId,start:p,end:p};canvas.setPointerCapture(e.pointerId);});
@@ -46,7 +45,7 @@ function beginFinish(previousBodies){
  finishEffect=createFinishEffect(match,reduced,previousBodies);$('pause').disabled=true;aim=null;
  $('status').textContent=match.result.reason==='time'?'決着！ 時間切れ':match.result.reason==='ringout'?'決着！ 場外へ飛ばされました':'決着！ ゲージ切れで回転が止まります';
  $('arena-caption').textContent=match.result.reason==='time'?'時間切れ':match.result.reason==='ringout'?'場外！':'ゲージ切れ → 回転停止';
- if(finishEffect.reason==='ringout')tone(450,.25);
+ if(finishEffect.reason==='ringout')gameAudio.play('ringout');
 }
 function finished(){const {winner,reason}=match.result;const name=regions[selected].name,other=regions[opponent].name;
  $('result-title').textContent=winner==='player'?'あなたの勝ち！':winner==='cpu'?'CPUの勝ち！':'引き分け！';
@@ -54,7 +53,7 @@ function finished(){const {winner,reason}=match.result;const name=regions[select
  const why=match.result.tiebreak==='remaining-energy'?'同時にゲージ切れ・超過ダメージの少ない側の勝利':reason==='ringout'?'場外で決着':reason==='spin'?'回転スタミナがなくなって決着':'45秒、どちらもゆずらず';
  $('result-detail').textContent=`${name} vs ${other} · ${why}`;$('status').textContent=`${$('result-title').textContent} ${why}`;$('arena-caption').textContent='地域や発射の向きを変えて、もう一戦。';$('result').hidden=false;$('pause').disabled=true;
  // Selection is enabled after a match, but launch remains disabled until reset.
- controls(false);$('launch').disabled=true;tone(winner==='player'?880:260,.3);track('blade_finish',{region:regions[selected].id,winner,reason,duration:Math.round(match.elapsed)});
+ controls(false);$('launch').disabled=true;gameAudio.play(winner==='player'?'win':winner==='cpu'?'lose':'draw');track('blade_finish',{region:regions[selected].id,winner,reason,duration:Math.round(match.elapsed)});
 }
 $('share').addEventListener('click',async()=>{if(!match?.result)return;const text=`都市ブレード〈試作版〉 ${regions[selected].name} vs ${regions[opponent].name}：${$('result-title').textContent}`;
  try{if(navigator.share)await navigator.share({title:'都市ブレード',text,url:'https://japan-map.app/blade/'});else if(navigator.clipboard){await navigator.clipboard.writeText(`${text}\nhttps://japan-map.app/blade/`);$('share-status').textContent='結果とリンクをコピーしました。';}else $('share-status').textContent='このページのURLをコピーして共有できます。';}catch(e){if(e.name!=='AbortError')$('share-status').textContent='このページのURLをコピーして共有できます。';}});
@@ -82,11 +81,11 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
  if(match.phase==='ready'){const b=match.bodies[0];let dx,dy,power;if(aim){dx=aim.start.x-aim.end.x;dy=aim.start.y-aim.end.y;power=Math.min(1,Math.hypot(dx,dy)/85);}else{const a=Number($('angle').value)*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=Number($('power').value)/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(b.x+ux*38,b.y+uy*38);ctx.lineTo(end.x,end.y);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(end.x-ux*8-uy*5,end.y-uy*8+ux*5);ctx.lineTo(end.x,end.y);ctx.lineTo(end.x-ux*8+uy*5,end.y-uy*8-ux*5);ctx.stroke();}
 }
 function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
- if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){const previousBodies=match.bodies;match=step(match,1/120);accumulator-=1/120;if(match.phase==='finished'){beginFinish(previousBodies);accumulator=0;break;}}const fresh=match.impacts.find(p=>p.age<.015);if(match.phase==='active'&&fresh&&match.elapsed-lastHit>.12){tone(180,.045);lastHit=match.elapsed;}updateHud();}
+ if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){const previousBodies=match.bodies;match=step(match,1/120);accumulator-=1/120;if(match.phase==='finished'){beginFinish(previousBodies);accumulator=0;break;}}const fresh=match.impacts.find(p=>p.age<.015);if(match.phase==='active'&&fresh&&match.elapsed-lastHit>.12){gameAudio.play('hit');lastHit=match.elapsed;}updateHud();}
  if(finishEffect&&!document.hidden){
   const previousAge=finishEffect.age,wasDone=finishEffect.done;finishEffect=advanceFinishEffect(finishEffect,dt);
   if(previousAge<finishEffect.burstAt&&finishEffect.age>=finishEffect.burstAt&&finishEffect.losers.some(i=>canExplode(finishEffect,i))){
-   tone(110,.4);tone(1000,.13);$('status').textContent='決着！ 地図が砕け散る！';
+   gameAudio.play('break');$('status').textContent='決着！ 地図が砕け散る！';
   }
   if(!wasDone&&finishEffect.done)finished();
  }
@@ -104,7 +103,7 @@ async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const re
   if(max){const meter=document.createElement('meter');meter.min=title==='攻撃力'?1:0;meter.max=max;meter.value=value;meter.setAttribute('aria-label',`${r.name}の${title}`);row.append(meter);}
   panel.append(row);
  }
- b.append(panel);b.addEventListener('click',()=>{selected=i;if(opponent===i)opponent=(i+1)%regions.length;reset();});$('regions').append(b);}
+ b.append(panel);b.addEventListener('click',()=>{selected=i;if(opponent===i)opponent=(i+1)%regions.length;reset();gameAudio.play('select');});$('regions').append(b);}
  selected=Math.max(0,regions.findIndex(r=>r.id==='city-osaka'));opponent=0;reset();resize();requestAnimationFrame(tick);
  }catch(error){$('status').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('region-hint').textContent='通信環境をご確認ください。';$('arena-caption').textContent='読み込みエラー';console.error('City Blade initialization failed:',error);}}
 init();

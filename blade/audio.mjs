@@ -1,0 +1,73 @@
+// Web Audio is created only after the player's sound/launch gesture.
+export const CUES = Object.freeze(Object.fromEntries(
+  ['select','launch','hit','ringout','break','win','lose','draw']
+    .map(name=>[name,new URL(`./audio/${name}.mp3`,import.meta.url).href])
+));
+const MAX_VOICES=4,HIT_COOLDOWN_MS=180,MASTER_GAIN=.22;
+
+export function createBladeAudio(options={}) {
+  const contextFactory=options.contextFactory??(()=>new (globalThis.AudioContext??globalThis.webkitAudioContext)());
+  const fetchAudio=options.fetch??globalThis.fetch.bind(globalThis);
+  const now=options.now??(()=>performance.now());
+  const warn=options.warn??((...args)=>console.warn(...args));
+  let context,master,loads,enabled=false,generation=0,voices=[],lastHit=-Infinity;
+  const warned=new Set();
+  const report=(key,error)=>{
+    if(!warned.has(key)){warned.add(key);warn(`都市ブレードの効果音を再生できません (${key})`,error);}
+  };
+  const load=async(name,url)=>{
+    try {
+      const response=await fetchAudio(url);
+      if(!response.ok)throw new Error(`HTTP ${response.status}`);
+      return await context.decodeAudioData(await response.arrayBuffer());
+    }catch(error){report(name,error);return null;}
+  };
+  const release=source=>{
+    voices=voices.filter(item=>item!==source);
+    source.disconnect();
+  };
+  const stopSource=source=>{
+    try{source.stop();}catch(error){report('stop',error);}
+    release(source);
+  };
+  function stop(){
+    generation++;lastHit=-Infinity;
+    for(const source of [...voices])stopSource(source);
+  }
+  function disable(){enabled=false;stop();}
+  async function enable(){
+    enabled=true;
+    const token=generation;
+    try{
+      if(!context){
+        context=contextFactory();master=context.createGain();master.gain.value=MASTER_GAIN;
+        master.connect(context.destination);
+        loads=Object.fromEntries(Object.entries(CUES).map(([name,url])=>[name,load(name,url)]));
+      }
+      if(context.state!=='running')await context.resume();
+      await Promise.all(Object.values(loads));
+      return enabled&&token===generation;
+    }catch(error){
+      if(token===generation)enabled=false;
+      report('enable',error);return false;
+    }
+  }
+  async function play(cue){
+    if(!enabled||!Object.hasOwn(CUES,cue)||!loads)return false;
+    const token=generation;
+    try{
+      const buffer=await loads[cue];
+      if(!buffer||!enabled||token!==generation||context.state!=='running')return false;
+      const timestamp=now();
+      if(cue==='hit'&&timestamp-lastHit<HIT_COOLDOWN_MS)return false;
+      if(voices.length>=MAX_VOICES)stopSource(voices[0]);
+      const source=context.createBufferSource();source.buffer=buffer;
+      source.connect(master);source.onended=()=>release(source);
+      voices=[...voices,source];
+      try{source.start();}catch(error){release(source);throw error;}
+      if(cue==='hit')lastHit=timestamp;
+      return true;
+    }catch(error){report(cue,error);return false;}
+  }
+  return Object.freeze({enable,disable,stop,play});
+}
