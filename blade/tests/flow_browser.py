@@ -31,7 +31,7 @@ export function step(match,dt) {
             assert await page.locator('#title-screen button:disabled').count() >= 2
             await enter_selection(page)
             assert await page.locator('#title-screen').is_hidden()
-            assert await page.locator('.region-card').count() == 10
+            assert await page.locator('.region-card').count() < 200
             assert await page.locator('#prefecture-list').is_visible()
             assert await page.locator('#selection-map').is_visible()
             sidebar = page.locator('.picker-sidebar')
@@ -49,11 +49,16 @@ export function step(match,dt) {
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             await page.locator('.prefecture-card[data-prefecture="大阪府"]').click()
             assert await page.locator('#prefecture-list').is_hidden()
+            assert await page.locator('.region-card:visible').count() > 40
+            await page.locator('#region-search').fill('おおさかし')
             assert await page.locator('.region-card:visible').count() == 2
+            await page.locator('#region-search').fill('存在しない都市')
+            assert await page.locator('#no-regions').is_visible()
+            await page.locator('#region-search').fill('')
             await page.locator('#regions').get_by_role('button',name='大阪市を選ぶ',exact=True).click()
             assert '大阪市' in await page.locator('#selected-region-detail').inner_text()
-            assert await page.locator('#selected-region-detail meter').count() == 3
-            assert '攻撃力' in await page.locator('#selected-region-detail').inner_text()
+            assert await page.locator('#selected-region-detail meter').count() == 0
+            assert '全地域共通' in await page.locator('#selected-region-detail').inner_text()
             await page.locator('#prefecture-back').click()
             assert await page.locator('#prefecture-list').is_visible()
             await page.locator('#select-cpu').click()
@@ -113,6 +118,54 @@ export function step(match,dt) {
         await start_battle(page)
         assert await page.locator('#launch').is_enabled()
         print('Background map failure: list selection and battle remain usable PASS')
+        await page.close()
+        page = await browser.new_page()
+        await page.route('**/googletagmanager.com/**', lambda route: route.abort())
+        await page.route('**/selection-maps/27.json*', lambda route: route.fulfill(status=503, body='Unavailable'))
+        await page.goto(BASE+'/blade/')
+        await enter_selection(page)
+        await page.locator('.prefecture-card[data-prefecture="大阪府"]').click()
+        await page.wait_for_function("document.getElementById('map-caption').textContent.includes('読み込めません')")
+        await page.locator('#regions').get_by_role('button',name='大阪市を選ぶ',exact=True).click()
+        await start_battle(page)
+        assert await page.locator('#player-name').inner_text() == '大阪市'
+        print('Prefecture map failure: list selection and battle remain usable PASS')
+        await page.close()
+        page = await browser.new_page()
+        await page.route('**/googletagmanager.com/**', lambda route: route.abort())
+        async def delayed_osaka(route):
+            await asyncio.sleep(1)
+            await route.continue_()
+        await page.route('**/selection-maps/27.json*', delayed_osaka)
+        await page.goto(BASE+'/blade/')
+        await enter_selection(page)
+        await page.wait_for_function("document.querySelectorAll('#selection-map .map-region').length === 47")
+        await page.locator('.prefecture-card[data-prefecture="大阪府"]').click()
+        await page.locator('#prefecture-back').click()
+        await page.locator('.prefecture-card[data-prefecture="沖縄県"]').click()
+        await page.locator('#selection-map [aria-label="石垣市を選ぶ"]').wait_for()
+        await page.wait_for_timeout(1500)
+        assert await page.locator('#picker-title').inner_text() == '沖縄県'
+        assert await page.locator('#selection-map [aria-label="大阪市を選ぶ"]').count() == 0
+        await page.locator('#regions').get_by_role('button',name='石垣市を選ぶ',exact=True).click()
+        await start_battle(page)
+        assert await page.locator('#player-name').inner_text() == '石垣市'
+        print('Late map response cannot replace newly selected prefecture PASS')
+        await page.close()
+        page = await browser.new_page()
+        await page.route('**/googletagmanager.com/**', lambda route: route.abort())
+        await page.goto(BASE+'/blade/')
+        await enter_selection(page)
+        await page.locator('.prefecture-card[data-prefecture="北海道"]').click()
+        await page.locator('#regions').get_by_role('button',name='伊達市を選ぶ',exact=True).click()
+        await page.locator('#prefecture-back').click()
+        await page.locator('.prefecture-card[data-prefecture="福島県"]').click()
+        other_date = page.locator('#selection-map [aria-label="伊達市を選ぶ"]')
+        await other_date.wait_for()
+        assert not await other_date.evaluate('(el)=>el.classList.contains("map-selected")')
+        await page.locator('#regions').get_by_role('button',name='伊達市を選ぶ',exact=True).click()
+        assert await other_date.evaluate('(el)=>el.classList.contains("map-selected")')
+        print('Same city name in different prefectures retains distinct selection PASS')
         await browser.close()
 
 asyncio.run(main())

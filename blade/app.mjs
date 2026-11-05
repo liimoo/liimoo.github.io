@@ -1,7 +1,7 @@
-import {mountFlow} from './flow.mjs?v=20261105-map-picker';
+import {mountFlow} from './flow.mjs?v=20261105-national';
 import {createBladeAudio} from './audio.mjs?v=20261105-final-hit';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-overkill';
-import {createMatch,launch,step,regionStats,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-overkill';
+import {createMatch,launch,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-overkill';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastHit=-1,finishEffect=null;
@@ -14,14 +14,14 @@ function reset(){
  match=createMatch(regions[selected],regions[opponent],seed++);finishEffect=null;aim=null;paused=false;accumulator=0;lastHit=-1;
  $('result').hidden=true;$('pause-cover').hidden=true;$('pause').disabled=true;$('pause').textContent='Ⅱ';
  $('player-name').textContent=regions[selected].name;$('cpu-name').textContent=regions[opponent].name;$('opponent-name').textContent=regions[opponent].name;
- $('region-kind').textContent=regions[selected].kind==='市'?`${regions[selected].prefecture} / 市のかたち`:'都道府県のかたち';
+ $('region-kind').textContent=regions[selected].name!==regions[selected].prefecture?`${regions[selected].prefecture} / 市区町村のかたち`:'都道府県のかたち';
  for(const [i,side] of ['player','cpu'].entries()){
   $(`${side}-grit`).textContent=`底力 ${match.bodies[i].grit} / 100`;
   $(`${side}-spin-power`).textContent=`回転力 ${match.bodies[i].spinPower} / 100`;
  }
  $('region-hint').textContent=regions[selected].hint;$('region-link').href=regions[selected].url;
  $('status').textContent='地域を選んだら、青い地図を引いて発射。';$('arena-caption').textContent='青い地図を手前に引いて、はなそう';$('share-status').textContent='';
- document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===selected)));controls(false);updateHud();resize();draw(0);flow?.refresh();
+ document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(Number(b.dataset.index)===selected)));controls(false);updateHud();resize();draw(0);flow?.refresh();
 }
 function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power,#battle-back'))el.disabled=active;}
 function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=launch(match,direction,power);aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{region:regions[selected].id,opponent:regions[opponent].id});}
@@ -94,17 +94,8 @@ function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
 }
 function resize(){const width=canvas.getBoundingClientRect().width;if(width>0)canvas.width=canvas.height=Math.round(width*Math.min(devicePixelRatio||1,2));}
 new ResizeObserver(resize).observe(canvas);
-async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const response=await fetch('./regions.json');if(!response.ok)throw new Error('Map load failed');regions=await response.json();if(!Array.isArray(regions)||regions.length<2)throw new Error('Invalid maps');
- for(const [i,r] of regions.entries()){if(!Array.isArray(r.points)||r.points.length<3||!r.url.startsWith('/play/'))throw new Error('Invalid map');const b=document.createElement('button');b.className='region-card';b.dataset.index=String(i);b.type='button';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',`${r.name}を選ぶ`);const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','-1.1 -1.1 2.2 2.2');svg.setAttribute('aria-hidden','true');const polygon=document.createElementNS(svg.namespaceURI,'polygon');polygon.setAttribute('points',r.points.map(p=>p.join(',')).join(' '));svg.append(polygon);const name=document.createElement('strong');name.textContent=r.name;const label=document.createElement('small');label.textContent=r.kind==='市'?r.prefecture:'都道府県';b.append(svg,name,label);
- const stats=regionStats(r),panel=document.createElement('span');panel.className='region-stats';
- for(const [title,value,max] of [['攻撃力',50,100],['回転力',stats.spinPower,100],['底力',stats.grit,100]]){
-  const row=document.createElement('span');row.className='region-stat';
-  const caption=document.createElement('span');caption.textContent=title;
-  const number=document.createElement('b');number.textContent=String(value);row.append(caption,number);
-  if(max){const meter=document.createElement('meter');meter.min=title==='攻撃力'?1:0;meter.max=max;meter.value=value;meter.setAttribute('aria-label',`${r.name}の${title}`);row.append(meter);}
-  panel.append(row);
- }
- b.append(panel);$('regions').append(b);}
+async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const response=await fetch('./regions.json?v=20261105-national');if(!response.ok)throw new Error('Map load failed');regions=await response.json();if(!Array.isArray(regions)||regions.length<2)throw new Error('Invalid maps');
+ for(const r of regions){if(!Array.isArray(r.points)||r.points.length<3||!r.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))||typeof r.url!=='string'||!r.url.startsWith('/play/'))throw new Error('Invalid map');}
  selected=Math.max(0,regions.findIndex(r=>r.id==='city-osaka'));opponent=0;
  flow=mountFlow({regions,getSelection:()=>({selected,opponent}),select:(index,side)=>{
   if(side==='cpu'){opponent=index;if(selected===index)selected=(index+1)%regions.length;}

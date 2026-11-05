@@ -1,5 +1,4 @@
-import {mountPicker} from './picker.mjs?v=20261105-map-picker';
-import {regionStats} from './engine.mjs?v=20261105-overkill';
+import {mountPicker} from './picker.mjs?v=20261105-national';
 const $=id=>document.getElementById(id);
 const SVG='http://www.w3.org/2000/svg';
 function preview(region,side){
@@ -8,7 +7,7 @@ function preview(region,side){
  const map=document.createElementNS(SVG,'svg');map.setAttribute('viewBox','-1.1 -1.1 2.2 2.2');map.setAttribute('aria-hidden','true');
  const polygon=document.createElementNS(SVG,'polygon');polygon.setAttribute('points',region.points.map(p=>p.join(',')).join(' '));map.append(polygon);
  const title=document.createElement('h3');title.textContent=region.name;
- const stats=regionStats(region),details=document.createElement('p');details.textContent=`攻撃力 50　回転力 ${stats.spinPower}　底力 ${stats.grit}`;
+ const details=document.createElement('p');details.textContent=region.name===region.prefecture?'県全体':region.prefecture;
  panel.append(label,map,title,details);return panel;
 }
 export function mountFlow({regions,getSelection,select,startBattle,leave}){
@@ -24,7 +23,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave}){
   $('select-cpu').setAttribute('aria-pressed',String(side==='cpu'));
   $('opponent-name').textContent=regions[opponent].name;
   const region=regions[side==='player'?selected:opponent];
-  $('region-kind').textContent=region.kind==='市'?`${region.prefecture} / 市のかたち`:'都道府県のかたち';
+  $('region-kind').textContent=region.name!==region.prefecture?`${region.prefecture} / 市区町村のかたち`:'都道府県のかたち';
   $('region-hint').textContent=region.hint;$('region-link').href=region.url;
   picker?.refresh();
  }

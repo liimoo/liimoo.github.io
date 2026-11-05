@@ -16,12 +16,9 @@ async def main():
             await page.route('**/googletagmanager.com/**', lambda route: route.abort())
             await page.goto(BASE + '/blade/')
             await enter_selection(page)
-            assert await page.locator('.region-card').count() == 10
+            assert await page.locator('.prefecture-card').count() == 47
             assert '大阪市' in await page.locator('#match-preview .player').inner_text()
-            assert await page.locator('.region-stat').count() == 30
-            assert '攻撃力' in await page.locator('.region-card').first.inner_text()
-            assert await page.locator('.region-card meter').count() == 30
-            assert 'ゲージが少ないほど' in await page.locator('#grit-help').inner_text()
+            assert await page.locator('.region-card meter').count() == 0
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             await page.locator('.prefecture-card[data-prefecture="神奈川県"]').click()
             await page.locator('#regions').get_by_role('button', name='横浜市を選ぶ').click()
@@ -89,7 +86,7 @@ async def main():
         await page.close()
         print('Reduced motion: short finish and replay PASS')
         page = await browser.new_page()
-        await page.route('**/regions.json', lambda route: route.fulfill(status=503, body='Unavailable'))
+        await page.route('**/regions.json*', lambda route: route.fulfill(status=503, body='Unavailable'))
         await page.goto(BASE + '/blade/')
         await page.wait_for_function('document.getElementById("load-error").textContent.includes("読み込めません")')
         assert await page.locator('#start-exhibition').is_disabled()

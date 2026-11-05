@@ -2,7 +2,7 @@
 async def enter_selection(page):
     await page.locator('#start-exhibition').click()
     await page.locator('#choose-region').wait_for()
-    await page.locator('.region-card').last.wait_for(state='attached')
+    await page.locator('.prefecture-card').last.wait_for(state='attached')
 
 async def start_battle(page):
     await page.locator('#confirm-match').click()
