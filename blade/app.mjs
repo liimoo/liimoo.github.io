@@ -40,7 +40,7 @@ function prepareLaunchControls(){
  stageControls.hidden=!team;
  if(team){stageControls.append(launchTabs,launchHome);launchHome.append($('launch'));}else{launchAnchor.after(launchTabs,launchHome);launchHome.append($('launch'));}
  if(team)syncLaunchSliders();refreshLaunchControls();
- document.querySelector('.control-note').textContent=team?'都市名を選んで、それぞれの角度・強さを調整。舞台の「発射する」で3都市が一斉に出陣します。':'引っ張る操作の代わりに、上の調整と発射ボタンでも遊べます。';
+ document.querySelector('.control-note').textContent=team?'駒を引っ張るか、都市名とスライダーで角度・強さを調整。「発射する」を押すまで始まりません。':'引っ張る操作の代わりに、上の調整と発射ボタンでも遊べます。';
 }
 function reset(){
  gameAudio.stop();
@@ -70,9 +70,18 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){gameAudio.
 window.addEventListener('blur',()=>{gameAudio.stop();setPause(true);});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&match?.phase==='active'){e.preventDefault();setPause(!paused);}});
 function pointer(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*440-220,y:(e.clientY-r.top)/r.height*440-220};}
-canvas.addEventListener('pointerdown',e=>{if(flow?.screen!=='battle'||!match||match.phase!=='ready'||!e.isPrimary)return;const p=pointer(e),b=match.bodies.find(b=>b.side==='player'&&Math.hypot(p.x-b.x,p.y-b.y)<=BODY_RADIUS+18);if(!b)return;if(mode==='team'){launchCity=match.bodies.indexOf(b);syncLaunchSliders();refreshLaunchControls();return;}aim={pointerId:e.pointerId,start:p,end:p,bodyIndex:match.bodies.indexOf(b)};canvas.setPointerCapture(e.pointerId);});
-canvas.addEventListener('pointermove',e=>{if(aim?.pointerId===e.pointerId)aim={...aim,end:pointer(e)};});
-canvas.addEventListener('pointerup',e=>{if(aim?.pointerId!==e.pointerId)return;const a=aim,p=pointer(e),v={x:a.start.x-p.x,y:a.start.y-p.y},length=Math.hypot(v.x,v.y);aim=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);if(length>7)fire(v,Math.min(1,Math.max(.2,length/85)));});
+canvas.addEventListener('pointerdown',e=>{if(flow?.screen!=='battle'||!match||match.phase!=='ready'||!e.isPrimary)return;const p=pointer(e),b=match.bodies.find(b=>b.side==='player'&&Math.hypot(p.x-b.x,p.y-b.y)<=BODY_RADIUS+18);if(!b)return;if(mode==='team'){launchCity=match.bodies.indexOf(b);syncLaunchSliders();refreshLaunchControls();}aim={pointerId:e.pointerId,start:p,end:p,bodyIndex:match.bodies.indexOf(b)};canvas.setPointerCapture(e.pointerId);});
+function adjustTeamAim(end){
+ if(mode!=='team'||!aim)return;
+ const dx=aim.start.x-end.x,dy=aim.start.y-end.y,length=Math.hypot(dx,dy);
+ if(length<=7)return;
+ const angle=Math.round(Math.max(-65,Math.min(65,Math.atan2(dx,-dy)*180/Math.PI)));
+ const power=Math.round(Math.max(20,Math.min(100,length/85*100)));
+ launchSettings=launchSettings.map((setting,i)=>i===aim.bodyIndex?{angle,power}:setting);
+ syncLaunchSliders();refreshLaunchControls();
+}
+canvas.addEventListener('pointermove',e=>{if(aim?.pointerId===e.pointerId){aim={...aim,end:pointer(e)};adjustTeamAim(aim.end);}});
+canvas.addEventListener('pointerup',e=>{if(aim?.pointerId!==e.pointerId)return;const a=aim,p=pointer(e),v={x:a.start.x-p.x,y:a.start.y-p.y},length=Math.hypot(v.x,v.y);adjustTeamAim(p);aim=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);if(mode!=='team'&&length>7)fire(v,Math.min(1,Math.max(.2,length/85)));});
 for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{aim=null;});
 function updateHud(){if(!match)return;$('time').textContent=String(Math.max(0,Math.ceil(MATCH_SECONDS-match.elapsed))).padStart(2,'0');
  for(const side of ['player','cpu']){const members=match.bodies.filter(b=>b.side===side);$(`${side}-energy`).style.transform=`scaleX(${members.reduce((sum,b)=>sum+(b.eliminated?0:b.energy),0)/members.length})`;}
@@ -117,7 +126,7 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
  if(match.phase==='ready'&&i===(mode==='team'?launchCity:0)){const pulse=reduced?1:1+Math.sin(t*.003)*.04;circle(0,0,43*pulse);ctx.setLineDash([3,5]);ctx.strokeStyle='#71e6df60';ctx.stroke();ctx.setLineDash([]);}ctx.restore();}
  drawCriticalFlashes();
  if(mode==='team')drawTeamEffects(ctx,teamEffects,match.bodies);else drawFinishEffect(ctx,finishEffect,match.bodies);
- if(match.phase==='ready')for(const index of mode==='team'?[0,1,2]:[aim?.bodyIndex??0]){const b=match.bodies[index];let dx,dy,power;if(aim){dx=aim.start.x-aim.end.x;dy=aim.start.y-aim.end.y;power=Math.min(1,Math.hypot(dx,dy)/85);}else{const setting=mode==='team'?launchSettings[index]:{angle:Number($('angle').value),power:Number($('power').value)};const a=setting.angle*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=setting.power/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(b.x+ux*38,b.y+uy*38);ctx.lineTo(end.x,end.y);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(end.x-ux*8-uy*5,end.y-uy*8+ux*5);ctx.lineTo(end.x,end.y);ctx.lineTo(end.x-ux*8+uy*5,end.y-uy*8-ux*5);ctx.stroke();}
+ if(match.phase==='ready')for(const index of mode==='team'?[0,1,2]:[aim?.bodyIndex??0]){const b=match.bodies[index];let dx,dy,power;if(aim&&mode!=='team'){dx=aim.start.x-aim.end.x;dy=aim.start.y-aim.end.y;power=Math.min(1,Math.hypot(dx,dy)/85);}else{const setting=mode==='team'?launchSettings[index]:{angle:Number($('angle').value),power:Number($('power').value)};const a=setting.angle*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=setting.power/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(b.x+ux*38,b.y+uy*38);ctx.lineTo(end.x,end.y);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(end.x-ux*8-uy*5,end.y-uy*8+ux*5);ctx.lineTo(end.x,end.y);ctx.lineTo(end.x-ux*8+uy*5,end.y-uy*8-ux*5);ctx.stroke();}
 }
 function collectImpacts(){
  for(const hit of match.impacts){
