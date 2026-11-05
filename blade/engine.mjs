@@ -68,13 +68,17 @@ export function createMatch(playerRegion, cpuRegion, seed=1) {
   criticalRng:(Number(seed)^0x9e3779b9)>>>0, criticalContact:{spent:false,separation:0}, impactSerial:0 };
 }
 
-export function launch(match, direction, power) {
- if(match.phase!=='ready') return match;
- if(!Number.isFinite(direction.x)||!Number.isFinite(direction.y)) throw new Error('Invalid direction');
+function launchSettings(direction,power) {
+ if(!Number.isFinite(direction?.x)||!Number.isFinite(direction?.y)) throw new Error('Invalid direction');
  if(!Number.isFinite(power)) throw new Error('Invalid power');
  const length=Math.hypot(direction.x,direction.y);
  const aim=length>EPSILON?{x:direction.x/length,y:direction.y/length}:{x:0,y:-1};
- const strength=clamp(power,0,1);
+ return {aim,strength:clamp(power,0,1)};
+}
+
+export function launch(match, direction, power) {
+ if(match.phase!=='ready') return match;
+ const {aim,strength}=launchSettings(direction,power);
  const variation=((Math.imul(match.seed,1664525)+1013904223)>>>0)/4294967296;
  const cpuAngle=(variation-.5)*.42;
  return {...match,phase:'active',bodies:match.bodies.map((b,i)=>{
@@ -82,6 +86,20 @@ export function launch(match, direction, power) {
   return {...b,vx:cpu?Math.sin(cpuAngle)*190:aim.x*(80+strength*160),
    vy:cpu?Math.cos(cpuAngle)*190:aim.y*(80+strength*160),
    spin:cpu?-13:12+strength*3,cruiseSpin:cpu?-13:12+strength*3,energy:1};
+ })};
+}
+
+
+// Plans follow player roster order; CPU launch remains seed-driven.
+export function launchTeam(match,settings) {
+ if(match.phase!=='ready') return match;
+ if(match.mode!=='team'||!Array.isArray(settings)||settings.length!==3) throw new Error('Invalid team launch settings');
+ const plans=Array.from(settings,setting=>launchSettings(setting?.direction,setting?.power));
+ const launched=launch(match,{x:0,y:-1},.75);
+ return {...launched,bodies:launched.bodies.map((b,i)=>{
+  if(b.side!=='player') return b;
+  const {aim,strength}=plans[i];
+  return {...b,vx:aim.x*(80+strength*160),vy:aim.y*(80+strength*160),spin:12+strength*3,cruiseSpin:12+strength*3};
  })};
 }
 

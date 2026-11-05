@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createTeamMatch,launch,step,MATCH_SECONDS} from '../engine.mjs';
+import {createMatch,createTeamMatch,launch,launchTeam,step,MATCH_SECONDS} from '../engine.mjs';
 const city=(id,prefectureCode='27')=>({id,name:id,kind:'市',prefectureCode,prefecture:prefectureCode,points:[[-1,-1],[1,-1],[1,1],[-1,1]],grit:50,spinPower:50});
 const teams=()=>[[city('a'),city('b'),city('c')],[city('d','13'),city('e','13'),city('f','13')]];
 const active=()=>launch(createTeamMatch(...teams(),12),{x:0,y:-1},.75);
@@ -74,4 +74,28 @@ test('team readiness is inert and malformed direction/power is rejected',()=>{
  const m=createTeamMatch(...teams());assert.equal(step(m,.1),m);assert.throws(()=>launch(m,{x:NaN,y:0},1));assert.throws(()=>launch(m,{x:0,y:-1},NaN));
  const launched=launch(m,{x:0,y:0},2);assert.equal(launch(launched,{x:0,y:-1},1),launched);
  assert.ok(launched.bodies.slice(0,3).every(b=>b.vy===-240));
+});
+
+test('individual team launch applies each player direction and power without changing CPU or inputs',()=>{
+ const ready=createTeamMatch(...teams(),12),saved=JSON.stringify(ready);
+ const settings=[{direction:{x:-3,y:-4},power:.25},{direction:{x:0,y:-2},power:.5},{direction:{x:4,y:-3},power:1}];
+ const settingsSaved=JSON.stringify(settings),launched=launchTeam(ready,settings),legacy=launch(ready,{x:0,y:-1},.75);
+ assert.equal(JSON.stringify(ready),saved);assert.equal(JSON.stringify(settings),settingsSaved);
+ assert.equal(launched.phase,'active');
+ assert.deepEqual(launched.bodies.slice(0,3).map(b=>[b.vx,b.vy,b.spin,b.cruiseSpin]),[[-72,-96,12.75,12.75],[0,-160,13.5,13.5],[192,-144,15,15]]);
+ assert.deepEqual(launched.bodies.slice(3),legacy.bodies.slice(3));
+ assert.deepEqual(launchTeam(ready,settings),launched);
+ assert.equal(launchTeam(launched,null),launched);
+ assert.equal(launchTeam({...launched,phase:'finished'},null).phase,'finished');
+});
+test('individual team launch clamps powers and defaults zero vectors upward',()=>{
+ const result=launchTeam(createTeamMatch(...teams()),[-1,2,.5].map(power=>({direction:{x:0,y:0},power})));
+ assert.deepEqual(result.bodies.slice(0,3).map(b=>[b.vx,b.vy,b.spin]),[[0,-80,12],[0,-240,15],[0,-160,13.5]]);
+});
+test('individual team launch rejects incomplete or malformed plans atomically',()=>{
+ const match=createTeamMatch(...teams()),saved=JSON.stringify(match),valid={direction:{x:0,y:-1},power:.5};
+ for(const settings of [null,{},[],[valid],[valid,valid,valid,valid],Array(3),[valid,null,valid],[valid,{direction:null,power:1},valid],[valid,{direction:{x:Infinity,y:0},power:1},valid],[valid,{direction:{x:0,y:-1},power:NaN},valid]]){
+  assert.throws(()=>launchTeam(match,settings));assert.equal(JSON.stringify(match),saved);
+ }
+ const [a,b]=teams();assert.throws(()=>launchTeam(createMatch(a[0],b[0]),[valid,valid,valid]));
 });

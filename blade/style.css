@@ -66,3 +66,6 @@
 .battle-member{position:relative;margin-top:6px;min-width:0;padding-bottom:5px;font-size:10px;line-height:1.4;color:var(--ink)}.battle-member span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.battle-member i{display:block;height:3px;margin-top:3px;background:var(--cyan);transform-origin:left;border-radius:3px}.cpu .battle-member i{background:var(--gold);transform-origin:right}.battle-member.eliminated{opacity:.4}.battle-member.eliminated span{text-decoration:line-through}.battle-member.eliminated i{background:var(--muted)}
 
 .battle-member .energy{height:4px;margin-top:3px}.battle-member i{height:100%;margin:0}
+
+#launch-cities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:16px 22px 0}#launch-cities button{font-size:12px;overflow-wrap:anywhere;padding:10px 6px}#launch-cities button[aria-pressed=true]{border-color:var(--cyan);background:#174c5c}.team-battle .launch-controls{grid-template-columns:1fr 1fr}.stage-launch{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;min-width:140px;box-shadow:0 4px 18px #0008}.stage-launch:hover{transform:translate(-50%,-50%)}
+.stage-launch:active:enabled{transform:translate(-50%,calc(-50% + 2px))}
