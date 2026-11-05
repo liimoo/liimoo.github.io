@@ -1,3 +1,4 @@
+import {projectPoint,VIEW_TILT} from './depth-view.mjs?v=20261105-depth';
 const COLORS=['#71e6df','#f6ce80'];
 export function createFinishEffect(match,reduced=false,previousBodies=match.bodies) {
  const {winner,reason}=match.result;
@@ -39,7 +40,7 @@ export function canExplode(fx,index) {
  if(!fx||fx.reduced||!fx.losers.includes(index))return false;
  const body=finishBody({...fx,age:fx.burstAt},index,fx.origins[index]);
  const c=Math.cos(body.angle),s=Math.sin(body.angle);
- let points=body.region.points.map(([x,y])=>({x:body.x+32*(x*c-y*s),y:body.y+32*(x*s+y*c)}));
+ let points=body.region.points.map(([x,y])=>projectPoint({x:body.x+32*(x*c-y*s),y:body.y+32*(x*s+y*c)},10*VIEW_TILT));
  // Clip the displayed outline against the canvas, not just a circular bounding radius.
  for(const [axis,edge,sign] of [['x',-220,1],['x',220,-1],['y',-220,1],['y',220,-1]]) {
   const clipped=[];

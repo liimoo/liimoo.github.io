@@ -1,4 +1,4 @@
-import {advanceFinishEffect,finishBody,canExplode,hiddenByFinish,drawFinishEffect} from './finish-effects.mjs?v=20261105-team';
+import {advanceFinishEffect,finishBody,canExplode,hiddenByFinish,drawFinishEffect} from './finish-effects.mjs?v=20261105-depth';
 
 export function createTeamEffects() {return {effects:[],pendingCues:[],final:null};}
 function eliminationEffect(event,bodies,reduced) {

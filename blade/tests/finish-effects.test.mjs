@@ -147,3 +147,7 @@ test('simultaneous depletion winner carries pre-impact spin without shattering',
  assert.deepEqual(fx.losers,[1]);
  assert.equal(hiddenByFinish(advanceFinishEffect(fx,2),0),false);
 });
+test('tilted view retains a visible explosion near the front edge',()=>{
+ const m={...match('cpu','ringout'),bodies:[{...bodies[0],x:0,y:230,vx:0,vy:0},bodies[1]]};
+ assert.equal(canExplode(createFinishEffect(m),0),true);
+});

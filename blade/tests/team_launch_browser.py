@@ -28,7 +28,7 @@ async def main():
    assert await page.locator('#angle').input_value()=='-40'
    assert await page.locator('#power').input_value()=='30'
    await page.locator('#arena').scroll_into_view_if_needed()
-   r=await page.locator('#arena').bounding_box();x=r['x']+r['width']*(148/440);y=r['y']+r['height']*(315/440)
+   r=await page.locator('#arena').bounding_box();x=r['x']+r['width']*(148/440);y=r['y']+r['height']*((220+85*.78)/440)
    await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-20,y+25);await page.mouse.up()
    assert 30<=int(await page.locator('#angle').input_value())<=45
    assert '50° / 100%' in await page.locator('#launch-cities button[data-city="2"]').inner_text()

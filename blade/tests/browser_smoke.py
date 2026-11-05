@@ -17,12 +17,12 @@ async def main():
             await page.goto(BASE + '/blade/')
             await enter_selection(page)
             assert await page.locator('.prefecture-card').count() == 47
-            assert '大阪市' in await page.locator('#match-preview .player').inner_text()
+            assert '大阪市' in await page.locator('#match-preview .player').text_content()
             assert await page.locator('.region-card meter').count() == 0
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             await page.locator('.prefecture-card[data-prefecture="神奈川県"]').click()
             await page.locator('#regions').get_by_role('button', name='横浜市を選ぶ').click()
-            assert '横浜市' in await page.locator('#match-preview .player').inner_text()
+            assert '横浜市' in await page.locator('#match-preview .player').text_content()
             await page.locator('#shuffle').click()
             await start_battle(page)
             assert await page.locator('#player-name').inner_text() == '横浜市'
@@ -32,13 +32,13 @@ async def main():
             # A tap near the edge must not launch; cancellation must not launch either.
             await page.locator('#arena').scroll_into_view_if_needed()
             box = await page.locator('#arena').bounding_box()
-            await page.mouse.click(box['x']+box['width']*(240/440),box['y']+box['height']*(315/440))
+            await page.mouse.click(box['x']+box['width']*(240/440),box['y']+box['height']*((220+85*.78)/440))
             assert await page.locator('#launch').is_enabled(), 'tap must not launch'
             if touch:
                 await page.locator('#arena').scroll_into_view_if_needed()
                 box = await page.locator('#arena').bounding_box()
                 x = box['x'] + box['width'] / 2
-                y = box['y'] + box['height'] * (315 / 440)
+                y = box['y'] + box['height'] * ((220+85*.78) / 440)
                 session = await page.context.new_cdp_session(page)
                 # Actual touch drag, not mouse emulation.
                 await session.send('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': [{'x': x, 'y': y}]})
