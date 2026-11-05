@@ -17,3 +17,5 @@
 .fighter .grit-stat{display:block;font-size:11px;color:var(--gold);letter-spacing:0;margin:3px 0}#grit-help{font-size:11px;line-height:1.7;color:var(--gold)}
 
 #spin-help{font-size:11px;line-height:1.7;color:var(--cyan)}
+
+.stats-help{font-size:11px;color:var(--muted);margin:0 0 14px}.region-stats{display:grid;gap:5px;margin-top:9px;width:100%;text-align:left;grid-column:1/-1}.region-stat{display:grid;grid-template-columns:1fr auto;gap:2px;font-size:10px;line-height:1.4;color:var(--muted)}.region-stat b{color:var(--ink);font-size:10px}.region-stat meter{grid-column:1/-1;width:100%;height:6px;appearance:none;border:0;background:var(--line);border-radius:4px}.region-stat meter::-webkit-meter-bar{background:var(--line);border:0;border-radius:4px}.region-stat meter::-webkit-meter-optimum-value{background:var(--cyan)}.region-stat:last-child meter::-webkit-meter-optimum-value{background:var(--gold)}.region-stat meter::-moz-meter-bar{background:var(--cyan)}

@@ -1,5 +1,5 @@
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261104-winner-stop';
-import {createMatch,launch,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-spin-power';
+import {createMatch,launch,step,regionStats,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-spin-power';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,audio=null,lastHit=-1,finishEffect=null;
@@ -95,7 +95,16 @@ function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
 function resize(){canvas.width=canvas.height=Math.round(canvas.getBoundingClientRect().width*Math.min(devicePixelRatio||1,2));}
 new ResizeObserver(resize).observe(canvas);
 async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const response=await fetch('./regions.json');if(!response.ok)throw new Error('Map load failed');regions=await response.json();if(!Array.isArray(regions)||regions.length<2)throw new Error('Invalid maps');
- for(const [i,r] of regions.entries()){if(!Array.isArray(r.points)||r.points.length<3||!r.url.startsWith('/play/'))throw new Error('Invalid map');const b=document.createElement('button');b.className='region-card';b.type='button';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',`${r.name}を選ぶ`);const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','-1.1 -1.1 2.2 2.2');svg.setAttribute('aria-hidden','true');const polygon=document.createElementNS(svg.namespaceURI,'polygon');polygon.setAttribute('points',r.points.map(p=>p.join(',')).join(' '));svg.append(polygon);const name=document.createElement('strong');name.textContent=r.name;const label=document.createElement('small');label.textContent=r.kind==='市'?r.prefecture:'都道府県';b.append(svg,name,label);b.addEventListener('click',()=>{selected=i;if(opponent===i)opponent=(i+1)%regions.length;reset();});$('regions').append(b);}
+ for(const [i,r] of regions.entries()){if(!Array.isArray(r.points)||r.points.length<3||!r.url.startsWith('/play/'))throw new Error('Invalid map');const b=document.createElement('button');b.className='region-card';b.type='button';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',`${r.name}を選ぶ`);const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','-1.1 -1.1 2.2 2.2');svg.setAttribute('aria-hidden','true');const polygon=document.createElementNS(svg.namespaceURI,'polygon');polygon.setAttribute('points',r.points.map(p=>p.join(',')).join(' '));svg.append(polygon);const name=document.createElement('strong');name.textContent=r.name;const label=document.createElement('small');label.textContent=r.kind==='市'?r.prefecture:'都道府県';b.append(svg,name,label);
+ const stats=regionStats(r),panel=document.createElement('span');panel.className='region-stats';
+ for(const [title,value,max] of [['攻撃力','1.00倍',null],['回転力',stats.spinPower,100],['底力',stats.grit,100]]){
+  const row=document.createElement('span');row.className='region-stat';
+  const caption=document.createElement('span');caption.textContent=title;
+  const number=document.createElement('b');number.textContent=String(value);row.append(caption,number);
+  if(max){const meter=document.createElement('meter');meter.min=0;meter.max=max;meter.value=value;meter.setAttribute('aria-label',`${r.name}の${title}`);row.append(meter);}
+  panel.append(row);
+ }
+ b.append(panel);b.addEventListener('click',()=>{selected=i;if(opponent===i)opponent=(i+1)%regions.length;reset();});$('regions').append(b);}
  selected=Math.max(0,regions.findIndex(r=>r.id==='city-osaka'));opponent=0;reset();resize();requestAnimationFrame(tick);
  }catch(error){$('status').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('region-hint').textContent='通信環境をご確認ください。';$('arena-caption').textContent='読み込みエラー';console.error('City Blade initialization failed:',error);}}
 init();
