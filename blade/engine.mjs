@@ -40,7 +40,7 @@ export function regionStats(region) {
 }
 
 export function combatBonuses(body) {
- const bonus=1+body.grit/100*(1-clamp(body.energy,0,1));
+ const bonus=1+body.grit/100*(1-clamp(body.energy,0,1))**2;
  return {attack:bonus,resistance:bonus};
 }
 

@@ -218,11 +218,11 @@ test('full gauges share resistance and inertia; grit rises only as stamina falls
  assert.equal(m.bodies[0].inertia,400);
  assert.equal(m.bodies[1].inertia,400);
  for(const body of m.bodies) assert.deepEqual(combatBonuses(body),{attack:1,resistance:1});
- for(const [energy,expected] of [[1,1],[.5,1.5],[.1,1.9],[0,2],[-1,2],[2,1]]) {
+ for(const [energy,expected] of [[1,1],[.75,1.0625],[.5,1.25],[.25,1.5625],[.1,1.81],[0,2],[-1,2],[2,1]]) {
   assert.deepEqual(combatBonuses({...m.bodies[1],energy}),{attack:expected,resistance:expected});
   assert.deepEqual(combatBonuses({...m.bodies[0],energy}),{attack:1,resistance:1});
  }
- assert.deepEqual(combatBonuses({...m.bodies[1],grit:50,energy:.5}),{attack:1.25,resistance:1.25});
+ assert.deepEqual(combatBonuses({...m.bodies[1],grit:50,energy:.5}),{attack:1.125,resistance:1.125});
 });
 
 function gritContact(grit,energy=.3) {
