@@ -65,6 +65,12 @@ async def main():
             result_box=await page.locator('#result').bounding_box()
             assert result_box['y']-arena_box['y']<arena_box['height']*.05
             assert result_box['height']<arena_box['height']*.55
+            if width == 320:
+                detail = await page.locator('#result-detail').inner_text()
+                await page.locator('#result-detail').evaluate("el=>el.textContent='横浜市 vs かすみがうら市 · 同時にゲージ切れ・超過ダメージの少ない側の勝利'")
+                compact_box = await page.locator('#result').bounding_box()
+                assert compact_box['height'] < arena_box['height']*.55, 'long result must leave the winner visible'
+                await page.locator('#result-detail').evaluate('(el,text)=>el.textContent=text', detail)
             await page.locator('.arena-wrap').screenshot(path=f'/tmp/blade-result-{width}.png')
             await replay_battle(page)
             assert await page.locator('#time').inner_text() == '45'

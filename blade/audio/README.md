@@ -7,6 +7,7 @@
 |select|decision1.mp3|select.mp3|0.7秒|
 |launch|shakin1.mp3|launch.mp3|1秒|
 |hit|punch-middle2.mp3|hit.mp3|0.4秒|
+|critical（クリティカルの金属音）|metal-bat1.mp3|critical.mp3|0.55秒|
 |ringout|buun1.mp3|ringout.mp3|0.65秒|
 |break|bomb2.mp3|break.mp3|1.05秒|
 |win|success1.mp3|win.mp3|2.4秒|

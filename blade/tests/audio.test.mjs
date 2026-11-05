@@ -11,16 +11,16 @@ function fixture(overrides={}) {
   return {audio,context,sources,requests,warnings,tick:ms=>{clock+=ms;}};
 }
 
-test('audio is lazy, preloads eight module-relative cues once, and resumes on enable',async()=>{
+test('audio is lazy, preloads nine module-relative cues once, and resumes on enable',async()=>{
  const f=fixture();assert.equal(await f.audio.play('launch'),false);assert.equal(f.requests.length,0);
- await f.audio.enable();await f.audio.enable();assert.equal(f.requests.length,8);
- assert.equal(Object.keys(CUES).length,8);assert.ok(f.requests.every(x=>x.includes('/blade/audio/')&&x.endsWith('.mp3')));
+ await f.audio.enable();await f.audio.enable();assert.equal(f.requests.length,9);
+ assert.equal(Object.keys(CUES).length,9);assert.ok(f.requests.every(x=>x.includes('/blade/audio/')&&x.endsWith('.mp3')));
  assert.equal(await f.audio.play('select'),true);assert.equal(f.sources.length,1);
 });
 test('disable stops voices and prevents sound until enabled again',async()=>{
  const f=fixture();await f.audio.enable();await f.audio.play('launch');f.audio.disable();
  assert.ok(f.sources[0].stopped);assert.equal(await f.audio.play('win'),false);
- await f.audio.enable();assert.equal(await f.audio.play('win'),true);assert.equal(f.requests.length,8);
+ await f.audio.enable();assert.equal(await f.audio.play('win'),true);assert.equal(f.requests.length,9);
 });
 test('stop clears voices but preserves enabled state',async()=>{
  const f=fixture();await f.audio.enable();await f.audio.play('launch');f.audio.stop();assert.ok(f.sources[0].stopped);
@@ -34,8 +34,8 @@ test('hit cooldown and four-voice bound suppress audio pileup',async()=>{
 });
 test('missing cues and failed loads do not throw or warn repeatedly',async()=>{
  const f=fixture({fetch:async()=>({ok:false,status:404})});await f.audio.enable();
- assert.equal(f.warnings.length,8);assert.equal(await f.audio.play('launch'),false);
- assert.equal(await f.audio.play('unknown'),false);await f.audio.enable();assert.equal(f.warnings.length,8);
+ assert.equal(f.warnings.length,9);assert.equal(await f.audio.play('launch'),false);
+ assert.equal(await f.audio.play('unknown'),false);await f.audio.enable();assert.equal(f.warnings.length,9);
 });
 test('pending sounds never play after stop or disable, even after re-enable',async()=>{
  for(const method of ['stop','disable']){
@@ -55,7 +55,7 @@ test('unsupported audio and resume failures are safe',async()=>{
 });
 test('decode and source start failures stay isolated from gameplay',async()=>{
  const f=fixture();f.context.decodeAudioData=async()=>{throw new Error('invalid audio');};
- await f.audio.enable();assert.equal(await f.audio.play('launch'),false);assert.equal(f.warnings.length,8);
+ await f.audio.enable();assert.equal(await f.audio.play('launch'),false);assert.equal(f.warnings.length,9);
  const g=fixture();await g.audio.enable();
  g.context.createBufferSource=()=>({connect(){},disconnect(){},start(){throw new Error('device lost');}});
  assert.equal(await g.audio.play('launch'),false);assert.equal(g.warnings.length,1);
@@ -71,4 +71,10 @@ test('decisive hit bypasses cooldown but still respects mute',async()=>{
  assert.equal(await f.audio.play('hit',{decisive:true}),true);
  assert.equal(await f.audio.play('hit'),false);
  f.audio.disable();assert.equal(await f.audio.play('hit',{decisive:true}),false);
+});
+
+test('critical chime bypasses normal hit cooldown and obeys mute',async()=>{
+ const f=fixture();await f.audio.enable();await f.audio.play('hit');
+ assert.equal(await f.audio.play('critical'),true);
+ f.audio.disable();assert.equal(await f.audio.play('critical'),false);
 });

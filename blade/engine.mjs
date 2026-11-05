@@ -51,6 +51,11 @@ export function combatBonuses(body) {
  return {attack:bonus,resistance:bonus};
 }
 
+export function criticalChance(body) {
+ return .08+.08*clamp(body.grit,0,100)/100*(1-clamp(body.energy,0,1))**2;
+}
+const nextCriticalRandom = seed => (Math.imul(seed,1664525)+1013904223)>>>0;
+
 function body(region, side) {
  const shape=regionShape(region),{grit,spinPower}=regionStats(region);
  return { region, shape, side, mass:1, radius:BODY_RADIUS, inertia:400, grit, spinPower,
@@ -59,7 +64,8 @@ function body(region, side) {
 
 export function createMatch(playerRegion, cpuRegion, seed=1) {
  return { bodies:[body(playerRegion,'player'),body(cpuRegion,'cpu')], seed:Number(seed)>>>0,
-  elapsed:0, phase:'ready', result:null, impacts:[] };
+  elapsed:0, phase:'ready', result:null, impacts:[],
+  criticalRng:(Number(seed)^0x9e3779b9)>>>0, criticalContact:{spent:false,separation:0}, impactSerial:0 };
 }
 
 export function launch(match, direction, power) {
@@ -115,7 +121,7 @@ function sustainedSpin(body,spin,energy) {
  return direction*clamp(spin*direction,8,24);
 }
 
-function resolve(a,b,hit) {
+function resolve(a,b,hit,criticalAttackers=[]) {
  const {normal:n,depth,point:p}=hit;
  const ra=subtract(p,a),rb=subtract(p,b);
  const relative={x:b.vx-b.spin*rb.y-a.vx+a.spin*ra.y,y:b.vy+b.spin*rb.x-a.vy-a.spin*ra.x};
@@ -134,7 +140,8 @@ function resolve(a,b,hit) {
   const {resistance}=combatBonuses(v),{attack}=combatBonuses(i?a:b);
   const angularChange=sign*cross(offset,force)/v.inertia/resistance;
   // Grit resists torque and boosts stamina damage, never the linear collision impulse.
-  const drain=Math.min(.18,(impulse*.00012+Math.abs(angularChange)*.012)*attack);
+  const multiplier=criticalAttackers.includes(i?0:1)?1.5:1;
+  const drain=Math.min(.18,(impulse*.00012+Math.abs(angularChange)*.012)*attack)*multiplier;
   const rawEnergy=(v.rawEnergy??v.energy)-drain;
   const energy=Math.max(0,rawEnergy);
   return {...v,x:v.x+sign*n.x*correction,y:v.y+sign*n.y*correction,
@@ -179,6 +186,28 @@ function outcome(bodies,elapsed) {
  return elapsed>=MATCH_SECONDS?{winner:'draw',reason:'time'}:null;
 }
 
+// One lottery per damaging contact episode, not one lottery per physics frame.
+// At least 100 ms without contact rearms it, ignoring tiny SAT separation jitter.
+function criticalCollision(current,bodies,hit,slice) {
+ const contact=current.criticalContact??{spent:false,separation:0};
+ let rng=current.criticalRng??((current.seed^0x9e3779b9)>>>0);
+ if(!hit) {
+  const separation=contact.separation+slice;
+  return {bodies,rng,contact:{spent:separation>=.1-EPSILON?false:contact.spent,separation},attackers:[]};
+ }
+ const ordinary=resolve(...bodies,hit),attackers=[];
+ let spent=contact.spent;
+ if(!spent) for(let attacker=0;attacker<2;attacker++) {
+  const defender=1-attacker;
+  const damage=(bodies[defender].rawEnergy??bodies[defender].energy)-ordinary[defender].rawEnergy;
+  if(damage<=EPSILON) continue;
+  spent=true;rng=nextCriticalRandom(rng);
+  if(rng/4294967296<criticalChance(bodies[attacker])) attackers.push(attacker);
+ }
+ return {bodies:attackers.length?resolve(...bodies,hit,attackers):ordinary,rng,
+  contact:{spent,separation:0},attackers};
+}
+
 export function step(match,dt) {
  if(match.phase!=='active'||!Number.isFinite(dt)||dt<=0) return match;
  // Substeps prevent a delayed frame from tunneling through narrow shapes.
@@ -188,9 +217,14 @@ export function step(match,dt) {
   let bodies=current.bodies.map(b=>move(b,slice));
   let impacts=current.impacts.map(p=>({...p,age:p.age+slice})).filter(p=>p.age<.45);
   const hit=collision(...bodies);
-  if(hit) {bodies=resolve(...bodies,hit);impacts=[...impacts.slice(-11),{...hit.point,age:0}];}
+  const critical=criticalCollision(current,bodies,hit,slice);
+  bodies=critical.bodies;
+  const impactSerial=(current.impactSerial??0)+(hit?1:0);
+  if(hit) impacts=[...impacts.slice(-11),{...hit.point,age:0,id:impactSerial,
+   critical:critical.attackers.length>0,criticalAttackers:critical.attackers}];
   const elapsed=current.elapsed+slice,result=outcome(bodies,elapsed);
-  current={...current,bodies,impacts,elapsed,result,phase:result?'finished':'active'};
+  current={...current,bodies,impacts,elapsed,result,phase:result?'finished':'active',
+   criticalRng:critical.rng,criticalContact:critical.contact,impactSerial};
   if(result) break;
  }
  return current;

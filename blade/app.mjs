@@ -1,17 +1,17 @@
 import {mountFlow} from './flow.mjs?v=20261105-national';
-import {createBladeAudio} from './audio.mjs?v=20261105-final-hit';
+import {createBladeAudio} from './audio.mjs?v=20261105-critical';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-overkill';
-import {createMatch,launch,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-overkill';
+import {createMatch,launch,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-critical';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
-let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastHit=-1,finishEffect=null;
+let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const colors=['#71e6df','#f6ce80'];
 const gameAudio=createBladeAudio();
 function track(name,params={}){if(typeof window.gtag==='function')window.gtag('event',name,{...params,page_path:location.pathname});}
 function reset(){
  gameAudio.stop();
- match=createMatch(regions[selected],regions[opponent],seed++);finishEffect=null;aim=null;paused=false;accumulator=0;lastHit=-1;
+ match=createMatch(regions[selected],regions[opponent],seed++);finishEffect=null;aim=null;paused=false;accumulator=0;lastImpactId=0;criticalFlashes=[];
  $('result').hidden=true;$('pause-cover').hidden=true;$('pause').disabled=true;$('pause').textContent='Ⅱ';
  $('player-name').textContent=regions[selected].name;$('cpu-name').textContent=regions[opponent].name;$('opponent-name').textContent=regions[opponent].name;
  $('region-kind').textContent=regions[selected].name!==regions[selected].prefecture?`${regions[selected].prefecture} / 市区町村のかたち`:'都道府県のかたち';
@@ -78,11 +78,37 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
  ctx.save();ctx.rotate(b.angle);ctx.translate(0,3);path(b.region.points,BODY_RADIUS);ctx.fillStyle=i?'#8d6637':'#287b80';ctx.fill();ctx.translate(0,-3);path(b.region.points,BODY_RADIUS);const top=ctx.createLinearGradient(-25,-25,25,25);top.addColorStop(0,i?'#fff2c9':'#b8fff5');top.addColorStop(1,colors[i]);ctx.fillStyle=top;ctx.fill();ctx.lineWidth=1;ctx.strokeStyle=i?'#fff4d6':'#ddfff7';ctx.stroke();circle(0,0,4);ctx.fillStyle='#17374a';ctx.fill();circle(0,0,1.6);ctx.fillStyle='#ebffff';ctx.fill();ctx.restore();
  ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillStyle=colors[i];ctx.fillText(b.region.name,0,49);
  if(match.phase==='ready'&&i===0){const pulse=reduced?1:1+Math.sin(t*.003)*.04;circle(0,0,43*pulse);ctx.setLineDash([3,5]);ctx.strokeStyle='#71e6df60';ctx.stroke();ctx.setLineDash([]);}ctx.restore();}
+ drawCriticalFlashes();
  drawFinishEffect(ctx,finishEffect,match.bodies);
  if(match.phase==='ready'){const b=match.bodies[0];let dx,dy,power;if(aim){dx=aim.start.x-aim.end.x;dy=aim.start.y-aim.end.y;power=Math.min(1,Math.hypot(dx,dy)/85);}else{const a=Number($('angle').value)*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=Number($('power').value)/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(b.x+ux*38,b.y+uy*38);ctx.lineTo(end.x,end.y);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(end.x-ux*8-uy*5,end.y-uy*8+ux*5);ctx.lineTo(end.x,end.y);ctx.lineTo(end.x-ux*8+uy*5,end.y-uy*8-ux*5);ctx.stroke();}
 }
+function collectImpacts(){
+ for(const hit of match.impacts){
+  // Read every fixed step: an impact can age past the frame before rendering.
+  if(hit.id!==undefined?hit.id<=lastImpactId:hit.age!==0)continue;
+  if(hit.id!==undefined)lastImpactId=hit.id;
+  const critical=hit.criticalAttackers?.length>0;
+  gameAudio.play(critical?'critical':'hit',{decisive:match.phase==='finished'});
+  if(critical)criticalFlashes=[...criticalFlashes,{...hit,age:0}];
+ }
+}
+function drawCriticalFlashes(){
+ for(const flash of criticalFlashes){
+  const fade=Math.max(0,1-flash.age/.3);
+  ctx.save();ctx.globalAlpha=fade*(reduced?.35:.8);ctx.strokeStyle='#fff3b0';ctx.fillStyle='#fffce3';ctx.lineWidth=2;
+  if(!reduced){ctx.shadowColor='#ffe89a';ctx.shadowBlur=10;}
+  circle(flash.x,flash.y,reduced?5:5+flash.age*34);ctx.fill();
+  if(!reduced)for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;ctx.beginPath();ctx.moveTo(flash.x+Math.cos(a)*8,flash.y+Math.sin(a)*8);ctx.lineTo(flash.x+Math.cos(a)*(18+flash.age*20),flash.y+Math.sin(a)*(18+flash.age*20));ctx.stroke();}
+  for(const i of flash.criticalAttackers){
+   if(hiddenByFinish(finishEffect,i))continue;
+   const b=finishBody(finishEffect,i,match.bodies[i]);ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);path(b.region.points,BODY_RADIUS);ctx.globalAlpha=fade*(reduced?.12:.4);ctx.fill();ctx.restore();
+  }
+  ctx.restore();
+ }
+}
 function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
- if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){const previousBodies=match.bodies;match=step(match,1/120);accumulator-=1/120;if(match.phase==='finished'){if(match.impacts.some(p=>p.age===0))gameAudio.play('hit',{decisive:true});beginFinish(previousBodies);accumulator=0;break;}}const fresh=match.impacts.find(p=>p.age<.015);if(match.phase==='active'&&fresh&&match.elapsed-lastHit>.12){gameAudio.play('hit');lastHit=match.elapsed;}updateHud();}
+ if(!paused&&!document.hidden)criticalFlashes=criticalFlashes.map(f=>({...f,age:f.age+dt})).filter(f=>f.age<.3);
+ if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){const previousBodies=match.bodies;match=step(match,1/120);collectImpacts();accumulator-=1/120;if(match.phase==='finished'){beginFinish(previousBodies);accumulator=0;break;}}updateHud();}
  if(finishEffect&&!document.hidden){
   const previousAge=finishEffect.age,wasDone=finishEffect.done;finishEffect=advanceFinishEffect(finishEffect,dt);
   if(previousAge<finishEffect.burstAt&&finishEffect.age>=finishEffect.burstAt&&finishEffect.losers.some(i=>canExplode(finishEffect,i))){
@@ -101,7 +127,7 @@ async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const re
   if(side==='cpu'){opponent=index;if(selected===index)selected=(index+1)%regions.length;}
   else{selected=index;if(opponent===index)opponent=(index+1)%regions.length;}
   gameAudio.play('select');
- },startBattle:reset,leave:()=>{gameAudio.stop();match=null;finishEffect=null;aim=null;paused=false;accumulator=0;last=0;controls(false);$('result').hidden=true;$('pause-cover').hidden=true;}});
+ },startBattle:reset,leave:()=>{gameAudio.stop();match=null;finishEffect=null;criticalFlashes=[];lastImpactId=0;aim=null;paused=false;accumulator=0;last=0;controls(false);$('result').hidden=true;$('pause-cover').hidden=true;}});
  $('start-exhibition').disabled=false;$('shuffle').disabled=false;resize();requestAnimationFrame(tick);
  }catch(error){$('load-error').hidden=false;$('load-error').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('status').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('region-hint').textContent='通信環境をご確認ください。';$('arena-caption').textContent='読み込みエラー';console.error('City Blade initialization failed:',error);}}
 init();
