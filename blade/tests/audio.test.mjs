@@ -66,3 +66,9 @@ test('finished voices are released and disabled in-flight enable returns false',
  let resume;const g=fixture();g.context.resume=()=>new Promise(r=>{resume=r;});
  const pending=g.audio.enable();g.audio.disable();resume();assert.equal(await pending,false);
 });
+test('decisive hit bypasses cooldown but still respects mute',async()=>{
+ const f=fixture();await f.audio.enable();await f.audio.play('hit');
+ assert.equal(await f.audio.play('hit',{decisive:true}),true);
+ assert.equal(await f.audio.play('hit'),false);
+ f.audio.disable();assert.equal(await f.audio.play('hit',{decisive:true}),false);
+});

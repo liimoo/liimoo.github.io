@@ -16,12 +16,13 @@ async def main():
 export function step(match,dt) {{
  const next=actualStep(match,dt);
  if(next.elapsed<.3)return next;
- return {{...next,phase:'finished',result:{{winner:'{ 'draw' if reason=='time' else 'cpu'}',reason:'{reason}',tiebreak:{repr('remaining-energy') if x==1 else 'null'}}},
+ return {{...next,impacts:{'[...next.impacts,{x:0,y:0,age:0}]' if x==1 else 'next.impacts'},phase:'finished',result:{{winner:'{ 'draw' if reason=='time' else 'cpu'}',reason:'{reason}',tiebreak:{repr('remaining-energy') if x==1 else 'null'}}},
  bodies:next.bodies.map((b,i)=>i?b:{{...b,x:{x},y:0,vx:100,vy:0,spin:0,energy:0,
  region:{{...b.region,points:[[-1,-1],[1,-1],[1,1],[-1,1]]}}}})}};
 }}
 '''
             await page.route('**/engine.mjs*',lambda route:route.fulfill(content_type='text/javascript',body=script))
+            await page.route('**/audio.mjs*',lambda route:route.fulfill(content_type='text/javascript',body="window.cues=[];export const createBladeAudio=()=>({stop(){},disable(){},async enable(){return true},play(cue,options){window.cues.push({cue,options})}});"))
             await page.route('**/googletagmanager.com/**',lambda route:route.abort())
             await page.goto(BASE+'/blade/')
             await page.locator('.region-card').last.wait_for()
@@ -43,6 +44,7 @@ export function step(match,dt) {{
             await page.wait_for_function('!document.getElementById("result").hidden',timeout=3000)
             if x==1:
                 assert '超過ダメージの少ない側' in await page.locator('#result-detail').inner_text()
+                assert await page.evaluate("cues.filter(x=>x.cue==='hit'&&x.options?.decisive).length")==1
             assert await page.locator('#result-title').inner_text()==('引き分け！' if reason=='time' else 'CPUの勝ち！')
             style=await page.locator('#result').evaluate('(el)=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).backdropFilter})')
             assert style['background']=='rgba(0, 0, 0, 0)' and style['blur']=='none'

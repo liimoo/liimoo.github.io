@@ -52,14 +52,14 @@ export function createBladeAudio(options={}) {
       report('enable',error);return false;
     }
   }
-  async function play(cue){
+  async function play(cue,{decisive=false}={}){
     if(!enabled||!Object.hasOwn(CUES,cue)||!loads)return false;
     const token=generation;
     try{
       const buffer=await loads[cue];
       if(!buffer||!enabled||token!==generation||context.state!=='running')return false;
       const timestamp=now();
-      if(cue==='hit'&&timestamp-lastHit<HIT_COOLDOWN_MS)return false;
+      if(cue==='hit'&&!decisive&&timestamp-lastHit<HIT_COOLDOWN_MS)return false;
       if(voices.length>=MAX_VOICES)stopSource(voices[0]);
       const source=context.createBufferSource();source.buffer=buffer;
       source.connect(master);source.onended=()=>release(source);
