@@ -27,12 +27,15 @@ function buildTeamHud(){
  }
 }
 function refreshLaunchControls(){
- const focused=launchTabs.contains(document.activeElement)?document.activeElement.dataset.city:null;
- launchTabs.hidden=mode!=='team';launchTabs.replaceChildren();
- if(mode!=='team')return;
- launchSettings.forEach((setting,index)=>{const button=document.createElement('button');button.type='button';button.dataset.city=String(index);button.setAttribute('aria-pressed',String(index===launchCity));button.textContent=`${match.bodies[index].region.name} ${setting.angle}° / ${setting.power}%`;button.disabled=match.phase!=='ready';button.addEventListener('click',()=>{launchCity=index;syncLaunchSliders();refreshLaunchControls();});launchTabs.append(button);});
- if(focused!==null)launchTabs.querySelector(`[data-city="${focused}"]`)?.focus({preventScroll:true});
+ launchTabs.hidden=true;launchTabs.replaceChildren();
+ const team=mode==='team';
+ if(team&&match){canvas.tabIndex=0;canvas.setAttribute('aria-label',`${match.bodies[launchCity].region.name}の発射を調整中。駒をタップ、または左右キーで都市を選択`);}
+ else{canvas.removeAttribute('tabindex');canvas.setAttribute('aria-label','地図コマの対戦場。下の角度・強さと発射ボタンでも操作できます。');}
 }
+canvas.addEventListener('keydown',event=>{
+ if(mode!=='team'||match?.phase!=='ready'||!['ArrowLeft','ArrowRight'].includes(event.key))return;
+ event.preventDefault();launchCity=(launchCity+(event.key==='ArrowRight'?1:2))%3;syncLaunchSliders();refreshLaunchControls();
+});
 function syncLaunchSliders(){
  const setting=launchSettings[launchCity];
  for(const id of ['angle','power']){$(id).value=setting[id];$(`${id}-value`).textContent=setting[id]+(id==='angle'?'°':'%');}
@@ -43,7 +46,7 @@ function prepareLaunchControls(){
  stageControls.hidden=!team;
  if(team){stageControls.append(launchTabs,launchHome);launchHome.append($('launch'));}else{launchAnchor.after(launchTabs,launchHome);launchHome.append($('launch'));}
  if(team)syncLaunchSliders();refreshLaunchControls();
- document.querySelector('.control-note').textContent=team?'駒を引っ張るか、都市名とスライダーで角度・強さを調整。「発射する」を押すまで始まりません。':'引っ張る操作の代わりに、上の調整と発射ボタンでも遊べます。';
+ document.querySelector('.control-note').textContent=team?'駒をタップして選び、引っ張るかスライダーで角度・強さを調整。「発射する」を押すまで始まりません。':'引っ張る操作の代わりに、上の調整と発射ボタンでも遊べます。';
 }
 function reset(){
  gameAudio.stop();

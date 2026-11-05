@@ -70,15 +70,16 @@
 #launch-cities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:16px 22px 0}#launch-cities button{font-size:12px;overflow-wrap:anywhere;padding:10px 6px}#launch-cities button[aria-pressed=true]{border-color:var(--cyan);background:#174c5c}.team-battle .launch-controls{grid-template-columns:1fr 1fr}.stage-launch{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;min-width:140px;box-shadow:0 4px 18px #0008}.stage-launch:hover{transform:translate(-50%,-50%)}
 .stage-launch:active:enabled{transform:translate(-50%,calc(-50% + 2px))}
 
-/* Team preparation stays together beneath the arena, clear of the pieces. */
+/* Compact team preparation overlays the empty lower edge of the canvas. */
 .team-battle .fighter>.energy{display:none}
-#stage-controls{position:relative;background:#10283cec;border-top:1px solid #31516b;padding:8px 10px 10px;border-radius:0 0 12px 12px}
+#stage-controls{position:absolute;inset:auto 6px 4px;z-index:2;background:#10283cf2;border:1px solid #31516b;padding:4px 6px;border-radius:10px}
+.team-battle .arena-wrap{width:min(100%,600px,max(280px,calc(100dvh - 240px)))}
 #stage-controls #launch-cities{padding:0;gap:5px;margin-bottom:8px}
 #stage-controls #launch-cities button{font-size:11px;padding:6px 4px;line-height:1.4;min-height:42px}
-#stage-controls .launch-controls{padding:0 94px 0 0;grid-template-columns:1fr 1fr;gap:12px;min-height:54px}
-#stage-controls .launch-controls label{font-size:10px}
-#stage-controls .launch-controls input{margin:10px 0 5px;min-height:24px}
-#stage-controls .stage-launch{position:absolute;left:auto;top:auto;right:10px;bottom:15px;min-width:0;width:84px;padding:12px 6px;font-size:12px;justify-content:center;transform:none;gap:0}
+#stage-controls .launch-controls{padding:0 94px 0 0;grid-template-columns:1fr 1fr;gap:8px;min-height:48px}
+#stage-controls .launch-controls label{font-size:9px}
+#stage-controls .launch-controls input{margin:0;min-height:28px}
+#stage-controls .stage-launch{position:absolute;left:auto;top:auto;right:6px;bottom:8px;min-width:0;width:84px;padding:12px 6px;font-size:12px;justify-content:center;transform:none;gap:0}
 #stage-controls .stage-launch span{display:none}
 #stage-controls .stage-launch:hover{transform:none}
 #stage-controls .stage-launch:active:enabled{transform:translateY(2px)}
