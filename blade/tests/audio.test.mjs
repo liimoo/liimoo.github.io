@@ -14,7 +14,7 @@ function fixture(overrides={}) {
 test('audio is lazy, preloads nine module-relative cues once, and resumes on enable',async()=>{
  const f=fixture();assert.equal(await f.audio.play('launch'),false);assert.equal(f.requests.length,0);
  await f.audio.enable();await f.audio.enable();assert.equal(f.requests.length,9);
- assert.equal(Object.keys(CUES).length,9);assert.ok(f.requests.every(x=>x.includes('/blade/audio/')&&x.endsWith('.mp3')));
+ assert.equal(Object.keys(CUES).length,9);assert.ok(f.requests.every(x=>new URL(x).pathname.includes('/blade/audio/')&&new URL(x).pathname.endsWith('.mp3')));
  assert.equal(await f.audio.play('select'),true);assert.equal(f.sources.length,1);
 });
 test('disable stops voices and prevents sound until enabled again',async()=>{
@@ -77,4 +77,9 @@ test('critical chime bypasses normal hit cooldown and obeys mute',async()=>{
  const f=fixture();await f.audio.enable();await f.audio.play('hit');
  assert.equal(await f.audio.play('critical'),true);
  f.audio.disable();assert.equal(await f.audio.play('critical'),false);
+});
+
+test('critical asset has an independent cache version',()=>{
+ assert.equal(new URL(CUES.critical).searchParams.get('v'),'20261105-critical-clear');
+ assert.equal(new URL(CUES.hit).search,'');
 });

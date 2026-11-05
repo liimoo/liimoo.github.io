@@ -1,11 +1,12 @@
 import {mountFlow} from './flow.mjs?v=20261105-national';
-import {createBladeAudio} from './audio.mjs?v=20261105-critical';
+import {createBladeAudio} from './audio.mjs?v=20261105-critical-clear';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-overkill';
 import {createMatch,launch,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-critical';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CRITICAL_FLASH_SECONDS=.3,CRITICAL_LABEL_SECONDS=.65;
 const colors=['#71e6df','#f6ce80'];
 const gameAudio=createBladeAudio();
 function track(name,params={}){if(typeof window.gtag==='function')window.gtag('event',name,{...params,page_path:location.pathname});}
@@ -94,7 +95,7 @@ function collectImpacts(){
 }
 function drawCriticalFlashes(){
  for(const flash of criticalFlashes){
-  const fade=Math.max(0,1-flash.age/.3);
+  const fade=Math.max(0,1-flash.age/CRITICAL_FLASH_SECONDS);
   ctx.save();ctx.globalAlpha=fade*(reduced?.35:.8);ctx.strokeStyle='#fff3b0';ctx.fillStyle='#fffce3';ctx.lineWidth=2;
   if(!reduced){ctx.shadowColor='#ffe89a';ctx.shadowBlur=10;}
   circle(flash.x,flash.y,reduced?5:5+flash.age*34);ctx.fill();
@@ -104,10 +105,17 @@ function drawCriticalFlashes(){
    const b=finishBody(finishEffect,i,match.bodies[i]);ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.angle);path(b.region.points,BODY_RADIUS);ctx.globalAlpha=fade*(reduced?.12:.4);ctx.fill();ctx.restore();
   }
   ctx.restore();
+  // Keep the brief glow subtle, but leave enough time to identify the event.
+  const labelFade=Math.min(1,(CRITICAL_LABEL_SECONDS-flash.age)/.2);
+  const x=Math.max(-155,Math.min(155,flash.x));
+  const y=Math.max(-160,Math.min(155,flash.y-48))-(reduced?0:Math.min(6,flash.age*12));
+  ctx.save();ctx.globalAlpha=Math.max(0,labelFade);ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.lineWidth=4;ctx.lineJoin='round';ctx.strokeStyle='#071827';ctx.fillStyle='#fff1a8';
+  ctx.strokeText('クリティカル！',x,y);ctx.fillText('クリティカル！',x,y);ctx.restore();
  }
 }
 function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
- if(!paused&&!document.hidden)criticalFlashes=criticalFlashes.map(f=>({...f,age:f.age+dt})).filter(f=>f.age<.3);
+ if(!paused&&!document.hidden)criticalFlashes=criticalFlashes.map(f=>({...f,age:f.age+dt})).filter(f=>f.age<CRITICAL_LABEL_SECONDS);
  if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){const previousBodies=match.bodies;match=step(match,1/120);collectImpacts();accumulator-=1/120;if(match.phase==='finished'){beginFinish(previousBodies);accumulator=0;break;}}updateHud();}
  if(finishEffect&&!document.hidden){
   const previousAge=finishEffect.age,wasDone=finishEffect.done;finishEffect=advanceFinishEffect(finishEffect,dt);

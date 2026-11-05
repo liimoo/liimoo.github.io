@@ -25,6 +25,7 @@ async def main():
             await page.route('**/googletagmanager.com/**',lambda r:r.abort())
             # Force several physics substeps per frame: events must not be lost.
             await page.add_init_script('const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>raf(t=>setTimeout(()=>cb(performance.now()),65));')
+            await page.add_init_script("window.criticalLabels=[];const original=CanvasRenderingContext2D.prototype.fillText;CanvasRenderingContext2D.prototype.fillText=function(text,...args){if(text==='クリティカル！')window.criticalLabels.push({text,args,time:performance.now()});return original.call(this,text,...args);};")
             await page.goto('http://127.0.0.1:8766/blade/')
             await enter_selection(page)
             await start_battle(page)
@@ -33,22 +34,31 @@ async def main():
             await page.wait_for_function('criticalProbe().length===1')
             assert await page.evaluate("cues.filter(x=>x.cue==='critical').length")==1
             assert await page.evaluate("cues.filter(x=>x.cue==='hit').length")==0
+            await page.wait_for_function('criticalLabels.length>0')
             if not terminal:
                 await page.locator('#pause').click()
                 age=await page.evaluate('criticalProbe()[0].age')
                 await page.wait_for_timeout(400)
                 assert await page.evaluate('criticalProbe()[0].age')==age
                 await page.locator('#resume').click()
-            await page.wait_for_timeout(500)
+            await page.wait_for_timeout(800)
             assert await page.evaluate('criticalProbe().length')==0
+            if reduced:
+                positions=await page.evaluate('criticalLabels.map(label=>JSON.stringify(label.args))')
+                assert len(set(positions))==1, positions
+            label_count=await page.evaluate('criticalLabels.length')
+            await page.wait_for_timeout(100)
+            assert await page.evaluate('criticalLabels.length')==label_count
             assert await page.evaluate("cues.filter(x=>x.cue==='critical').length")==1
             if terminal:
                 await page.wait_for_function('!document.getElementById("result").hidden')
                 await replay_battle(page)
                 assert await page.evaluate('criticalProbe().length')==0
                 await page.locator('#sound').click()
+                label_count=await page.evaluate('criticalLabels.length')
                 await page.locator('#launch').click()
                 await page.wait_for_timeout(200)
+                assert await page.evaluate('criticalLabels.length')>label_count
                 assert await page.evaluate("cues.filter(x=>x.cue==='critical').length")==1
             assert not errors,errors
             print(f'critical final={terminal} reduced={reduced}: substep cue, flash expiry, pause/replay/mute PASS')
