@@ -12,7 +12,6 @@ let arenaLayer=null;
 let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null,mode='single',playerTeam=[],cpuTeam=[],teamEffects=createTeamEffects(),resultShown=false;
 let launchSettings=[],launchCity=0;
 const launchHome=$('launch').parentElement;
-const launchAnchor=document.createComment('launch controls');launchHome.before(launchAnchor);
 const stageControls=document.createElement('div');stageControls.id='stage-controls';stageControls.hidden=true;document.querySelector('.arena-wrap').append(stageControls);
 const launchTabs=document.createElement('div');launchTabs.id='launch-cities';launchTabs.setAttribute('aria-label','発射を調整する都市');launchHome.before(launchTabs);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -30,7 +29,7 @@ function refreshLaunchControls(){
  launchTabs.hidden=true;launchTabs.replaceChildren();
  const team=mode==='team';
  if(team&&match){canvas.tabIndex=0;canvas.setAttribute('aria-label',`${match.bodies[launchCity].region.name}の発射を調整中。駒をタップ、または左右キーで都市を選択`);}
- else{canvas.removeAttribute('tabindex');canvas.setAttribute('aria-label','地図コマの対戦場。下の角度・強さと発射ボタンでも操作できます。');}
+ else{canvas.removeAttribute('tabindex');canvas.setAttribute('aria-label','地図コマの対戦場。舞台内の角度・強さを調整し、発射ボタンで開始します。');}
 }
 canvas.addEventListener('keydown',event=>{
  if(mode!=='team'||match?.phase!=='ready'||!['ArrowLeft','ArrowRight'].includes(event.key))return;
@@ -42,11 +41,11 @@ function syncLaunchSliders(){
 }
 function prepareLaunchControls(){
  launchCity=0;launchSettings=Array.from({length:3},()=>({angle:0,power:75}));
- const team=mode==='team';$('battle').classList.toggle('team-battle',team);$('launch').classList.toggle('stage-launch',team);
- stageControls.hidden=!team;
- if(team){stageControls.append(launchTabs,launchHome);launchHome.append($('launch'));}else{launchAnchor.after(launchTabs,launchHome);launchHome.append($('launch'));}
- if(team)syncLaunchSliders();refreshLaunchControls();
- document.querySelector('.control-note').textContent=team?'駒をタップして選び、引っ張るかスライダーで角度・強さを調整。「発射する」を押すまで始まりません。':'引っ張る操作の代わりに、上の調整と発射ボタンでも遊べます。';
+ const team=mode==='team';$('battle').classList.toggle('team-battle',team);$('launch').classList.add('stage-launch');
+ stageControls.hidden=false;
+ stageControls.append(launchTabs,launchHome);launchHome.append($('launch'));
+ syncLaunchSliders();refreshLaunchControls();
+ document.querySelector('.control-note').textContent=team?'駒をタップして選び、引っ張るかスライダーで角度・強さを調整。「発射する」を押すまで始まりません。':'駒を引っ張るかスライダーで角度・強さを調整。「発射する」を押すまで始まりません。';
 }
 function reset(){
  gameAudio.stop();
@@ -59,14 +58,14 @@ function reset(){
   $(`${side}-spin-power`).textContent=`回転力 ${match.bodies.find(b=>b.side===side).spinPower} / 100`;
  }
  $('region-hint').textContent=regions[selected].hint;$('region-link').href=regions[selected].url;
- $('status').textContent=mode==='team'?'都市ごとに角度と強さを調整し、舞台のボタンで一斉発射。':'地域を選んだら、青い地図を引いて発射。';$('arena-caption').textContent=mode==='team'?'青の3都市があなたのチーム':'青い地図を手前に引いて、はなそう';$('share-status').textContent='';
+ $('status').textContent=mode==='team'?'都市ごとに角度と強さを調整し、舞台のボタンで一斉発射。':'角度と強さを調整し、舞台のボタンで発射。';$('arena-caption').textContent=mode==='team'?'青の3都市があなたのチーム':'引っ張って調整し、ボタンで発射';$('share-status').textContent='';
  document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(Number(b.dataset.index)===selected)));controls(false);updateHud();resize();draw(0);flow?.refresh();
 }
 function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power,#launch-cities button,#battle-back'))el.disabled=active;}
-function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=mode==='team'?launchTeam(match,launchSettings.map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):launch(match,direction,power);$('launch').hidden=mode==='team';stageControls.hidden=true;aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{mode,region:regions[selected].id,opponent:regions[opponent].id});}
+function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=mode==='team'?launchTeam(match,launchSettings.map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):launch(match,direction,power);$('launch').hidden=true;stageControls.hidden=true;aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{mode,region:regions[selected].id,opponent:regions[opponent].id});}
 function fireFromControls(){const a=Number($('angle').value)*Math.PI/180;fire({x:Math.sin(a),y:-Math.cos(a)},Number($('power').value)/100);}
 $('launch').addEventListener('click',fireFromControls);
-for(const id of ['angle','power'])$(id).addEventListener('input',()=>{if(mode==='team'){launchSettings=launchSettings.map((setting,i)=>i===launchCity?{...setting,[id]:Number($(id).value)}:setting);refreshLaunchControls();}$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});
+for(const id of ['angle','power'])$(id).addEventListener('input',()=>{launchSettings=launchSettings.map((setting,i)=>i===launchCity?{...setting,[id]:Number($(id).value)}:setting);refreshLaunchControls();$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});
 $('shuffle').addEventListener('click',()=>{const candidates=regions.map((_,i)=>i).filter(i=>mode==='team'?regions[i].name===regions[i].prefecture&&regions[i].prefecture!==teamName('player'):i!==selected&&i!==opponent);opponent=candidates[Math.floor(Math.random()*candidates.length)]??(selected+1)%regions.length;if(mode==='team'){cpuTeam=defaultTeam(regions,opponent);opponent=cpuTeam[0];}flow?.refresh();gameAudio.play('select');});
 $('again').addEventListener('click',()=>flow?.show('vs'));
 $('sound').addEventListener('click',async()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').textContent=sound?'音 ON':'音 OFF';if(sound){const enabled=await gameAudio.enable();if(enabled&&sound)gameAudio.play('select');}else gameAudio.disable();});
@@ -77,8 +76,8 @@ window.addEventListener('blur',()=>{gameAudio.stop();setPause(true);});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&match?.phase==='active'){e.preventDefault();setPause(!paused);}});
 function pointer(e){const r=canvas.getBoundingClientRect();return screenToWorld({x:(e.clientX-r.left)/r.width*440-220,y:(e.clientY-r.top)/r.height*440-220});}
 canvas.addEventListener('pointerdown',e=>{if(flow?.screen!=='battle'||!match||match.phase!=='ready'||!e.isPrimary)return;const p=pointer(e),b=match.bodies.find(b=>b.side==='player'&&Math.hypot(p.x-b.x,p.y-b.y)<=BODY_RADIUS+18);if(!b)return;if(mode==='team'){launchCity=match.bodies.indexOf(b);syncLaunchSliders();refreshLaunchControls();}aim={pointerId:e.pointerId,start:p,end:p,bodyIndex:match.bodies.indexOf(b)};canvas.setPointerCapture(e.pointerId);});
-function adjustTeamAim(end){
- if(mode!=='team'||!aim)return;
+function adjustAim(end){
+ if(!aim)return;
  const dx=aim.start.x-end.x,dy=aim.start.y-end.y,length=Math.hypot(dx,dy);
  if(length<=7)return;
  const angle=Math.round(Math.max(-65,Math.min(65,Math.atan2(dx,-dy)*180/Math.PI)));
@@ -86,8 +85,8 @@ function adjustTeamAim(end){
  launchSettings=launchSettings.map((setting,i)=>i===aim.bodyIndex?{angle,power}:setting);
  syncLaunchSliders();refreshLaunchControls();
 }
-canvas.addEventListener('pointermove',e=>{if(aim?.pointerId===e.pointerId){aim={...aim,end:pointer(e)};adjustTeamAim(aim.end);}});
-canvas.addEventListener('pointerup',e=>{if(aim?.pointerId!==e.pointerId)return;const a=aim,p=pointer(e),v={x:a.start.x-p.x,y:a.start.y-p.y},length=Math.hypot(v.x,v.y);adjustTeamAim(p);aim=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);if(mode!=='team'&&length>7)fire(v,Math.min(1,Math.max(.2,length/85)));});
+canvas.addEventListener('pointermove',e=>{if(aim?.pointerId===e.pointerId){aim={...aim,end:pointer(e)};adjustAim(aim.end);}});
+canvas.addEventListener('pointerup',e=>{if(aim?.pointerId!==e.pointerId)return;adjustAim(pointer(e));aim=null;if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);});
 for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{aim=null;});
 function updateHud(){if(!match)return;$('time').textContent=String(Math.max(0,Math.ceil(MATCH_SECONDS-match.elapsed))).padStart(2,'0');
  for(const side of ['player','cpu']){const members=match.bodies.filter(b=>b.side===side);$(`${side}-energy`).style.transform=`scaleX(${members.reduce((sum,b)=>sum+(b.eliminated?0:b.energy),0)/members.length})`;}
@@ -146,7 +145,7 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
  }
  drawCriticalFlashes();
  ctx.save();ctx.translate(0,-10);if(mode==='team')drawTeamEffects(ctx,teamEffects,match.bodies);else drawFinishEffect(ctx,finishEffect,match.bodies);ctx.restore();
- if(match.phase==='ready')for(const index of mode==='team'?[0,1,2]:[aim?.bodyIndex??0]){const b=match.bodies[index];let dx,dy,power;if(aim&&mode!=='team'){dx=aim.start.x-aim.end.x;dy=aim.start.y-aim.end.y;power=Math.min(1,Math.hypot(dx,dy)/85);}else{const setting=mode==='team'?launchSettings[index]:{angle:Number($('angle').value),power:Number($('power').value)};const a=setting.angle*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=setting.power/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();for(let n=0;n<=12;n++){const d=38+(7+power*55)*n/12,p={x:b.x+ux*d,y:b.y+uy*d};n?ctx.lineTo(p.x,p.y+floorOffset(p)):ctx.moveTo(p.x,p.y+floorOffset(p));}ctx.stroke();ctx.setLineDash([]);ctx.beginPath();const tipA={x:end.x-ux*8-uy*5,y:end.y-uy*8+ux*5},tipB={x:end.x-ux*8+uy*5,y:end.y-uy*8-ux*5};ctx.moveTo(tipA.x,tipA.y+floorOffset(tipA));ctx.lineTo(end.x,end.y+floorOffset(end));ctx.lineTo(tipB.x,tipB.y+floorOffset(tipB));ctx.stroke();}
+ if(match.phase==='ready')for(const index of mode==='team'?[0,1,2]:[aim?.bodyIndex??0]){const b=match.bodies[index];let dx,dy,power;{const setting=launchSettings[index];const a=setting.angle*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=setting.power/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();for(let n=0;n<=12;n++){const d=38+(7+power*55)*n/12,p={x:b.x+ux*d,y:b.y+uy*d};n?ctx.lineTo(p.x,p.y+floorOffset(p)):ctx.moveTo(p.x,p.y+floorOffset(p));}ctx.stroke();ctx.setLineDash([]);ctx.beginPath();const tipA={x:end.x-ux*8-uy*5,y:end.y-uy*8+ux*5},tipB={x:end.x-ux*8+uy*5,y:end.y-uy*8-ux*5};ctx.moveTo(tipA.x,tipA.y+floorOffset(tipA));ctx.lineTo(end.x,end.y+floorOffset(end));ctx.lineTo(tipB.x,tipB.y+floorOffset(tipB));ctx.stroke();}
 }
 function collectImpacts(){
  for(const hit of match.impacts){

@@ -45,8 +45,13 @@ async def main():
                 await session.send('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': [{'x': x, 'y': y}]})
                 await session.send('Input.dispatchTouchEvent', {'type': 'touchMove', 'touchPoints': [{'x': x+12, 'y': y+45}]})
                 await session.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
-            else:
-                await page.locator('#launch').click()
+            if touch:
+                assert await page.locator('#angle').input_value()!='0', 'touch drag must update angle'
+            assert await page.locator('#launch').is_enabled(), 'drag release must only adjust aim'
+            assert await page.locator('#time').inner_text()=='45'
+            box=await page.locator('#launch').bounding_box();arena=await page.locator('#arena').bounding_box()
+            assert box['y']+box['height']<=arena['y']+arena['height']+1
+            await page.locator('#launch').click()
             assert await page.locator('#launch').is_disabled()
             await page.locator('#pause').click()
             assert await page.locator('#pause-cover').is_visible()

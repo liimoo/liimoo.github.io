@@ -73,7 +73,7 @@
 /* Compact team preparation overlays the empty lower edge of the canvas. */
 .team-battle .fighter>.energy{display:none}
 #stage-controls{position:absolute;inset:auto 6px 4px;z-index:2;background:#10283cf2;border:1px solid #31516b;padding:4px 6px;border-radius:10px}
-.team-battle .arena-wrap{width:min(100%,600px,max(280px,calc(100dvh - 240px)))}
+#battle .arena-wrap{width:min(100%,600px,max(280px,calc(100dvh - 240px)))}
 #stage-controls #launch-cities{padding:0;gap:5px;margin-bottom:8px}
 #stage-controls #launch-cities button{font-size:11px;padding:6px 4px;line-height:1.4;min-height:42px}
 #stage-controls .launch-controls{padding:0 94px 0 0;grid-template-columns:1fr 1fr;gap:8px;min-height:48px}
@@ -83,7 +83,7 @@
 #stage-controls .stage-launch span{display:none}
 #stage-controls .stage-launch:hover{transform:none}
 #stage-controls .stage-launch:active:enabled{transform:translateY(2px)}
-.team-battle .arena-caption{display:none}
+#battle .arena-caption{display:none}
 
 /* Keep selection controls in one viewport; only the geography list scrolls. */
 body[data-screen=select]{overflow:hidden}
