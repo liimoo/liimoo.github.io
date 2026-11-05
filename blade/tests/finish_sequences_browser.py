@@ -21,7 +21,7 @@ export function step(match,dt) {{
  region:{{...b.region,points:[[-1,-1],[1,-1],[1,1],[-1,1]]}}}})}};
 }}
 '''
-            await page.route('**/engine.mjs',lambda route:route.fulfill(content_type='text/javascript',body=script))
+            await page.route('**/engine.mjs*',lambda route:route.fulfill(content_type='text/javascript',body=script))
             await page.route('**/googletagmanager.com/**',lambda route:route.abort())
             await page.goto(BASE+'/blade/')
             await page.locator('.region-card').last.wait_for()

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hull, createMatch, launch, step } from '../engine.mjs';
+import { hull, createMatch, launch, step, regionStats, combatBonuses } from '../engine.mjs';
 const square = { id: 'square', points: [[-0.7,-0.7],[0.7,-0.7],[0.7,0.7],[-0.7,0.7]] };
 const long = { id: 'long', points: [[-1,-0.25],[1,-0.25],[1,0.25],[-1,0.25]] };
 test('hull removes interior, duplicate and collinear points', () => {
@@ -200,4 +200,43 @@ test('every live top keeps rotating through contacts across all region pairs',as
   }
   assert.equal(a.phase,'finished');
  }
+});
+
+
+test('grit is a bounded shape statistic with validated explicit overrides',()=>{
+ assert.equal(regionStats({...square,grit:0}).grit,0);
+ assert.equal(regionStats({...square,grit:100}).grit,100);
+ assert.equal(regionStats(square).grit,100);
+ const irregular={points:[[-1,0],[0,.1],[.1,0],[0,-.1]]};
+ assert.ok(regionStats(irregular).grit<regionStats(square).grit);
+ for(const grit of [-1,101,NaN,Infinity,'50',null])
+  assert.throws(()=>regionStats({...square,grit}),/grit/i);
+ assert.throws(()=>regionStats({points:[[0,0]]}),/polygon/i);
+});
+test('full gauges share resistance and inertia; grit rises only as stamina falls',()=>{
+ const m=createMatch({...square,grit:0},{...long,grit:100});
+ assert.equal(m.bodies[0].inertia,400);
+ assert.equal(m.bodies[1].inertia,400);
+ for(const body of m.bodies) assert.deepEqual(combatBonuses(body),{attack:1,resistance:1});
+ for(const [energy,expected] of [[1,1],[.5,1.5],[.1,1.9],[0,2],[-1,2],[2,1]]) {
+  assert.deepEqual(combatBonuses({...m.bodies[1],energy}),{attack:expected,resistance:expected});
+  assert.deepEqual(combatBonuses({...m.bodies[0],energy}),{attack:1,resistance:1});
+ }
+ assert.deepEqual(combatBonuses({...m.bodies[1],grit:50,energy:.5}),{attack:1.25,resistance:1.25});
+});
+
+function gritContact(grit,energy=.3) {
+ const a=launch(createMatch({...square,grit},{...square,grit:0}),{x:0,y:-1},1);
+ return {...a,bodies:a.bodies.map((b,i)=>({...b,x:i?20:-20,y:i?3:-3,
+  vx:i?-20:20,vy:0,angle:0,spin:i?-10:10,cruiseSpin:i?-10:10,energy}))};
+}
+test('grit reduces own contact torque and increases opponent stamina damage without extra knockback',()=>{
+ const low=gritContact(0),high=gritContact(100),snapshot=structuredClone(high);
+ const a=step(low,1/120),b=step(high,1/120);
+ assert.ok(a.impacts.length && b.impacts.length);
+ assert.ok(b.bodies[0].energy>a.bodies[0].energy,'resistance reduces own torque damage');
+ assert.ok(b.bodies[1].energy<a.bodies[1].energy,'attack increases opposing damage');
+ assert.ok(Math.abs(b.bodies[0].spin-10)<Math.abs(a.bodies[0].spin-10),'resistance reduces rotation disturbance');
+ for(let i=0;i<2;i++) for(const key of ['vx','vy','x','y']) assert.equal(a.bodies[i][key],b.bodies[i][key]);
+ assert.deepEqual(high,snapshot);
 });

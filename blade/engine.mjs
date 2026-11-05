@@ -22,13 +22,31 @@ export function hull(points) {
  return [...half(sorted).slice(0,-1), ...half([...sorted].reverse()).slice(0,-1)];
 }
 
-function body(region, side) {
+function regionShape(region) {
  const polygon = hull(region.points);
  if(polygon.length<3) throw new Error('A polygon requires at least three non-collinear points');
  const maxRadius = Math.max(...polygon.map(p=>Math.hypot(p.x,p.y)));
- const shape = polygon.map(p=>({x:p.x/maxRadius*BODY_RADIUS,y:p.y/maxRadius*BODY_RADIUS}));
- return { region, shape, side, mass:1, radius:BODY_RADIUS,
-  inertia: Math.max(180,shape.reduce((sum,p)=>sum+dot(p,p),0)/shape.length*.6),
+ return polygon.map(p=>({x:p.x/maxRadius*BODY_RADIUS,y:p.y/maxRadius*BODY_RADIUS}));
+}
+
+export function regionStats(region) {
+ const shape=regionShape(region);
+ if(region.grit!==undefined) {
+  if(!Number.isFinite(region.grit)||region.grit<0||region.grit>100) throw new Error('Invalid grit');
+  return {grit:region.grit};
+ }
+ const shapeInertia=shape.reduce((sum,p)=>sum+dot(p,p),0)/shape.length*.6;
+ return {grit:Math.round(clamp((shapeInertia-180)/(BODY_RADIUS**2*.6-180),0,1)*100)};
+}
+
+export function combatBonuses(body) {
+ const bonus=1+body.grit/100*(1-clamp(body.energy,0,1));
+ return {attack:bonus,resistance:bonus};
+}
+
+function body(region, side) {
+ const shape=regionShape(region),{grit}=regionStats(region);
+ return { region, shape, side, mass:1, radius:BODY_RADIUS, inertia:400, grit,
   x:0, y:side==='player'?95:-95, vx:0, vy:0, angle:0, spin:0, energy:1 };
 }
 
@@ -106,9 +124,10 @@ function resolve(a,b,hit) {
   const sign=i?1:-1,offset=i?rb:ra;
   const vx=v.vx+sign*force.x,vy=v.vy+sign*force.y;
   const speed=Math.hypot(vx,vy),scale=speed>340?340/speed:1;
-  const angularChange=sign*cross(offset,force)/v.inertia;
-  // Off-centre hits destabilize each shape differently; equal mass does not mean equal damage.
-  const drain=Math.min(.18,impulse*.00012+Math.abs(angularChange)*.012);
+  const {resistance}=combatBonuses(v),{attack}=combatBonuses(i?a:b);
+  const angularChange=sign*cross(offset,force)/v.inertia/resistance;
+  // Grit resists torque and boosts stamina damage, never the linear collision impulse.
+  const drain=Math.min(.18,(impulse*.00012+Math.abs(angularChange)*.012)*attack);
   const energy=Math.max(0,v.energy-drain);
   return {...v,x:v.x+sign*n.x*correction,y:v.y+sign*n.y*correction,
    vx:vx*scale,vy:vy*scale,
