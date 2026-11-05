@@ -1,14 +1,16 @@
-import {mountFlow} from './flow.mjs?v=20261105-team-aim';
-import {chooseCity,defaultTeam} from './team-roster.mjs?v=20261105-team-aim';
-import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-team-aim';
+import {mountFlow} from './flow.mjs?v=20261105-team-panel';
+import {chooseCity,defaultTeam} from './team-roster.mjs?v=20261105-team-panel';
+import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-team-panel';
 import {createBladeAudio} from './audio.mjs?v=20261105-critical-clear';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-overkill';
-import {createMatch,createTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-team-aim';
+import {createMatch,createTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-team-panel';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null,mode='single',playerTeam=[],cpuTeam=[],teamEffects=createTeamEffects(),resultShown=false;
 let launchSettings=[],launchCity=0;
 const launchHome=$('launch').parentElement;
+const launchAnchor=document.createComment('launch controls');launchHome.before(launchAnchor);
+const stageControls=document.createElement('div');stageControls.id='stage-controls';stageControls.hidden=true;document.querySelector('.arena-wrap').append(stageControls);
 const launchTabs=document.createElement('div');launchTabs.id='launch-cities';launchTabs.setAttribute('aria-label','発射を調整する都市');launchHome.before(launchTabs);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CRITICAL_FLASH_SECONDS=.3,CRITICAL_LABEL_SECONDS=.65;
@@ -35,7 +37,8 @@ function syncLaunchSliders(){
 function prepareLaunchControls(){
  launchCity=0;launchSettings=Array.from({length:3},()=>({angle:0,power:75}));
  const team=mode==='team';$('battle').classList.toggle('team-battle',team);$('launch').classList.toggle('stage-launch',team);
- (team?document.querySelector('.arena-wrap'):launchHome).append($('launch'));
+ stageControls.hidden=!team;
+ if(team){stageControls.append(launchTabs,launchHome);launchHome.append($('launch'));}else{launchAnchor.after(launchTabs,launchHome);launchHome.append($('launch'));}
  if(team)syncLaunchSliders();refreshLaunchControls();
  document.querySelector('.control-note').textContent=team?'都市名を選んで、それぞれの角度・強さを調整。舞台の「発射する」で3都市が一斉に出陣します。':'引っ張る操作の代わりに、上の調整と発射ボタンでも遊べます。';
 }
@@ -54,7 +57,7 @@ function reset(){
  document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(Number(b.dataset.index)===selected)));controls(false);updateHud();resize();draw(0);flow?.refresh();
 }
 function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power,#launch-cities button,#battle-back'))el.disabled=active;}
-function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=mode==='team'?launchTeam(match,launchSettings.map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):launch(match,direction,power);$('launch').hidden=mode==='team';aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{mode,region:regions[selected].id,opponent:regions[opponent].id});}
+function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=mode==='team'?launchTeam(match,launchSettings.map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):launch(match,direction,power);$('launch').hidden=mode==='team';stageControls.hidden=true;aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{mode,region:regions[selected].id,opponent:regions[opponent].id});}
 function fireFromControls(){const a=Number($('angle').value)*Math.PI/180;fire({x:Math.sin(a),y:-Math.cos(a)},Number($('power').value)/100);}
 $('launch').addEventListener('click',fireFromControls);
 for(const id of ['angle','power'])$(id).addEventListener('input',()=>{if(mode==='team'){launchSettings=launchSettings.map((setting,i)=>i===launchCity?{...setting,[id]:Number($(id).value)}:setting);refreshLaunchControls();}$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});

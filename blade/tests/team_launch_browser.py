@@ -13,6 +13,14 @@ async def main():
    await page.goto(BASE+'/blade/')
    await page.locator('#start-team').click();await page.locator('#confirm-match').click();await page.locator('#skip-vs').click()
    assert await page.locator('.arena-wrap #launch').count()==1
+   assert await page.locator('#player-energy').is_hidden()
+   assert await page.locator('#cpu-energy').is_hidden()
+   assert await page.locator('.battle-member .energy:visible').count()==6
+   assert await page.locator('#stage-controls #angle').is_visible()
+   assert await page.locator('#stage-controls #power').is_visible()
+   panel=await page.locator('#stage-controls').bounding_box();button=await page.locator('#launch').bounding_box()
+   assert button['x']>panel['x']+panel['width']/2
+   assert button['y']>panel['y']+panel['height']/3
    for i,(angle,power) in enumerate([(-40,30),(0,70),(50,100)]):
     await page.locator(f'#launch-cities button[data-city="{i}"]').click()
     await page.locator('#angle').fill(str(angle));await page.locator('#power').fill(str(power))
@@ -44,6 +52,8 @@ async def main():
    await page.locator('#confirm-match').click();await page.locator('#skip-vs').click()
    assert await page.locator('.launch-controls #launch').count()==1
    assert await page.locator('#launch-cities').is_hidden()
+   assert await page.locator('#player-energy').is_visible()
+   assert await page.locator('#cpu-energy').is_visible()
    assert not errors,errors
    await page.close()
   await browser.close()
