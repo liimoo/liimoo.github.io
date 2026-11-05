@@ -83,7 +83,7 @@ export function drawFinishEffect(ctx,fx,bodies) {
  if(!fx)return;
  for(const index of fx.losers) {
   if(!fx.reduced&&(fx.age<fx.burstAt||!canExplode(fx,index)))continue;
-  const body=finishBody({...fx,age:fx.burstAt},index,bodies[index]),color=COLORS[index],age=Math.max(0,fx.age-fx.burstAt);
+  const body=finishBody({...fx,age:fx.burstAt},index,bodies[index]),color=COLORS[body.side==='cpu'?1:0],age=Math.max(0,fx.age-fx.burstAt);
   ctx.save();ctx.translate(body.x,body.y);
   if(fx.reduced) {
    ctx.globalAlpha=.35*(1-fx.age/fx.duration);ring(ctx,42,color,3);ctx.restore();continue;

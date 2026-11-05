@@ -28,7 +28,9 @@ export function step(match,dt) {
             assert await page.locator('#title-screen').is_visible()
             assert await page.locator('#choose-region').is_hidden()
             assert await page.locator('#battle').is_hidden()
-            assert await page.locator('#title-screen button:disabled').count() >= 2
+            await page.locator('#start-team').wait_for(state='visible')
+            await page.wait_for_function("!document.getElementById('start-team').disabled")
+            assert await page.locator('#title-screen button:disabled').count() == 1
             await enter_selection(page)
             assert await page.locator('#title-screen').is_hidden()
             assert await page.locator('.region-card').count() < 200

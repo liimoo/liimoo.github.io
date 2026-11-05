@@ -77,10 +77,12 @@ export function launch(match, direction, power) {
  const strength=clamp(power,0,1);
  const variation=((Math.imul(match.seed,1664525)+1013904223)>>>0)/4294967296;
  const cpuAngle=(variation-.5)*.42;
- return {...match,phase:'active',bodies:match.bodies.map((b,i)=>({...b,
-  vx:i?Math.sin(cpuAngle)*190:aim.x*(80+strength*160),
-  vy:i?Math.cos(cpuAngle)*190:aim.y*(80+strength*160),
-  spin:i?-13:12+strength*3,cruiseSpin:i?-13:12+strength*3,energy:1}))};
+ return {...match,phase:'active',bodies:match.bodies.map((b,i)=>{
+  const cpu=match.mode==='team'?b.side==='cpu':Boolean(i);
+  return {...b,vx:cpu?Math.sin(cpuAngle)*190:aim.x*(80+strength*160),
+   vy:cpu?Math.cos(cpuAngle)*190:aim.y*(80+strength*160),
+   spin:cpu?-13:12+strength*3,cruiseSpin:cpu?-13:12+strength*3,energy:1};
+ })};
 }
 
 function vertices(b) {
@@ -209,6 +211,7 @@ function criticalCollision(current,bodies,hit,slice) {
 }
 
 export function step(match,dt) {
+ if(match.mode==='team') return stepTeam(match,dt);
  if(match.phase!=='active'||!Number.isFinite(dt)||dt<=0) return match;
  // Substeps prevent a delayed frame from tunneling through narrow shapes.
  const duration=Math.min(dt,.1),count=Math.ceil(duration/(1/120)),slice=duration/count;
@@ -225,6 +228,90 @@ export function step(match,dt) {
   const elapsed=current.elapsed+slice,result=outcome(bodies,elapsed);
   current={...current,bodies,impacts,elapsed,result,phase:result?'finished':'active',
    criticalRng:critical.rng,criticalContact:critical.contact,impactSerial};
+  if(result) break;
+ }
+ return current;
+}
+
+
+function validateTeam(regions) {
+ if(!Array.isArray(regions)||regions.length!==3) throw new Error('A team requires three cities');
+ const prefecture=regions[0]?.prefectureCode??regions[0]?.prefecture;
+ if(!prefecture||regions.some(r=>!r||r.kind!=='市'||!r.id||(r.prefectureCode??r.prefecture)!==prefecture))
+  throw new Error('Choose three municipalities from the same prefecture');
+ if(new Set(regions.map(r=>r.id)).size!==3) throw new Error('Choose three distinct municipalities');
+}
+
+export function createTeamMatch(playerRegions,cpuRegions,seed=1) {
+ validateTeam(playerRegions);validateTeam(cpuRegions);
+ const base=createMatch(playerRegions[0],cpuRegions[0],seed);
+ const bodies=[...playerRegions,...cpuRegions].map((region,i)=>({...body(region,i<3?'player':'cpu'),
+  x:(i%3-1)*72,y:i<3?95:-95,eliminated:false}));
+ return {...base,mode:'team',bodies,criticalContacts:{},eliminations:[],eliminationSerial:0};
+}
+
+function teamResult(bodies,elapsed,events) {
+ const alive=['player','cpu'].map(side=>bodies.filter(b=>b.side===side&&!b.eliminated));
+ if(alive.every(team=>team.length===0)) {
+  const last=events;
+  const spinOnly=last.length>0&&last.every(e=>e.reason==='spin');
+  const energies=['player','cpu'].map(side=>last.filter(e=>e.body.side===side)
+   .reduce((sum,e)=>sum+(e.body.rawEnergy??e.body.energy),0));
+  const difference=energies[0]-energies[1];
+  return {winner:spinOnly&&Math.abs(difference)>EPSILON?(difference>0?'player':'cpu'):'draw',
+   reason:spinOnly?'spin':'ringout',...(spinOnly&&Math.abs(difference)>EPSILON?{tiebreak:'remaining-energy'}:{})};
+ }
+ if(alive.some(team=>team.length===0)) return {winner:alive[0].length?'player':'cpu',reason:events.some(e=>e.reason==='ringout')?'ringout':'spin'};
+ if(elapsed<MATCH_SECONDS) return null;
+ const countDifference=alive[0].length-alive[1].length;
+ const energyDifference=alive[0].reduce((sum,b)=>sum+b.energy,0)-alive[1].reduce((sum,b)=>sum+b.energy,0);
+ const difference=countDifference||energyDifference;
+ return {winner:Math.abs(difference)<EPSILON?'draw':difference>0?'player':'cpu',reason:'time'};
+}
+
+function teamCollisions(current,moved,slice) {
+ let bodies=moved,rng=current.criticalRng,contacts={...current.criticalContacts},serial=current.impactSerial;
+ let impacts=current.impacts.map(p=>({...p,age:p.age+slice})).filter(p=>p.age<.45);
+ for(let a=0;a<bodies.length;a++) for(let b=a+1;b<bodies.length;b++) {
+  const pair=[bodies[a],bodies[b]];
+  if(pair.some(v=>v.eliminated||v.energy<=0||Math.hypot(v.x,v.y)>ARENA_RADIUS+8)) continue;
+  const hit=collision(...pair),key=`${a}:${b}`,friendly=pair[0].side===pair[1].side;
+  if(friendly&&!hit) continue;
+  const critical=friendly?{bodies:resolve(...pair,hit).map((v,i)=>({...v,energy:pair[i].energy,
+   rawEnergy:pair[i].rawEnergy,spin:sustainedSpin(pair[i],v.spin,pair[i].energy)})),rng,attackers:[]}
+   :criticalCollision({...current,criticalRng:rng,criticalContact:contacts[key]},pair,hit,slice);
+  rng=critical.rng;if(!friendly) contacts={...contacts,[key]:critical.contact};
+  bodies=bodies.map((v,i)=>i===a?critical.bodies[0]:i===b?critical.bodies[1]:v);
+  if(hit) impacts=[...impacts.slice(-31),{...hit.point,age:0,id:++serial,critical:critical.attackers.length>0,
+   criticalAttackers:critical.attackers.map(i=>i===0?a:b),friendly}];
+ }
+ return {bodies,criticalRng:rng,criticalContacts:contacts,impactSerial:serial,impacts};
+}
+
+function eliminateTeamBodies(bodies,previous,serial) {
+ let events=[];
+ const next=bodies.map((b,index)=>{
+  if(b.eliminated) return b;
+  const reason=Math.hypot(b.x,b.y)>ARENA_RADIUS+8?'ringout':b.energy<=0?'spin':null;
+  if(!reason) return b;
+  const eliminated={...b,eliminated:true,eliminationReason:reason};
+  events=[...events,{id:++serial,index,reason,body:eliminated,previousBody:previous[index]}];
+  return eliminated;
+ });
+ return {bodies:next,events,serial};
+}
+
+function stepTeam(match,dt) {
+ if(match.phase!=='active'||!Number.isFinite(dt)||dt<=0) return match;
+ const duration=Math.min(dt,.1),count=Math.ceil(duration/(1/120)),slice=duration/count;
+ let current=match;
+ for(let i=0;i<count;i++) {
+  const moved=current.bodies.map(b=>b.eliminated||b.energy<=0?b:move(b,slice));
+  const collisionState=teamCollisions(current,moved,slice);
+  const eliminated=eliminateTeamBodies(collisionState.bodies,current.bodies,current.eliminationSerial);
+  const elapsed=current.elapsed+slice,result=teamResult(eliminated.bodies,elapsed,eliminated.events);
+  current={...current,...collisionState,bodies:eliminated.bodies,elapsed,result,phase:result?'finished':'active',
+   eliminations:[...current.eliminations,...eliminated.events],eliminationSerial:eliminated.serial};
   if(result) break;
  }
  return current;

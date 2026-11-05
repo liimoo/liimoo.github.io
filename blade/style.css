@@ -58,3 +58,11 @@
 /* Empty share feedback must not reserve space over the winning piece. */
 #result #share-status:empty{display:none}
 @media(max-width:360px){#result #result-detail{font-size:10px;line-height:1.4;margin:2px 0 4px}}
+
+/* Same-prefecture exhibition rosters. */
+.team-roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}.team-slot{min-width:0;font-size:12px;overflow-wrap:anywhere;border-color:var(--cyan)}.team-slot:disabled{opacity:.65}.preview-team{min-width:0;text-align:center}.preview-team>h3{font-size:15px;margin:0 0 10px;color:var(--cyan)}.preview-team.cpu>h3{color:var(--gold)}.preview-cities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.preview-cities .preview-fighter h3{font-size:14px!important}.preview-cities .preview-fighter>small,.preview-cities .preview-fighter>p{display:none}.preview-cities .preview-fighter svg{height:95px}.team-preview{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr)}
+@media(max-width:650px){.team-preview{grid-template-columns:1fr;gap:7px}.team-preview .versus-mark{font-size:16px}.team-preview .preview-team>h3{font-size:13px;margin:0 0 5px}.vs-screen .preview-cities .preview-fighter svg{height:75px}.team-slot{padding:10px 5px;font-size:11px}.preview-cities .preview-fighter h3{font-size:12px!important}}
+
+.battle-member{position:relative;margin-top:6px;min-width:0;padding-bottom:5px;font-size:10px;line-height:1.4;color:var(--ink)}.battle-member span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.battle-member i{display:block;height:3px;margin-top:3px;background:var(--cyan);transform-origin:left;border-radius:3px}.cpu .battle-member i{background:var(--gold);transform-origin:right}.battle-member.eliminated{opacity:.4}.battle-member.eliminated span{text-decoration:line-through}.battle-member.eliminated i{background:var(--muted)}
+
+.battle-member .energy{height:4px;margin-top:3px}.battle-member i{height:100%;margin:0}

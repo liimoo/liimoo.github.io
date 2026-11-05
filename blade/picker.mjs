@@ -9,7 +9,7 @@ function validMapRegions(items,{national=false}={}){
    Array.isArray(polygon)&&polygon.length>=3&&polygon.every(point=>
     Array.isArray(point)&&point.length===2&&point.every(Number.isFinite))));
 }
-export function mountPicker({regions,getSelected,onSelect}){
+export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=>[getSelected()],isTeam=()=>false}){
  let prefecture='',maps=null,mapRequested=false,mapFailed=false,renderedPrefecture=null;
  const cityMaps=new Map(),pending=new Set(),failed=new Set();
  const names=[...new Set(regions.map(r=>r.prefecture))].sort((a,b)=>Number(regions.find(r=>r.prefecture===a).prefectureCode)-Number(regions.find(r=>r.prefecture===b).prefectureCode));
@@ -22,10 +22,12 @@ export function mountPicker({regions,getSelected,onSelect}){
  }
  $('prefecture-back').addEventListener('click',()=>choosePrefecture(''));
  function renderCards(){
-  if(renderedPrefecture===prefecture)return;
-  renderedPrefecture=prefecture;
+  const renderKey=`${prefecture}:${isTeam()}`;
+  if(renderedPrefecture===renderKey)return;
+  renderedPrefecture=renderKey;
   const fragment=document.createDocumentFragment();
   for(const {region,index} of byPrefecture.get(prefecture)||[]){
+   if(isTeam()&&region.name===region.prefecture)continue;
    const button=element('button');button.type='button';button.className='region-card';button.dataset.index=String(index);
    button.setAttribute('aria-label',`${region.name}を選ぶ`);
    button.append(element('small',region.reading),element('strong',region.name),element('small',region.name===prefecture?'県全体':'市区町村'));
@@ -35,7 +37,7 @@ export function mountPicker({regions,getSelected,onSelect}){
  }
  function filterCards(){
   const query=normalize($('region-search').value);let count=0;
-  for(const card of $('regions').children){const region=regions[Number(card.dataset.index)];card.hidden=!normalize(`${region.name} ${region.reading}`).includes(query);card.setAttribute('aria-pressed',String(Number(card.dataset.index)===getSelected()));if(!card.hidden)count++;}
+  for(const card of $('regions').children){const region=regions[Number(card.dataset.index)];card.hidden=!normalize(`${region.name} ${region.reading}`).includes(query);card.setAttribute('aria-pressed',String(getSelectedIndices().includes(Number(card.dataset.index))));if(!card.hidden)count++;}
   $('no-regions').hidden=!prefecture||count>0;
  }
  $('region-search').addEventListener('input',filterCards);
@@ -62,7 +64,7 @@ export function mountPicker({regions,getSelected,onSelect}){
     group.addEventListener('click',()=>activateMap(region.name,index));
     group.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();const wasPrefecture=Boolean(prefecture);activateMap(region.name,index);if(wasPrefecture){[...svg.querySelectorAll('[role=button]')].find(node=>node.dataset.name===region.name)?.focus();}else $('prefecture-back').focus();}});
    }
-   if(prefecture?selected.prefecture===prefecture&&selected.name===region.name:selected.prefecture===region.name)group.classList.add('map-selected');
+   if(getSelectedIndices().some(i=>prefecture?regions[i].prefecture===prefecture&&regions[i].name===region.name:regions[i].prefecture===region.name))group.classList.add('map-selected');
    for(const polygon of region.polygons){const node=document.createElementNS(SVG,'polygon');node.setAttribute('points',polygon.map(p=>p.join(',')).join(' '));group.append(node);}
    const title=document.createElementNS(SVG,'title');title.textContent=region.name;group.append(title);svg.append(group);
   }
@@ -85,7 +87,7 @@ export function mountPicker({regions,getSelected,onSelect}){
   loadMap();loadCityMap(prefecture);renderCards();filterCards();
   $('prefecture-list').hidden=Boolean(prefecture);$('prefecture-back').hidden=!prefecture;$('regions').hidden=!prefecture;$('region-search-label').hidden=!prefecture;
   $('picker-title').textContent=prefecture||'全国';$('picker-step').textContent=prefecture?'② 使う地域を選ぶ':'① 都道府県を選ぶ';
-  $('map-caption').textContent=mapFailed||failed.has(prefecture)?'地図を読み込めませんでした。左の一覧から選べます。':pending.has(prefecture)?'県の地図を読み込み中… 左の一覧からも選べます。':prefecture?'左の一覧から県全体や都市を選べます':'都道府県を選ぶと都市の地図が開きます';
+  $('map-caption').textContent=mapFailed||failed.has(prefecture)?'地図を読み込めませんでした。左の一覧から選べます。':pending.has(prefecture)?'県の地図を読み込み中… 左の一覧からも選べます。':prefecture?(isTeam()?'同じ県から3都市を選択。選択済みを押すと外せます':'左の一覧から県全体や都市を選べます'):'都道府県を選ぶと都市の地図が開きます';
   const selected=regions[getSelected()];$('selected-region-detail').replaceChildren(element('small','選択中'),element('h3',selected.name),element('p','能力は全地域共通。地図の形で勝負！'));
   drawMap();
  }
