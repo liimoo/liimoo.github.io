@@ -139,3 +139,11 @@ test('survivor slows monotonically and stops rotating after four seconds',()=>{
   assert.ok(Math.abs((angle(4)-angle(3.999))/.001)<.001);
  }
 });
+
+test('simultaneous depletion winner carries pre-impact spin without shattering',()=>{
+ const m={bodies:bodies.map(b=>({...b,energy:0,spin:0})),result:{winner:'player',reason:'spin',tiebreak:'remaining-energy'}};
+ const fx=createFinishEffect(m,false,bodies);
+ assert.equal(fx.origins[0].spin,bodies[0].spin);
+ assert.deepEqual(fx.losers,[1]);
+ assert.equal(hiddenByFinish(advanceFinishEffect(fx,2),0),false);
+});

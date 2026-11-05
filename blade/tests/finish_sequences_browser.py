@@ -8,7 +8,7 @@ async def main():
     source=(Path(__file__).parents[1]/'engine.mjs').read_text().replace('export function step(match,dt)', 'function actualStep(match,dt)')
     async with async_playwright() as p:
         browser=await p.chromium.launch()
-        for reason, x in [('spin',0),('ringout',189),('ringout',300),('time',0)]:
+        for reason, x in [('spin',0),('spin',1),('ringout',189),('ringout',300),('time',0)]:
             page=await browser.new_page(viewport={'width':390,'height':844})
             errors=[]
             page.on('pageerror',lambda error:errors.append(str(error)))
@@ -16,7 +16,7 @@ async def main():
 export function step(match,dt) {{
  const next=actualStep(match,dt);
  if(next.elapsed<.3)return next;
- return {{...next,phase:'finished',result:{{winner:'{ 'draw' if reason=='time' else 'cpu'}',reason:'{reason}'}},
+ return {{...next,phase:'finished',result:{{winner:'{ 'draw' if reason=='time' else 'cpu'}',reason:'{reason}',tiebreak:{repr('remaining-energy') if x==1 else 'null'}}},
  bodies:next.bodies.map((b,i)=>i?b:{{...b,x:{x},y:0,vx:100,vy:0,spin:0,energy:0,
  region:{{...b.region,points:[[-1,-1],[1,-1],[1,1],[-1,1]]}}}})}};
 }}
@@ -41,6 +41,8 @@ export function step(match,dt) {{
                 await page.wait_for_timeout(160)
                 await page.locator('#arena').screenshot(path=f'/tmp/blade-sequence-{reason}.png')
             await page.wait_for_function('!document.getElementById("result").hidden',timeout=3000)
+            if x==1:
+                assert '超過ダメージの少ない側' in await page.locator('#result-detail').inner_text()
             assert await page.locator('#result-title').inner_text()==('引き分け！' if reason=='time' else 'CPUの勝ち！')
             style=await page.locator('#result').evaluate('(el)=>({background:getComputedStyle(el).backgroundColor,blur:getComputedStyle(el).backdropFilter})')
             assert style['background']=='rgba(0, 0, 0, 0)' and style['blur']=='none'

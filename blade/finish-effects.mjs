@@ -3,7 +3,7 @@ export function createFinishEffect(match,reduced=false,previousBodies=match.bodi
  const {winner,reason}=match.result;
  const losers=reason==='time'?[]:winner==='draw'?[0,1]:[winner==='player'?1:0];
  const burstAt=reason==='ringout'?.4:.65;
- const origins=match.bodies.map((body,i)=>({...body,spin:(losers.includes(i)?previousBodies[i].spin:body.spin)??body.cruiseSpin??0}));
+ const origins=match.bodies.map((body,i)=>({...body,spin:(losers.includes(i)||body.energy<=0?previousBodies[i].spin:body.spin)??body.cruiseSpin??0}));
  const fx={losers,origins,reason,burstAt,reduced,age:0,motionAge:0,
   duration:(reduced||!losers.length)?.35:burstAt+1.05,done:false};
  return !reduced&&reason==='ringout'&&!losers.some(i=>canExplode(fx,i))?{...fx,duration:.55}:fx;

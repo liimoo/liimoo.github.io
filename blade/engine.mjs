@@ -135,16 +135,18 @@ function resolve(a,b,hit) {
   const angularChange=sign*cross(offset,force)/v.inertia/resistance;
   // Grit resists torque and boosts stamina damage, never the linear collision impulse.
   const drain=Math.min(.18,(impulse*.00012+Math.abs(angularChange)*.012)*attack);
-  const energy=Math.max(0,v.energy-drain);
+  const rawEnergy=(v.rawEnergy??v.energy)-drain;
+  const energy=Math.max(0,rawEnergy);
   return {...v,x:v.x+sign*n.x*correction,y:v.y+sign*n.y*correction,
    vx:vx*scale,vy:vy*scale,
-   spin:sustainedSpin(v,v.spin+angularChange,energy),energy};
+   spin:sustainedSpin(v,v.spin+angularChange,energy),energy,rawEnergy};
  });
 }
 
 function move(b,dt) {
  // Arcade bowl: stamina is endurance, not a multiplier on visible rotation.
- const energy=Math.max(0,b.energy-dt*.035*(1-.30*b.spinPower/100));
+ const rawEnergy=b.energy-dt*.035*(1-.30*b.spinPower/100);
+ const energy=Math.max(0,rawEnergy);
  const recovery=1-Math.exp(-4*dt);
  const spin=sustainedSpin(b,b.spin+(b.cruiseSpin-b.spin)*recovery,energy);
  const bowl=2.8,damping=Math.exp(-.13*dt);
@@ -160,12 +162,18 @@ function move(b,dt) {
  const limit=Math.min(1,340/Math.max(EPSILON,Math.hypot(nextX,nextY)));
  return {...b,vx:nextX*limit,vy:nextY*limit,
   x:b.x+nextX*limit*dt,y:b.y+nextY*limit*dt,
-  angle:(b.angle+spin*dt)%(Math.PI*2),spin,energy};
+  angle:(b.angle+spin*dt)%(Math.PI*2),spin,energy,rawEnergy};
 }
 
 function outcome(bodies,elapsed) {
  const outside=bodies.map(b=>Math.hypot(b.x,b.y)>ARENA_RADIUS+8);
  const exhausted=bodies.map(b=>b.energy<=0);
+ // Preserve ringout priority; compare overkill only when both gauges are exhausted.
+ if(!outside.some(Boolean)&&exhausted.every(Boolean)) {
+  const difference=(bodies[0].rawEnergy??bodies[0].energy)-(bodies[1].rawEnergy??bodies[1].energy);
+  if(Math.abs(difference)>EPSILON)
+   return {winner:difference>0?'player':'cpu',reason:'spin',tiebreak:'remaining-energy'};
+ }
  const loser=outside.some(Boolean)?outside:exhausted;
  if(loser.some(Boolean)) return {winner:loser[0]&&loser[1]?'draw':loser[0]?'cpu':'player',reason:outside.some(Boolean)?'ringout':'spin'};
  return elapsed>=MATCH_SECONDS?{winner:'draw',reason:'time'}:null;

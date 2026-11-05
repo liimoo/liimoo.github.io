@@ -280,3 +280,48 @@ test('spin power does not directly alter contact damage, torque or knockback',()
   assert.ok(Math.abs(damage[0]-damage[1])<1e-12);
  }
 });
+
+test('simultaneous contact exhaustion compares unclamped remaining energy in either player order',()=>{
+ const contact=gritContact(100,.001);
+ for(const reverse of [false,true]) {
+  const input={...contact,bodies:reverse?[...contact.bodies].reverse():contact.bodies};
+  const snapshot=structuredClone(input),out=step(input,1/120);
+  assert.ok(out.impacts.length>0);
+  assert.deepEqual(out.result,{winner:reverse?'cpu':'player',reason:'spin',tiebreak:'remaining-energy'});
+  assert.ok(out.bodies.every(b=>b.energy===0 && b.spin===0 && b.rawEnergy<0));
+  const winner=reverse?1:0;
+  assert.ok(out.bodies[winner].rawEnergy>out.bodies[1-winner].rawEnergy);
+  assert.deepEqual(input,snapshot);
+ }
+});
+test('equal contact overkill remains a draw within numerical tolerance',()=>{
+ const contact=gritContact(0,.001);
+ for(const difference of [0,1e-10]) {
+  const input={...contact,bodies:contact.bodies.map((b,i)=>({...b,y:0,spin:0,cruiseSpin:0,
+   energy:.001+(i?difference:0)}))};
+  const out=step(input,1/120);
+  assert.ok(out.impacts.length>0);
+  assert.ok(out.bodies.every(b=>b.rawEnergy<0 && b.energy===0));
+  assert.deepEqual(out.result,{winner:'draw',reason:'spin'});
+ }
+});
+test('passive exhaustion retains overshoot and ringout keeps precedence over energy tiebreaks',()=>{
+ const a=launch(createMatch(square,square),{x:0,y:-1},.5);
+ const bodies=a.bodies.map((b,i)=>({...b,x:i?120:-120,y:0,vx:0,vy:0,energy:i?.00001:.0001}));
+ const out=step({...a,bodies},1/120);
+ assert.deepEqual(out.result,{winner:'player',reason:'spin',tiebreak:'remaining-energy'});
+ assert.ok(out.bodies.every(b=>b.rawEnergy<0 && b.energy===0));
+ const ringout=step({...a,bodies:bodies.map((b,i)=>({...b,x:i?120:-200}))},1/120);
+ assert.deepEqual(ringout.result,{winner:'cpu',reason:'ringout'});
+ const bothOutside=step({...a,bodies:bodies.map((b,i)=>({...b,x:i?200:-200}))},1/120);
+ assert.deepEqual(bothOutside.result,{winner:'draw',reason:'ringout'});
+});
+test('contact damage preserves passive exhaustion overshoot instead of resetting it to zero',()=>{
+ const contact=gritContact(0,0);
+ const input={...contact,bodies:contact.bodies.map((b,i)=>({...b,y:0,spin:0,cruiseSpin:0,
+  energy:i?.00001:.0001}))};
+ const out=step(input,1/120);
+ assert.ok(out.impacts.length>0);
+ assert.deepEqual(out.result,{winner:'player',reason:'spin',tiebreak:'remaining-energy'});
+ assert.ok(Math.abs(out.bodies[0].rawEnergy-out.bodies[1].rawEnergy-.00009)<1e-12);
+});

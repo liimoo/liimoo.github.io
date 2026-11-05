@@ -1,5 +1,5 @@
-import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261104-winner-stop';
-import {createMatch,launch,step,regionStats,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-spin-power';
+import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-overkill';
+import {createMatch,launch,step,regionStats,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261105-overkill';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,audio=null,lastHit=-1,finishEffect=null;
@@ -51,7 +51,7 @@ function beginFinish(previousBodies){
 function finished(){const {winner,reason}=match.result;const name=regions[selected].name,other=regions[opponent].name;
  $('result-title').textContent=winner==='player'?'あなたの勝ち！':winner==='cpu'?'CPUの勝ち！':'引き分け！';
  $('result-kicker').textContent=winner==='player'?'VICTORY / NICE LAUNCH':winner==='cpu'?'NEXT TIME / TRY AGAIN':'DRAW / GOOD BATTLE';
- const why=reason==='ringout'?'場外で決着':reason==='spin'?'回転スタミナがなくなって決着':'45秒、どちらもゆずらず';
+ const why=match.result.tiebreak==='remaining-energy'?'同時にゲージ切れ・超過ダメージの少ない側の勝利':reason==='ringout'?'場外で決着':reason==='spin'?'回転スタミナがなくなって決着':'45秒、どちらもゆずらず';
  $('result-detail').textContent=`${name} vs ${other} · ${why}`;$('status').textContent=`${$('result-title').textContent} ${why}`;$('arena-caption').textContent='地域や発射の向きを変えて、もう一戦。';$('result').hidden=false;$('pause').disabled=true;
  // Selection is enabled after a match, but launch remains disabled until reset.
  controls(false);$('launch').disabled=true;tone(winner==='player'?880:260,.3);track('blade_finish',{region:regions[selected].id,winner,reason,duration:Math.round(match.elapsed)});
