@@ -9,12 +9,47 @@ function validMapRegions(items,{national=false}={}){
    Array.isArray(polygon)&&polygon.length>=3&&polygon.every(point=>
     Array.isArray(point)&&point.length===2&&point.every(Number.isFinite))));
 }
+function mapBounds(source){
+ const points=source.flatMap(region=>region.polygons.flat());
+ let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+ for(const [x,y] of points){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
+ const w=maxX-minX,h=maxY-minY,pad=Math.max(w,h)*.04;
+ return [minX-pad,minY-pad,w+pad*2,h+pad*2];
+}
 export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=>[getSelected()],isTeam=()=>false}){
  let prefecture='',maps=null,mapRequested=false,mapFailed=false,renderedPrefecture=null;
  const cityMaps=new Map(),pending=new Set(),failed=new Set();
+ let cameraFrame=0,cameraActive=false,cameraReveal=null;
+ function cancelCamera(){
+  cancelAnimationFrame(cameraFrame);cameraReveal?.cancel();cameraReveal=null;cameraActive=false;
+  const svg=$('selection-map');svg.removeAttribute('aria-busy');svg.style.pointerEvents='';svg.removeAttribute('inert');
+ }
+ function zoomCamera(from,to,onDone){
+  const svg=$('selection-map');cameraActive=true;svg.setAttribute('aria-busy','true');svg.setAttribute('inert','');svg.style.pointerEvents='none';
+  const started=performance.now();
+  const frame=now=>{
+   const t=Math.min(1,(now-started)/420),ease=t*t*(3-2*t);
+   svg.setAttribute('viewBox',from.map((value,i)=>value+(to[i]-value)*ease).join(' '));
+   if(t<1)cameraFrame=requestAnimationFrame(frame);else{cancelCamera();onDone();}
+  };
+  svg.setAttribute('viewBox',from.join(' '));cameraFrame=requestAnimationFrame(frame);
+ }
  const names=[...new Set(regions.map(r=>r.prefecture))].sort((a,b)=>Number(regions.find(r=>r.prefecture===a).prefectureCode)-Number(regions.find(r=>r.prefecture===b).prefectureCode));
  const byPrefecture=new Map(names.map(name=>[name,regions.map((region,index)=>({region,index})).filter(item=>item.region.prefecture===name)]));
- function choosePrefecture(name){prefecture=name;$('region-search').value='';refresh();document.querySelector('.picker-sidebar').scrollTop=0;}
+ function choosePrefecture(name){
+  const interrupted=cameraActive?$('selection-map').getAttribute('viewBox').split(' ').map(Number):null;
+  const previous=prefecture;cancelCamera();drawMap();
+  const national=maps?.prefectures,focus=national?.find(region=>region.name===(name||previous));
+  const animate=previous!==name&&(!previous||!name)&&focus&&!$('choose-region').hidden&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const from=interrupted||(name?national&&mapBounds(national):focus&&mapBounds([focus]));
+  const to=name?focus&&mapBounds([focus]):national&&mapBounds(national);
+  prefecture=name;$('region-search').value='';
+  // Keep the national geometry while the camera moves; async refreshes may
+  // update cards and loading messages, but must not replace the moving map.
+  if(animate&&name)cameraActive=true;
+  refresh();document.querySelector('.picker-sidebar').scrollTop=0;
+  if(animate)zoomCamera(from,to,()=>{drawMap();if(name)cameraReveal=$('selection-map').animate([{opacity:.35},{opacity:1}],{duration:120});});
+ }
  for(const name of names){
   const button=element('button');button.type='button';button.className='prefecture-card';button.dataset.prefecture=name;
   button.append(element('small',regions.find(r=>r.name===name)?.reading||'都道府県'),element('strong',`${name} ›`));
@@ -41,8 +76,9 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
   $('no-regions').hidden=!prefecture||count>0;
  }
  $('region-search').addEventListener('input',filterCards);
- function activateMap(name,index){if(prefecture){onSelect(index);refresh();}else choosePrefecture(name);}
+ function activateMap(name,index){if(cameraActive)return;if(prefecture){onSelect(index);refresh();}else choosePrefecture(name);}
  function drawMap(){
+  if(cameraActive)return;
   const svg=$('selection-map');svg.replaceChildren();
   const selected=regions[getSelected()];
   const source=prefecture?cityMaps.get(prefecture):maps?.prefectures;
@@ -50,10 +86,7 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
    const fallback=regions.find(r=>r.name===prefecture)||selected;
    const polygon=document.createElementNS(SVG,'polygon');polygon.setAttribute('points',fallback.points.map(p=>p.join(',')).join(' '));polygon.classList.add('map-selected');svg.append(polygon);svg.setAttribute('viewBox','-1.2 -1.2 2.4 2.4');return;
   }
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  for(const region of source)for(const polygon of region.polygons)for(const [x,y] of polygon){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
-  const w=maxX-minX,h=maxY-minY,pad=Math.max(w,h)*.04;
-  svg.setAttribute('viewBox',`${minX-pad} ${minY-pad} ${w+pad*2} ${h+pad*2}`);
+  svg.setAttribute('viewBox',mapBounds(source).join(' '));
   const entries=byPrefecture.get(prefecture)||[];
   for(const region of source){
    const index=entries.find(item=>item.region.name===region.name)?.index??-1;
@@ -91,5 +124,5 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
   const selected=regions[getSelected()];$('selected-region-detail').replaceChildren(element('small','選択中'),element('h3',selected.name),element('p','能力は全地域共通。地図の形で勝負！'));
   drawMap();
  }
- refresh();return {refresh,reset:()=>choosePrefecture('')};
+ refresh();return {refresh,reset:()=>{cancelCamera();prefecture='';$('region-search').value='';refresh();document.querySelector('.picker-sidebar').scrollTop=0;}};
 }

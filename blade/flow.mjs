@@ -1,5 +1,5 @@
 import {validTeam as validRoster} from './team-roster.mjs?v=20261105-team';
-import {mountPicker} from './picker.mjs?v=20261105-team';
+import {mountPicker} from './picker.mjs?v=20261105-zoom';
 const $=id=>document.getElementById(id);
 const SVG='http://www.w3.org/2000/svg';
 function preview(region,side){
