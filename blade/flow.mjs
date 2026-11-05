@@ -1,3 +1,4 @@
+import {mountPicker} from './picker.mjs?v=20261105-map-picker';
 import {regionStats} from './engine.mjs?v=20261105-overkill';
 const $=id=>document.getElementById(id);
 const SVG='http://www.w3.org/2000/svg';
@@ -11,7 +12,7 @@ function preview(region,side){
  panel.append(label,map,title,details);return panel;
 }
 export function mountFlow({regions,getSelection,select,startBattle,leave}){
- let screen='title',side='player',timer=null;
+ let screen='title',side='player',timer=null,picker=null;
  const screens={title:$('title-screen'),select:$('choose-region'),vs:$('vs-screen'),battle:$('battle')};
  function refresh(){
   const {selected,opponent}=getSelection();
@@ -25,18 +26,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave}){
   const region=regions[side==='player'?selected:opponent];
   $('region-kind').textContent=region.kind==='市'?`${region.prefecture} / 市のかたち`:'都道府県のかたち';
   $('region-hint').textContent=region.hint;$('region-link').href=region.url;
-  filter();
- }
- function filter(){
-  const {selected,opponent}=getSelection(),query=$('region-search').value.trim().normalize('NFKC'),prefecture=$('prefecture-filter').value;
-  let visible=0;
-  document.querySelectorAll('.region-card').forEach(card=>{
-   const index=Number(card.dataset.index),region=regions[index];
-   card.hidden=Boolean((prefecture&&region.prefecture!==prefecture)||(query&&!`${region.name}${region.reading}${region.prefecture}`.normalize('NFKC').includes(query)));
-   card.setAttribute('aria-pressed',String(index===(side==='player'?selected:opponent)));
-   if(!card.hidden)visible++;
-  });
-  $('no-regions').hidden=visible>0;
+  picker?.refresh();
  }
  function show(next){
   if(!Object.hasOwn(screens,next))return;
@@ -51,10 +41,8 @@ export function mountFlow({regions,getSelection,select,startBattle,leave}){
   $(focus).focus({preventScroll:true});screens[next].scrollIntoView({block:'start',behavior:'instant'});
   if(next==='vs')timer=setTimeout(()=>{if(screen==='vs')show('battle');},matchMedia('(prefers-reduced-motion: reduce)').matches?200:1400);
  }
- for(const prefecture of new Set(regions.map(r=>r.prefecture))){const option=document.createElement('option');option.value=prefecture;option.textContent=prefecture;$('prefecture-filter').append(option);}
- for(const name of ['player','cpu'])$(`select-${name}`).addEventListener('click',()=>{side=name;refresh();});
- document.querySelectorAll('.region-card').forEach(card=>card.addEventListener('click',()=>{select(Number(card.dataset.index),side);refresh();}));
- $('region-search').addEventListener('input',filter);$('prefecture-filter').addEventListener('change',filter);
+ picker=mountPicker({regions,getSelected:()=>{const {selected,opponent}=getSelection();return side==='player'?selected:opponent;},onSelect:index=>{select(index,side);refresh();}});
+ for(const name of ['player','cpu'])$(`select-${name}`).addEventListener('click',()=>{side=name;picker.reset();refresh();});
  for(const [id,target] of Object.entries({'start-exhibition':'select','title-back':'title','confirm-match':'vs','skip-vs':'battle','vs-back':'select','reselect':'select','result-title-home':'title','battle-back':'select'}))$(id).addEventListener('click',()=>show(target));
  $('start-exhibition').disabled=false;show('title');
  return {show,refresh,get screen(){return screen;},get side(){return side;}};

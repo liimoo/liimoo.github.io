@@ -51,4 +51,6 @@ python3 blade/tests/finish_sequences_browser.py http://127.0.0.1:8766
 
 - SEは `audio/` に必要な8音だけ同梱。原本は共有Audio/se。音ON操作後に読み込み、音OFF・一時停止・再戦で停止。素材対応表は `audio/README.md`。
 
-- 画面はタイトル→地域選択（都道府県・名前検索／自分・CPU）→VS→対戦→結果。現状は10地域、2vs2・県対抗戦は準備中。
+- 画面はタイトル→地域選択（左のスクロール一覧で都道府県→都市／右に地図／自分・CPU）→VS→対戦→結果。現状は10地域、2vs2・県対抗戦は準備中。
+
+- `selection-map.json` は選択画面専用の軽量地図。全国47都道府県と対象8県の市区町村を表示し、対戦可能な10地域のみを選択できます。JapanMapの `tools/build_blade_selection_map.py` で再生成。対戦用の `regions.json` や物理計算とは独立しています。

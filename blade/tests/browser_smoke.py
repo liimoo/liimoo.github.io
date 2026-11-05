@@ -23,7 +23,8 @@ async def main():
             assert await page.locator('.region-card meter').count() == 30
             assert 'ゲージが少ないほど' in await page.locator('#grit-help').inner_text()
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-            await page.get_by_role('button', name='横浜市を選ぶ').click()
+            await page.locator('.prefecture-card[data-prefecture="神奈川県"]').click()
+            await page.locator('#regions').get_by_role('button', name='横浜市を選ぶ').click()
             assert '横浜市' in await page.locator('#match-preview .player').inner_text()
             await page.locator('#shuffle').click()
             await start_battle(page)

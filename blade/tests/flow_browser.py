@@ -32,18 +32,36 @@ export function step(match,dt) {
             await enter_selection(page)
             assert await page.locator('#title-screen').is_hidden()
             assert await page.locator('.region-card').count() == 10
-            await page.locator('#prefecture-filter').select_option(label='大阪府')
+            assert await page.locator('#prefecture-list').is_visible()
+            assert await page.locator('#selection-map').is_visible()
+            sidebar = page.locator('.picker-sidebar')
+            await sidebar.scroll_into_view_if_needed()
+            await page.wait_for_function("document.querySelectorAll('#selection-map .map-region').length === 47")
+            left = await sidebar.bounding_box()
+            right = await page.locator('#selection-map').bounding_box()
+            assert left['x'] + left['width'] <= right['x'] + 2, 'map stays beside list, including narrow phones'
+            assert abs(left['y'] - right['y']) < left['height'], 'map and list overlap vertically'
+            assert await sidebar.evaluate('(el)=>el.scrollHeight>el.clientHeight'), 'left list must scroll independently'
+            await sidebar.evaluate('(el)=>{el.scrollTop=el.scrollHeight}')
+            assert await sidebar.evaluate('(el)=>el.scrollTop') > 0
+            after = await page.locator('#selection-map').bounding_box()
+            assert abs(after['y'] - right['y']) < 1, 'scrolling list does not move map'
+            assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+            await page.locator('.prefecture-card[data-prefecture="大阪府"]').click()
+            assert await page.locator('#prefecture-list').is_hidden()
             assert await page.locator('.region-card:visible').count() == 2
-            await page.locator('#region-search').fill('存在しないまち')
-            assert await page.locator('.region-card:visible').count() == 0
-            assert await page.locator('#no-regions').is_visible()
-            await page.locator('#region-search').fill('おおさかし')
-            assert await page.locator('.region-card:visible').count() == 1
-            await page.get_by_role('button',name='大阪市を選ぶ',exact=True).click()
+            await page.locator('#regions').get_by_role('button',name='大阪市を選ぶ',exact=True).click()
+            assert '大阪市' in await page.locator('#selected-region-detail').inner_text()
+            assert await page.locator('#selected-region-detail meter').count() == 3
+            assert '攻撃力' in await page.locator('#selected-region-detail').inner_text()
+            await page.locator('#prefecture-back').click()
+            assert await page.locator('#prefecture-list').is_visible()
             await page.locator('#select-cpu').click()
-            await page.locator('#prefecture-filter').select_option(label='北海道')
-            await page.locator('#region-search').fill('')
-            await page.get_by_role('button',name='札幌市を選ぶ',exact=True).click()
+            await page.locator('#selection-map [role=button][aria-label="北海道を選ぶ"]').focus()
+            await page.keyboard.press('Enter')
+            await page.locator('#selection-map [role=button][aria-label="札幌市を選ぶ"]').focus()
+            await page.keyboard.press('Enter')
+            assert '札幌市' in await page.locator('#selected-region-detail').inner_text()
             preview = await page.locator('#match-preview').inner_text()
             assert '大阪市' in preview and '札幌市' in preview
             await page.locator('#confirm-match').click()
@@ -80,8 +98,21 @@ export function step(match,dt) {
             assert await page.locator('#title-screen').is_visible()
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             assert not errors, errors
-            print(f'{width}px: title, filters, both selections, VS cancellation, back, results PASS')
+            print(f'{width}px: title, prefecture hierarchy, both selections, VS cancellation, back, results PASS')
             await page.close()
+        page = await browser.new_page()
+        await page.route('**/googletagmanager.com/**', lambda route: route.abort())
+        await page.route('**/selection-map.json*', lambda route: route.fulfill(status=503, body='Unavailable'))
+        await page.goto(BASE+'/blade/')
+        await enter_selection(page)
+        await page.wait_for_function("document.getElementById('map-caption').textContent.includes('読み込めません')")
+        await page.locator('.prefecture-card[data-prefecture="大阪府"]').click()
+        await page.locator('#regions').get_by_role('button',name='大阪市を選ぶ',exact=True).click()
+        assert '大阪市' in await page.locator('#match-preview .player').inner_text()
+        assert '読み込めません' in await page.locator('#map-caption').inner_text()
+        await start_battle(page)
+        assert await page.locator('#launch').is_enabled()
+        print('Background map failure: list selection and battle remain usable PASS')
         await browser.close()
 
 asyncio.run(main())
