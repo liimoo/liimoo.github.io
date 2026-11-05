@@ -170,13 +170,13 @@ function resolve(a,b,hit,criticalAttackers=[]) {
  });
 }
 
-function move(b,dt) {
+function move(b,dt,openingAssist=0) {
  // Arcade bowl: stamina is endurance, not a multiplier on visible rotation.
  const rawEnergy=b.energy-dt*.035*(1-.30*b.spinPower/100);
  const energy=Math.max(0,rawEnergy);
  const recovery=1-Math.exp(-4*dt);
  const spin=sustainedSpin(b,b.spin+(b.cruiseSpin-b.spin)*recovery,energy);
- const bowl=2.8,damping=Math.exp(-.13*dt);
+ const bowl=2.8,damping=Math.exp(-(.13+openingAssist)*dt);
  const vx=(b.vx-b.x*bowl*dt)*damping,vy=(b.vy-b.y*bowl*dt)*damping;
  const speed=Math.hypot(vx,vy);
  // Smooth low-speed assistance keeps collisions from leaving inert tops together.
@@ -235,7 +235,10 @@ export function step(match,dt) {
  const duration=Math.min(dt,.1),count=Math.ceil(duration/(1/120)),slice=duration/count;
  let current=match;
  for(let i=0;i<count;i++) {
-  let bodies=current.bodies.map(b=>move(b,slice));
+  // Let the opening aim play out, then gradually shrink unproductive orbits.
+  // Symmetric, solo-only assistance ends permanently at the first contact.
+  const openingAssist=(current.impactSerial??0)===0?1.4*clamp((current.elapsed-1)/1.5,0,1):0;
+  let bodies=current.bodies.map(b=>move(b,slice,openingAssist));
   let impacts=current.impacts.map(p=>({...p,age:p.age+slice})).filter(p=>p.age<.45);
   const hit=collision(...bodies);
   const critical=criticalCollision(current,bodies,hit,slice);
