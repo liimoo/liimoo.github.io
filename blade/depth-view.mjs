@@ -1,8 +1,64 @@
-// The physics plane stays unchanged; only its canvas projection is tilted.
+// Physics stays planar; the renderer projects a shallow concave bowl.
 export const VIEW_TILT=.78;
 const TOP_HEIGHT=10,TOP_RADIUS=32;
-export function projectPoint({x,y},height=0){return {x,y:y*VIEW_TILT-height};}
-export function screenToWorld({x,y}){return {x,y:y/VIEW_TILT};}
+const FLOOR_RADIUS=180,BOWL_DEPTH=38;
+export function floorOffset({x,y}){
+ return BOWL_DEPTH*(1-Math.min((x*x+y*y)/(FLOOR_RADIUS*FLOOR_RADIUS),1));
+}
+export function projectPoint(point,height=0){return {x:point.x,y:(point.y+floorOffset(point))*VIEW_TILT-height};}
+export function screenToWorld({x,y}){
+ const target=y/VIEW_TILT;
+ // y + floorOffset is strictly increasing (minimum slope 1 - 76/180).
+ let low=target-BOWL_DEPTH,high=target;
+ for(let i=0;i<48;i++){
+  const mid=(low+high)/2;
+  if(mid+floorOffset({x,y:mid})<target)low=mid;else high=mid;
+ }
+ return {x,y:(low+high)/2};
+}
+function floorPath(ctx,points){
+ ctx.beginPath();points.forEach(([x,y],i)=>{
+  const down=y+floorOffset({x,y});
+  if(i)ctx.lineTo(x,down);else ctx.moveTo(x,down);
+ });
+}
+export function drawBowlFloor(ctx){
+ ctx.save();
+ // Nested radial contours descend toward the centre. Directional lighting
+ // distinguishes the inner back wall from the illuminated near slope.
+ for(let radius=FLOOR_RADIUS;radius>0;radius-=3){
+  const offset=floorOffset({x:radius,y:0}),slope=radius/FLOOR_RADIUS;
+  const shade=ctx.createLinearGradient(0,offset-radius,0,offset+radius);
+  shade.addColorStop(0,`hsl(205 55% ${12+5*(1-slope)}%)`);
+  shade.addColorStop(.5,`hsl(203 49% ${16+3*(1-slope)}%)`);
+  shade.addColorStop(1,`hsl(199 43% ${20+10*slope}%)`);
+  ctx.beginPath();ctx.arc(0,offset,radius,0,Math.PI*2);ctx.fillStyle=shade;ctx.fill();
+ }
+ ctx.strokeStyle='rgba(131,193,214,.11)';ctx.lineWidth=.65;
+ for(let axis=-160;axis<=160;axis+=20){
+  const extent=Math.sqrt(FLOOR_RADIUS*FLOOR_RADIUS-axis*axis),horizontal=[],vertical=[];
+  for(let i=0;i<=72;i++){
+   const value=-extent+2*extent*i/72;horizontal.push([value,axis]);vertical.push([axis,value]);
+  }
+  floorPath(ctx,horizontal);ctx.stroke();floorPath(ctx,vertical);ctx.stroke();
+ }
+ for(const radius of [60,120,176]){
+  ctx.beginPath();ctx.arc(0,floorOffset({x:radius,y:0}),radius,0,Math.PI*2);
+  ctx.strokeStyle=radius===176?'rgba(127,190,211,.28)':'rgba(127,190,211,.10)';ctx.lineWidth=1;ctx.stroke();
+ }
+ // Raised lip: its interior edge surrounds the concave surface.
+ ctx.beginPath();ctx.arc(0,0,185,0,Math.PI*2);ctx.strokeStyle='#071c2b';ctx.lineWidth=9;ctx.stroke();
+ ctx.beginPath();ctx.arc(0,0,189,0,Math.PI*2);ctx.strokeStyle='#486c80';ctx.lineWidth=3;ctx.stroke();
+ ctx.beginPath();ctx.arc(0,0,180,0,Math.PI*2);ctx.strokeStyle='#81a8b7';ctx.lineWidth=1.2;ctx.stroke();
+ for(let i=0;i<48;i++){
+  const angle=i*Math.PI/24,inner=i%4===0?194:196,outer=i%4===0?201:199;
+  ctx.beginPath();ctx.moveTo(Math.cos(angle)*inner,Math.sin(angle)*inner);ctx.lineTo(Math.cos(angle)*outer,Math.sin(angle)*outer);
+  ctx.strokeStyle=i%4===0?'#6f95a5':'#36556a';ctx.lineWidth=1;ctx.stroke();
+ }
+ ctx.strokeStyle='rgba(133,191,208,.24)';ctx.lineWidth=1;
+ floorPath(ctx,[[-8,0],[8,0]]);ctx.stroke();floorPath(ctx,[[0,-8],[0,8]]);ctx.stroke();
+ ctx.restore();
+}
 function polygon(ctx,points){
  ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();
 }
@@ -40,7 +96,7 @@ function drawSides(ctx,points,topY,bottomY,cpu){
 export function drawTop(ctx,body,{color,cpu=false,bounce=0,reduced=false,alpha=1}){
  const impact=reduced?0:Math.min(1,Math.max(0,bounce)),jump=impact*5;
  const points=topVertices(body,impact),topY=-TOP_HEIGHT-jump,bottomY=topY+5;
- ctx.save();ctx.translate(body.x,body.y);ctx.globalAlpha=alpha;
+ ctx.save();ctx.translate(body.x,body.y+floorOffset(body));ctx.globalAlpha=alpha;
  // Contact and soft shadows remain on the floor when the top briefly jumps.
  const shadow=ctx.createRadialGradient(5,6,2,5,6,36+jump);
  shadow.addColorStop(0,'rgba(0,8,17,.46)');shadow.addColorStop(1,'rgba(0,8,17,0)');

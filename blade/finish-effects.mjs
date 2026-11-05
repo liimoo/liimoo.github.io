@@ -1,4 +1,4 @@
-import {projectPoint,VIEW_TILT} from './depth-view.mjs?v=20261105-depth';
+import {projectPoint,VIEW_TILT,floorOffset} from './depth-view.mjs?v=20261105-bowl';
 const COLORS=['#71e6df','#f6ce80'];
 export function createFinishEffect(match,reduced=false,previousBodies=match.bodies) {
  const {winner,reason}=match.result;
@@ -40,7 +40,8 @@ export function canExplode(fx,index) {
  if(!fx||fx.reduced||!fx.losers.includes(index))return false;
  const body=finishBody({...fx,age:fx.burstAt},index,fx.origins[index]);
  const c=Math.cos(body.angle),s=Math.sin(body.angle);
- let points=body.region.points.map(([x,y])=>projectPoint({x:body.x+32*(x*c-y*s),y:body.y+32*(x*s+y*c)},10*VIEW_TILT));
+ const center=projectPoint(body,10*VIEW_TILT);
+ let points=body.region.points.map(([x,y])=>({x:center.x+32*(x*c-y*s),y:center.y+32*(x*s+y*c)*VIEW_TILT}));
  // Clip the displayed outline against the canvas, not just a circular bounding radius.
  for(const [axis,edge,sign] of [['x',-220,1],['x',220,-1],['y',-220,1],['y',220,-1]]) {
   const clipped=[];
@@ -85,7 +86,7 @@ export function drawFinishEffect(ctx,fx,bodies) {
  for(const index of fx.losers) {
   if(!fx.reduced&&(fx.age<fx.burstAt||!canExplode(fx,index)))continue;
   const body=finishBody({...fx,age:fx.burstAt},index,bodies[index]),color=COLORS[body.side==='cpu'?1:0],age=Math.max(0,fx.age-fx.burstAt);
-  ctx.save();ctx.translate(body.x,body.y);
+  ctx.save();ctx.translate(body.x,body.y+floorOffset(body));
   if(fx.reduced) {
    ctx.globalAlpha=.35*(1-fx.age/fx.duration);ring(ctx,42,color,3);ctx.restore();continue;
   }
