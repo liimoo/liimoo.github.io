@@ -1,3 +1,4 @@
+import {createSoundPreference} from './sound-preference.mjs?v=20261106-default-on';
 import {newSelection,randomOpponent} from './selection-state.mjs?v=20261106-pref-team';
 import {criticalPresentations} from './critical-presentation.mjs?v=20261106-sides';
 import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-basin';
@@ -10,7 +11,7 @@ import {createMatch,createTeamMatch,createPrefectureTeamMatch,launch,launchTeam,
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let arenaLayer=null;
-let regions=[],selected=null,opponent=null,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null,mode='single',playerTeam=[],cpuTeam=[],teamEffects=createTeamEffects(),resultShown=false;
+let regions=[],selected=null,opponent=null,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null,mode='single',playerTeam=[],cpuTeam=[],teamEffects=createTeamEffects(),resultShown=false;
 let launchSettings=[],launchCity=0;
 const launchHome=$('launch').parentElement;
 const stageControls=document.createElement('div');stageControls.id='stage-controls';stageControls.hidden=true;document.querySelector('.arena-wrap').append(stageControls);
@@ -71,7 +72,13 @@ $('launch').addEventListener('click',fireFromControls);
 for(const id of ['angle','power'])$(id).addEventListener('input',()=>{launchSettings=launchSettings.map((setting,i)=>i===launchCity?{...setting,[id]:Number($(id).value)}:setting);refreshLaunchControls();$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});
 $('shuffle').addEventListener('click',()=>{if(isTeamMode()){const next=newSelection(regions,mode);cpuTeam=next.cpuTeam;opponent=next.opponent;}else opponent=randomOpponent(regions,selected);flow?.refresh();gameAudio.play('select');});
 $('again').addEventListener('click',()=>flow?.show('vs'));
-$('sound').addEventListener('click',async()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').textContent=sound?'音 ON':'音 OFF';if(sound){const enabled=await gameAudio.enable();if(enabled&&sound)gameAudio.play('select');}else gameAudio.disable();});
+function renderSound(enabled){
+ for(const id of ['sound','title-sound']){$(id).setAttribute('aria-pressed',String(enabled));$(id).textContent=enabled?'音 ON':'音 OFF';}
+}
+let soundStorage;try{soundStorage=globalThis.localStorage;}catch{/* Storage may be disabled. */}
+const soundPreference=createSoundPreference({audio:gameAudio,storage:soundStorage,onChange:renderSound});
+renderSound(soundPreference.enabled);
+for(const id of ['sound','title-sound'])$(id).addEventListener('click',()=>soundPreference.toggle());
 function setPause(value){aim=null;if(match?.phase!=='active')return;paused=value;if(value)gameAudio.stop();accumulator=0;last=0;$('pause-cover').hidden=!paused;$('pause').setAttribute('aria-label',paused?'対戦を再開':'一時停止');$('pause').textContent=paused?'▶':'Ⅱ';}
 $('pause').addEventListener('click',()=>setPause(!paused));$('resume').addEventListener('click',()=>setPause(false));
 document.addEventListener('visibilitychange',()=>{if(document.hidden){gameAudio.stop();setPause(true);}});
@@ -225,6 +232,7 @@ async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const re
   else{selected=index;if(opponent===index)opponent=randomOpponent(regions,selected);}
   gameAudio.play('select');
  },onVersus:()=>gameAudio.play('vs'),startBattle:reset,leave:()=>{gameAudio.stop();match=null;finishEffect=null;teamEffects=createTeamEffects();resultShown=false;criticalFlashes=[];lastImpactId=0;aim=null;paused=false;accumulator=0;last=0;controls(false);$('launch').hidden=false;$('result').hidden=true;$('pause-cover').hidden=true;}});
+ for(const id of ['start-exhibition','start-team','start-pref-team'])$(id).addEventListener('click',()=>soundPreference.activate());
  $('start-exhibition').disabled=false;$('start-team').disabled=false;$('start-pref-team').disabled=false;$('shuffle').disabled=false;resize();requestAnimationFrame(tick);
  }catch(error){$('load-error').hidden=false;$('load-error').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('status').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('region-hint').textContent='通信環境をご確認ください。';$('arena-caption').textContent='読み込みエラー';console.error('City Blade initialization failed:',error);}}
 init();

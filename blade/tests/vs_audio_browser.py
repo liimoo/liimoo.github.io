@@ -39,12 +39,12 @@ async def main():
           await ctx.close(); return result;
         }''')
         assert abs(durations['vs'] - durations['launch']) > .1, durations
+        assert await page.evaluate('audioProbe.events.length') == 0
         await enter_selection(page)
+        await page.wait_for_function("audioProbe.events.some(e => e.kind === 'start')")
         await select_solo_match(page)
         await start_battle(page)
-        assert await page.evaluate('audioProbe.events.length') == 0
-        await page.locator('#sound').click()
-        await page.wait_for_function("audioProbe.events.some(e => e.kind === 'start')")
+
         await page.locator('#battle-back').click()
 
         async def enter_vs():

@@ -30,7 +30,7 @@ async def main():
             await enter_selection(page)
             await select_solo_match(page)
             await start_battle(page)
-            await page.locator('#sound').click()
+            assert await page.locator('#sound').get_attribute('aria-pressed') == 'true'
             await page.locator('#launch').click()
             await page.wait_for_function('criticalProbe().length===1')
             assert await page.evaluate("cues.filter(x=>x.cue==='critical').length")==1

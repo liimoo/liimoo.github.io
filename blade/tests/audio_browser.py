@@ -14,12 +14,12 @@ async def main():
         page.on('pageerror',lambda e:errors.append(str(e)))
         await page.route('**/googletagmanager.com/**',lambda r:r.abort())
         await page.goto('http://127.0.0.1:8766/blade/')
+        assert await page.evaluate('audioProbe.starts')==0
         await enter_selection(page)
+        await page.wait_for_function('audioProbe.starts>0')
         await select_solo_match(page)
         await start_battle(page)
-        assert await page.evaluate('audioProbe.starts')==0
-        await page.locator('#sound').click()
-        await page.wait_for_function('audioProbe.starts>0')
+
         await page.locator('#launch').click()
         await page.wait_for_function('audioProbe.starts>=2')
         await page.locator('#pause').click()

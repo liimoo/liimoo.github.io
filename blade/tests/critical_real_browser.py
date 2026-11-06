@@ -31,7 +31,7 @@ async def main():
         await enter_selection(page)
         await select_solo_match(page)
         await start_battle(page)
-        await page.locator('#sound').click()
+        assert await page.locator('#sound').get_attribute('aria-pressed') == 'true'
         await page.wait_for_function('audioStarts.length>0')
         await page.locator('#angle').fill('0')
         await page.locator('#power').fill('75')

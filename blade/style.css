@@ -170,3 +170,5 @@ body[data-screen=select] #choose-region{position:fixed;inset:8px;z-index:10;widt
 
 .map-island-name{fill:#456784;text-anchor:middle;pointer-events:none;font-weight:600}
 .prefecture-card[aria-pressed=true]{background:linear-gradient(#b5ebce,#96d8b6);border-color:#5caf83;box-shadow:0 3px 0 #70ac91;position:relative}.prefecture-card[aria-pressed=true]:after{content:'✓';position:absolute;right:8px;top:6px;color:#268b54;font-size:15px}
+
+.title-sound-control{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.title-sound-control button{padding:10px 16px;font-size:13px}.title-sound-control span{font-size:11px;color:var(--muted)}
