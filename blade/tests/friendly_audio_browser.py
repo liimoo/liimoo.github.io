@@ -1,4 +1,4 @@
-"""Impact-to-audio integration: friendly contacts stay silent without losing enemy cues."""
+"""Impact-to-audio integration: friendly contacts bump without losing enemy damage cues."""
 import asyncio
 from pathlib import Path
 
@@ -45,13 +45,14 @@ window.impactProbe=(impacts,phase='active',solo=false)=>{
 
         friendly = [impact(1, [0, 1], friendly=True), impact(2, [3, 4], friendly=True)]
         result = await collect(friendly)
-        assert result['cues'] == [], f"Friendly collisions played damage cues: {result['cues']}"
+        assert [cue['cue'] for cue in result['cues']] == ['bump', 'bump'], result
         assert result['lastImpactId'] == 2, result
         assert result['flashes'] == 0, result
 
         mixed = friendly + [impact(3, [1, 3], friendly=False), impact(4, [0, 2], friendly=True)]
         result = await collect(mixed)
-        assert result['cues'] == [{'cue': 'hit', 'options': {'decisive': False}}], result
+        assert [cue['cue'] for cue in result['cues']] == ['bump', 'bump', 'hit', 'bump'], result
+        assert result['cues'][2] == {'cue': 'hit', 'options': {'decisive': False}}, result
         assert result['lastImpactId'] == 4, result
         assert (await collect(mixed))['cues'] == result['cues'], 'Repeated events replayed sound'
 
@@ -67,10 +68,10 @@ window.impactProbe=(impacts,phase='active',solo=false)=>{
         assert result['cues'][-1] == {'cue': 'critical', 'options': {'enemy': False, 'decisive': True}}, result
         result = await collect([impact(9, [0, 1])], solo=True)
         assert result['cues'][-1] == {'cue': 'hit', 'options': {'decisive': False}}, result
-        assert len(result['cues']) == 6, result
+        assert len(result['cues']) == 9, result
         assert result['lastImpactId'] == 9, result
         assert not errors, errors
-        print('Friendly player/CPU silent; enemy normal/critical/decisive and solo audible; event deduplication PASS')
+        print('Friendly player/CPU bump; enemy normal/critical/decisive and solo audible; event deduplication PASS')
         await browser.close()
 
 

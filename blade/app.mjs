@@ -5,7 +5,7 @@ import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop
 import {mountFlow} from './flow.mjs?v=20261106-pref-team';
 import {chooseCity,choosePrefecture} from './team-roster.mjs?v=20261106-pref-team';
 import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-basin';
-import {createBladeAudio} from './audio.mjs?v=20261106-vs';
+import {createBladeAudio} from './audio.mjs?v=20261106-friendly-bump';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-basin';
 import {createMatch,createTeamMatch,createPrefectureTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261106-pref-team';
 const $=id=>document.getElementById(id);
@@ -162,8 +162,8 @@ function collectImpacts(){
   // Read every fixed step: an impact can age past the frame before rendering.
   if(hit.id!==undefined?hit.id<=lastImpactId:hit.age!==0)continue;
   if(hit.id!==undefined)lastImpactId=hit.id;
-  // Friendly contacts have no damage; consume their IDs without damage audio.
-  if(hit.friendly)continue;
+  // Friendly contacts get a soft bump, never a damage or critical cue.
+  if(hit.friendly){gameAudio.play('bump');continue;}
   const critical=hit.criticalAttackers?.length>0;
   const presentations=critical?criticalPresentations(hit,match.bodies):[];
   if(presentations.length){
