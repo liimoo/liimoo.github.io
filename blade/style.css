@@ -165,3 +165,7 @@ body[data-screen=select] #choose-region{position:fixed;inset:8px;z-index:10;widt
 
 #picker-list-tools{position:sticky;top:0;z-index:3;background:#e1eaf7}
 #picker-list-tools #prefecture-back{position:static}
+
+#selection-map .map-selected polygon{stroke-width:2} .map-inset-frame{fill:#ffffff90;stroke:#9ab5ce;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}.map-inset-title{font-size:22px;font-weight:700;fill:#466886;pointer-events:none}.map-selection-label{pointer-events:none}
+
+.map-island-name{fill:#456784;text-anchor:middle;pointer-events:none;font-weight:600}

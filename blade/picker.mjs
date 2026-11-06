@@ -1,3 +1,5 @@
+import {prefectureLayout} from './prefecture-layout.mjs?v=20261106-insets';
+import {drawFrames,drawSelectionLabels} from './map-annotations.mjs?v=20261106-insets';
 import {orderRegions} from './region-order.mjs?v=20261106-sort';
 const $=id=>document.getElementById(id),SVG='http://www.w3.org/2000/svg';
 const element=(tag,text)=>{const node=document.createElement(tag);if(text)node.textContent=text;return node;};
@@ -77,7 +79,7 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
    const button=element('button');button.type='button';button.className='region-card';button.dataset.index=String(index);
    button.setAttribute('aria-label',`${region.name}を選ぶ`);
    button.append(element('small',region.reading),element('strong',region.name),element('small',region.name===prefecture?'県全体':'市区町村'));
-   button.addEventListener('click',()=>{onSelect(index);refresh();});fragment.append(button);
+   button.addEventListener('click',()=>selectRegion(index));fragment.append(button);
   }
   $('regions').replaceChildren(fragment);
  }
@@ -87,7 +89,12 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
   $('no-regions').hidden=!prefecture||count>0;
  }
  $('region-search').addEventListener('input',filterCards);
- function activateMap(name,index){if(cameraActive)return;if(prefecture){onSelect(index);refresh();}else choosePrefecture(name);}
+ function selectRegion(index){
+  onSelect(index);refresh();
+  if(!getSelectedIndices().includes(index)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  for(const group of $('selection-map').querySelectorAll('.map-selected'))if(regions[index].name===prefecture||group.dataset.name===regions[index].name)group.animate([{opacity:.35},{opacity:1}],{duration:450});
+ }
+ function activateMap(name,index){if(cameraActive)return;if(prefecture)selectRegion(index);else choosePrefecture(name);}
  function drawMap(){
   if(cameraActive)return;
   const svg=$('selection-map');svg.replaceChildren();
@@ -98,9 +105,12 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
    if(!fallback){svg.setAttribute('viewBox','0 0 1 1');return;}
    const polygon=document.createElementNS(SVG,'polygon');polygon.setAttribute('points',fallback.points.map(p=>p.join(',')).join(' '));polygon.classList.add('map-selected');svg.append(polygon);svg.setAttribute('viewBox','-1.2 -1.2 2.4 2.4');return;
   }
-  svg.setAttribute('viewBox',mapBounds(source).join(' '));
+  const layout=prefecture?prefectureLayout(source,prefecture,{compact:svg.clientWidth<500}):null;
+  const display=layout?.regions??source,bounds=layout?.bounds??mapBounds(source);
+  svg.setAttribute('viewBox',bounds.join(' '));
+  if(layout)drawFrames(svg,layout.frames);
   const entries=byPrefecture.get(prefecture)||[];
-  for(const region of source){
+  for(const region of display){
    const index=entries.find(item=>item.region.name===region.name)?.index??-1;
    const available=prefecture?index>=0:names.includes(region.name);
    const group=document.createElementNS(SVG,'g');group.classList.add('map-region');group.dataset.name=region.name;
@@ -113,13 +123,15 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
    for(const polygon of region.polygons){const node=document.createElementNS(SVG,'polygon');node.setAttribute('points',polygon.map(p=>p.join(',')).join(' '));group.append(node);}
    const title=document.createElementNS(SVG,'title');title.textContent=region.name;group.append(title);svg.append(group);
   }
+  if(prefecture)drawSelectionLabels(svg,display,getSelectedIndices().map(i=>regions[i]?.name),bounds,layout?.frames);
+  if(layout&&prefecture==='東京都'){for(const region of display.filter(r=>r.frameId!=='mainland'&&!getSelectedIndices().some(i=>regions[i]?.name===r.name))){const label=document.createElementNS(SVG,'text');label.setAttribute('x',(region.namePoint??region.labelPoint)[0]);label.setAttribute('y',(region.namePoint??region.labelPoint)[1]);label.setAttribute('class','map-island-name');label.setAttribute('font-size',bounds[2]===600?'24':'18');label.textContent=region.name;svg.append(label);}}
  }
  async function loadCityMap(name){
   if(!name||cityMaps.has(name)||pending.has(name)||failed.has(name)||!maps)return;
   const code=maps.prefectures.find(region=>region.name===name)?.code;
   if(!/^\d{2}$/.test(String(code)))return;
   pending.add(name);
-  try{const response=await fetch(`./selection-maps/${code}.json?v=20261105-national`);if(!response.ok)throw Error('県の地図を読み込めませんでした');const data=await response.json();if(!validMapRegions(data))throw Error('県の地図形式が不正です');cityMaps.set(name,data);}
+  try{const response=await fetch(`./selection-maps/${code}.json?v=20261106-detail`);if(!response.ok)throw Error('県の地図を読み込めませんでした');const data=await response.json();if(!validMapRegions(data))throw Error('県の地図形式が不正です');cityMaps.set(name,data);}
   catch(error){failed.add(name);console.warn('地域選択の地図を読み込めませんでした',error);}
   finally{pending.delete(name);if(prefecture===name)refresh();}
  }
@@ -133,8 +145,10 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
   $('prefecture-list').hidden=Boolean(prefecture);$('prefecture-back').hidden=!prefecture;$('regions').hidden=!prefecture;$('region-search-label').hidden=!prefecture;
   $('picker-title').textContent=prefecture||'全国';$('picker-step').textContent=prefecture?'② 使う地域を選ぶ':'① 都道府県を選ぶ';
   $('map-caption').textContent=mapFailed||failed.has(prefecture)?'地図を読み込めませんでした。左の一覧から選べます。':pending.has(prefecture)?'県の地図を読み込み中… 左の一覧からも選べます。':prefecture?(isTeam()?'同じ県から3都市を選択。選択済みを押すと外せます':'左の一覧から県全体や都市を選べます'):'都道府県を選ぶと都市の地図が開きます';
+  if(['東京都','島根県','長崎県','鹿児島県','沖縄県'].includes(prefecture)&&cityMaps.has(prefecture))$('map-caption').textContent='離島は位置・縮尺を変えて別枠に表示しています。';
   const selected=regions[getSelected()];$('selected-region-detail').replaceChildren(element('small',selected?'選択中':'選択状態'),element('h3',selected?.name||'未選択'),element('p',selected?'能力は全地域共通。地図の形で勝負！':'都道府県を選んで、使う地域を決めよう。'));
   drawMap();
  }
+ new ResizeObserver(()=>{if(prefecture&&!cameraActive)drawMap();}).observe($('selection-map'));
  refresh();return {refresh,reset:()=>{cancelCamera();prefecture='';$('region-search').value='';refresh();document.querySelector('.picker-sidebar').scrollTop=0;}};
 }
