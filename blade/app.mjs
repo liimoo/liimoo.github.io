@@ -1,3 +1,4 @@
+import {createBladeTelemetry} from './telemetry.mjs?v=20261106-stats';
 import {createSoundPreference} from './sound-preference.mjs?v=20261106-default-on';
 import {newSelection,randomOpponent} from './selection-state.mjs?v=20261106-pref-team';
 import {criticalPresentations} from './critical-presentation.mjs?v=20261106-sides';
@@ -20,6 +21,8 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CRITICAL_FLASH_SECONDS=.3,CRITICAL_LABEL_SECONDS=.65;
 const colors=['#71e6df','#f6ce80'];
 const gameAudio=createBladeAudio();
+const telemetry=createBladeTelemetry();
+let telemetryMatch=null;
 function track(name,params={}){if(typeof window.gtag==='function')window.gtag('event',name,{...params,page_path:location.pathname});}
 function isTeamMode(){return mode==='team'||mode==='pref-team';}
 function pieceUnit(){return mode==='pref-team'?'県':'都市';}
@@ -52,6 +55,7 @@ function prepareLaunchControls(){
  document.querySelector('.control-note').textContent=team?'駒をタップして選び、引っ張るかスライダーで角度・強さを調整。「発射する」を押すまで始まりません。':'駒を引っ張るかスライダーで角度・強さを調整。「発射する」を押すまで始まりません。';
 }
 function reset(){
+ telemetryMatch=null;
  gameAudio.stop();
  match=isTeamMode()?(mode==='pref-team'?createPrefectureTeamMatch:createTeamMatch)(playerTeam.map(i=>regions[i]),cpuTeam.map(i=>regions[i]),seed++):createMatch(regions[selected],regions[opponent],seed++);teamEffects=createTeamEffects();resultShown=false;buildTeamHud();prepareLaunchControls();finishEffect=null;aim=null;paused=false;accumulator=0;lastImpactId=0;criticalFlashes=[];
  $('launch').hidden=false;$('result').hidden=true;$('pause-cover').hidden=true;$('pause').disabled=true;$('pause').textContent='Ⅱ';
@@ -66,7 +70,7 @@ function reset(){
  document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(Number(b.dataset.index)===selected)));controls(false);updateHud();resize();draw(0);flow?.refresh();
 }
 function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power,#launch-cities button,#battle-back'))el.disabled=active;}
-function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=isTeamMode()?launchTeam(match,launchSettings.map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):launch(match,direction,power);$('launch').hidden=true;stageControls.hidden=true;aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{mode,region:regions[selected].id,opponent:regions[opponent].id});}
+function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=isTeamMode()?launchTeam(match,launchSettings.map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):launch(match,direction,power);telemetryMatch=telemetry.start({mode,player_regions:match.bodies.filter(b=>b.side==='player').map(b=>b.region.id),cpu_regions:match.bodies.filter(b=>b.side==='cpu').map(b=>b.region.id)});$('launch').hidden=true;stageControls.hidden=true;aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{mode,region:regions[selected].id,opponent:regions[opponent].id});}
 function fireFromControls(){const a=Number($('angle').value)*Math.PI/180;fire({x:Math.sin(a),y:-Math.cos(a)},Number($('power').value)/100);}
 $('launch').addEventListener('click',fireFromControls);
 for(const id of ['angle','power'])$(id).addEventListener('input',()=>{launchSettings=launchSettings.map((setting,i)=>i===launchCity?{...setting,[id]:Number($(id).value)}:setting);refreshLaunchControls();$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});
@@ -109,7 +113,7 @@ function beginFinish(previousBodies){
  $('arena-caption').textContent=match.result.reason==='time'?'時間切れ':match.result.reason==='ringout'?'場外！':'ゲージ切れ → 回転停止';
  if(finishEffect.reason==='ringout')gameAudio.play('ringout');
 }
-function finished(){resultShown=true;const {winner,reason}=match.result;const name=isTeamMode()?teamName('player'):regions[selected].name,other=isTeamMode()?teamName('cpu'):regions[opponent].name;
+function finished(){if(resultShown)return;resultShown=true;telemetryMatch?.finish({...match.result,duration:Math.round(match.elapsed)});const {winner,reason}=match.result;const name=isTeamMode()?teamName('player'):regions[selected].name,other=isTeamMode()?teamName('cpu'):regions[opponent].name;
  $('result-title').textContent=winner==='player'?'あなたの勝ち！':winner==='cpu'?'CPUの勝ち！':'引き分け！';
  $('result-kicker').textContent=winner==='player'?'VICTORY / NICE LAUNCH':winner==='cpu'?'NEXT TIME / TRY AGAIN':'DRAW / GOOD BATTLE';
  const why=isTeamMode()?(reason==='time'?'時間切れ：残った駒の数、合計スタミナの順で判定':winner==='draw'?'両チームが全滅':match.result.tiebreak==='remaining-energy'?'同時に全滅・超過ダメージの少ない側の勝利':`相手の3${pieceUnit()}をすべて撃破`):match.result.tiebreak==='remaining-energy'?'同時にゲージ切れ・超過ダメージの少ない側の勝利':reason==='ringout'?'場外で決着':reason==='spin'?'回転スタミナがなくなって決着':'45秒、どちらもゆずらず';

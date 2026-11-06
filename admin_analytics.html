@@ -56,6 +56,12 @@
   td { padding: 6px 8px; border-bottom: 1px solid #1b2942; }
   td.r, th.r { text-align: right; }
   .scroll { overflow-x: auto; }
+  .blade-filters { display: flex; flex-wrap: wrap; gap: 12px; }
+  .blade-filters label { display: grid; gap: 4px; max-width: 100%; }
+  .blade-filters input, .blade-filters select { max-width: 100%; }
+  .blade-table { max-height: 480px; overflow: auto; }
+  .blade-table th { position: sticky; top: 0; background: #16233c; white-space: nowrap; }
+  .blade-table td { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -90,6 +96,7 @@
     <div id="app_versions" aria-live="polite"></div>
     <div id="store"></div>
     <div id="retention"></div>
+    <section id="blade_analytics" aria-live="polite"></section>
     <div class="sec-title" style="margin-top:22px">🌐 サイト（japan-map.app）のアクセス</div>
     <div class="card meta">
       Cloudflare 経由の数字。<b>ページビュー</b>＝トップページの表示回数が目安。<b>リクエスト</b>は
@@ -173,8 +180,78 @@ async function load(){
       + '<div class="card muted">読み込み失敗: ' + esc(err && err.message ? err.message : err) + '</div>';
   });
   const v = loadVersions(days).then(ok => { if (!ok) failed = true; });
-  await Promise.all([a, b, c, e, v]);
+  const blade = loadBlade(days).then(ok => { if (!ok) failed = true; });
+  await Promise.all([a, b, c, e, v, blade]);
   if (!failed) setMsg("");   // 失敗メッセージ(api()が入れた詳細)を消さない
+}
+
+// 都市ブレードの記録は直近30日だけ保持。名前の辞書は初回だけ取得する。
+let bladeRequest = 0, bladeNamesPromise = null;
+const bladeModes = {single:'1 vs 1', team:'都市対抗 3 vs 3', 'pref-team':'県対抗 3 vs 3'};
+async function bladeNames(){
+  if (!bladeNamesPromise) bladeNamesPromise = fetch('./blade/regions.json').then(async response => {
+    if (!response.ok) throw new Error('地域名を取得できませんでした');
+    return new Map((await response.json()).map(region => [region.id, region]));
+  }).catch(error => { bladeNamesPromise = null; throw error; });
+  return bladeNamesPromise;
+}
+async function loadBlade(days){
+  const request = ++bladeRequest, el = document.getElementById('blade_analytics');
+  const period = Math.max(1, Math.min(30, Number(days) || 7));
+  el.innerHTML = '<div class="card muted">都市ブレードの集計を読み込み中…</div>';
+  try {
+    const data = await api('blade_analytics', {days:period});
+    let names = new Map(), namesFailed = false;
+    if ((data.regions || []).length) {
+      try { names = await bladeNames(); } catch (_) { namesFailed = true; }
+    }
+    if (request === bladeRequest) renderBlade(data, names, period, namesFailed);
+    return true;
+  } catch(error) {
+    if (request !== bladeRequest) return true;
+    el.innerHTML = '<div class="sec-title">🌀 都市ブレード Web版</div><div class="card muted">読み込み失敗: ' + esc(error.message || error) + '</div>';
+    return false;
+  }
+}
+function bladeWinRate(row){
+  const decided = Number(row.wins || 0) + Number(row.losses || 0);
+  return decided ? (100 * Number(row.wins || 0) / decided).toFixed(1) + '%' : '—';
+}
+function bladeRows(rows, filters, names){
+  return rows.filter(row => (!filters.side || row.side === filters.side)
+    && (!filters.mode || row.mode === filters.mode)
+    && (!filters.search || [row.region_id, names.get(row.region_id)?.name, names.get(row.region_id)?.prefecture]
+      .some(value => String(value || '').includes(filters.search))))
+    .sort((a,b) => b.starts - a.starts || String(a.region_id).localeCompare(String(b.region_id), 'ja'));
+}
+function bladeRowHtml(row, names){
+  const region = names.get(row.region_id);
+  const label = region ? region.name + (region.name !== region.prefecture ? '（' + region.prefecture + '）' : '') : row.region_id;
+  return '<tr><td>' + esc(label) + '</td><td>' + esc(bladeModes[row.mode] || row.mode) + '</td><td>'
+    + (row.side === 'player' ? 'ユーザー' : 'CPU') + '</td>'
+    + ['starts','completed','unfinished','wins','losses','draws'].map(key => '<td class="r">' + fmt(row[key]) + '</td>').join('')
+    + '<td class="r">' + bladeWinRate(row) + '</td></tr>';
+}
+function renderBlade(data, names, period, namesFailed){
+  const el = document.getElementById('blade_analytics'), totals = data.summary || {}, rows = data.regions || [];
+  el.innerHTML = '<div class="sec-title" style="margin-top:22px">🌀 都市ブレード Web版 · 直近' + period + '日</div>'
+    + '<div class="card"><p class="meta">記録は直近30日間のみ保持し、それ以前は自動削除します。上の期間が90日以上でも、ここは直近30日を表示します。集計開始後の対戦のみが対象です。</p>'
+    + '<div class="grid">' + [['starts','対戦開始'],['completed','結果受信済み'],['unfinished','結果未受信']].map(([key,label]) => '<div class="stat">' + label + '<div class="n">' + fmt(totals[key]) + '</div></div>').join('') + '</div>'
+    + '<p class="meta">対戦開始＝実際に発射した回数。結果未受信には進行中・途中離脱・通信失敗を含みます。勝敗は受信できた結果だけの集計です。</p>'
+    + '<div class="blade-filters"><label>陣営 <select id="blade-side"><option value="player">ユーザー</option><option value="cpu">CPU</option><option value="">両方</option></select></label>'
+    + '<label>モード <select id="blade-mode"><option value="">すべて</option>' + Object.entries(bladeModes).map(([key,label]) => '<option value="' + key + '">' + label + '</option>').join('') + '</select></label>'
+    + '<label>地域名 <input id="blade-search" type="search" placeholder="都市・県を検索"></label></div>'
+    + '<p class="meta">使用回数の多い順。3 vs 3の勝敗は、その地域を含むチームの勝敗です。CPUの選択はユーザーの人気とは分けて見てください。勝率は引き分けを除く「勝ち ÷（勝ち＋負け）」です。少数の対戦だけでは強さを判断できません。</p>'
+    + (namesFailed ? '<p class="meta">地域名を取得できなかったためIDを表示しています。更新すると再取得します。</p>' : '')
+    + '<p id="blade-row-count" class="meta"></p><div class="scroll blade-table"><table><thead><tr><th>地域</th><th>モード</th><th>陣営</th><th>使用回数</th><th>結果数</th><th>未受信</th><th>勝ち</th><th>負け</th><th>引分</th><th>勝率</th></tr></thead><tbody id="blade-region-rows"></tbody></table></div></div>';
+  const update = () => {
+    const filtered = bladeRows(rows, {side:document.getElementById('blade-side').value, mode:document.getElementById('blade-mode').value, search:document.getElementById('blade-search').value.trim()}, names);
+    document.getElementById('blade-row-count').textContent = filtered.length + '件';
+    document.getElementById('blade-region-rows').innerHTML = filtered.map(row => bladeRowHtml(row,names)).join('')
+      || '<tr><td colspan="10">' + (rows.length ? '条件に一致する記録がありません。' : 'まだ記録がありません。集計開始後に発射すると記録されます。') + '</td></tr>';
+  };
+  ['blade-side','blade-mode','blade-search'].forEach(id => document.getElementById(id).addEventListener('input', update));
+  update();
 }
 
 // バージョン別UUは独立して取得。期間変更時に古い応答を表示しない。
