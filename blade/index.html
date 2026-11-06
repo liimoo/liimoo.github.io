@@ -10,7 +10,7 @@
 <meta property="og:description" content="角度を決めて、ボタンで発射。地図で勝負。無料のWeb試作版。">
 <meta property="og:image" content="https://japan-map.app/assets/japanmap/ogp.png">
 <meta property="og:url" content="https://japan-map.app/blade/">
-<link rel="stylesheet" href="./style.css?v=20261106-sort"><link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
+<link rel="stylesheet" href="./style.css?v=logo-20261106-sort"><link rel="stylesheet" href="/assets/japanmap/app-promo.css?v=20261022">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DP16PC4C8J"></script>
 <script>
 window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
@@ -23,7 +23,7 @@ document.addEventListener('click',function(e){var a=e.target.closest('a[href]');
 <main>
 <section class="intro"><div><p class="eyebrow"><span class="live-dot"></span> BROWSER EXPERIMENT / 01</p><h1>都市<span>ブレード</span><small>試作版</small></h1><p class="tagline">あなたの街が、コマになる。</p></div><p class="intro-note">地図を選ぶ。ねらう。ぶつかる。<br>形の違いを楽しむ、ちいさな地理バトル。</p></section>
 <section id="title-screen" class="title-screen" aria-labelledby="mode-heading">
-<div class="title-orbit" aria-hidden="true"><span>地図 × 回転 × 勝負</span><b>都 市<br>ブレード</b><i>CITY BLADE</i></div>
+<div class="title-brand"><p>地図 × 回転 × 勝負</p><img src="./assets/city-blade-logo.webp" alt="都市ブレード / CITY BLADE" width="1536" height="1024" fetchpriority="high"></div>
 <div class="mode-menu"><p class="step">CHOOSE YOUR BATTLE</p><h2 id="mode-heading" tabindex="-1">どのバトルで遊ぶ？</h2><button id="start-exhibition" disabled><span>エキシビジョン <b>1 vs 1</b></span><span>→</span></button><button id="start-team" disabled><span>エキシビジョン <b>3 vs 3</b> <small>（県対抗）</small></span><span>→</span></button><p>好きな地域を選んで、CPUと勝負しよう。</p><p id="load-error" class="error" role="alert" hidden></p></div>
 </section>
 <section id="vs-screen" class="vs-screen" aria-labelledby="vs-heading" hidden><p class="step">EXHIBITION / 1 vs 1</p><h2 id="vs-heading" tabindex="-1">まもなくバトル！</h2><div class="versus-preview" id="vs-preview"></div><button id="skip-vs" class="primary">バトルへ →</button><button id="vs-back" class="text-button">← 地域を選び直す</button></section>
