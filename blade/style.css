@@ -169,3 +169,4 @@ body[data-screen=select] #choose-region{position:fixed;inset:8px;z-index:10;widt
 #selection-map .map-selected polygon{stroke-width:2} .map-inset-frame{fill:#ffffff90;stroke:#9ab5ce;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}.map-inset-title{font-size:22px;font-weight:700;fill:#466886;pointer-events:none}.map-selection-label{pointer-events:none}
 
 .map-island-name{fill:#456784;text-anchor:middle;pointer-events:none;font-weight:600}
+.prefecture-card[aria-pressed=true]{background:linear-gradient(#b5ebce,#96d8b6);border-color:#5caf83;box-shadow:0 3px 0 #70ac91;position:relative}.prefecture-card[aria-pressed=true]:after{content:'✓';position:absolute;right:8px;top:6px;color:#268b54;font-size:15px}

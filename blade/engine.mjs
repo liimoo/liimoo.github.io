@@ -265,6 +265,16 @@ function validateTeam(regions) {
 
 export function createTeamMatch(playerRegions,cpuRegions,seed=1) {
  validateTeam(playerRegions);validateTeam(cpuRegions);
+ return buildTeamMatch(playerRegions,cpuRegions,seed);
+}
+export function createPrefectureTeamMatch(playerRegions,cpuRegions,seed=1) {
+ for(const regions of [playerRegions,cpuRegions]){
+  if(!Array.isArray(regions)||regions.length!==3||regions.some(r=>!r||r.kind!=='県'||!r.id||!r.prefecture||r.name!==r.prefecture)||new Set(regions.map(r=>r.id)).size!==3||new Set(regions.map(r=>r.prefectureCode??r.prefecture)).size!==3)
+   throw new Error('Choose three distinct prefectures');
+ }
+ return buildTeamMatch(playerRegions,cpuRegions,seed);
+}
+function buildTeamMatch(playerRegions,cpuRegions,seed) {
  const base=createMatch(playerRegions[0],cpuRegions[0],seed);
  const bodies=[...playerRegions,...cpuRegions].map((region,i)=>({...body(region,i<3?'player':'cpu'),
   x:(i%3-1)*72,y:i<3?95:-95,eliminated:false}));
