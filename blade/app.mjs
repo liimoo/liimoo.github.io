@@ -162,6 +162,8 @@ function collectImpacts(){
   // Read every fixed step: an impact can age past the frame before rendering.
   if(hit.id!==undefined?hit.id<=lastImpactId:hit.age!==0)continue;
   if(hit.id!==undefined)lastImpactId=hit.id;
+  // Friendly contacts have no damage; consume their IDs without damage audio.
+  if(hit.friendly)continue;
   const critical=hit.criticalAttackers?.length>0;
   const presentations=critical?criticalPresentations(hit,match.bodies):[];
   if(presentations.length){
