@@ -12,7 +12,7 @@ function preview(region,side){
  const details=document.createElement('p');details.textContent=region.name===region.prefecture?'県全体':region.prefecture;
  panel.append(label,map,title,details);return panel;
 }
-export function mountFlow({regions,getSelection,select,startBattle,leave,setMode=()=>{},removeTeam}){
+export function mountFlow({regions,getSelection,select,startBattle,leave,setMode=()=>{},onVersus=()=>{},removeTeam}){
  let screen='title',side='player',timer=null,picker=null;
  const selection=$('choose-region'),topbar=document.createElement('div'),actions=document.createElement('div');
  topbar.className='selection-topbar';topbar.append($('title-back'),selection.querySelector('.section-heading'));
@@ -74,6 +74,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   document.body.dataset.screen=next;info.open=false;
   for(const element of document.querySelectorAll('main > :not(.game-layout),.site-head'))element.inert=next==='select';
   if(next==='select'||next==='vs')refresh();
+  if(next==='vs')onVersus();
   if(next==='battle')startBattle();
   const focus={title:'mode-heading',select:'selection-heading',vs:'vs-heading',battle:'battle'}[next];
   $(focus).focus({preventScroll:true});screens[next].scrollIntoView({block:'start',behavior:'instant'});

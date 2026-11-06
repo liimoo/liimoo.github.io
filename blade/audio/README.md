@@ -5,7 +5,8 @@
 |用途|元ファイル|同梱ファイル|尺|
 |---|---|---|---|
 |select|decision1.mp3|select.mp3|0.7秒|
-|launch|shakin1.mp3|launch.mp3|1秒|
+|vs（VS画面への登場）|shakin1.mp3|vs.mp3|1秒|
+|launch（発射）|machdash1.mp3|launch.mp3|0.65秒|
 |hit|punch-middle2.mp3|hit.mp3|0.4秒|
 |critical（クリティカルの金属音）|metal-bat1.mp3|critical.mp3|0.55秒|
 |ringout|buun1.mp3|ringout.mp3|0.65秒|

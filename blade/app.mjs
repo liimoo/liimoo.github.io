@@ -1,10 +1,10 @@
 import {newSelection,randomOpponent} from './selection-state.mjs?v=20261106-empty';
 import {criticalPresentations} from './critical-presentation.mjs?v=20261106-sides';
 import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-basin';
-import {mountFlow} from './flow.mjs?v=20261106-pref-highlight';
+import {mountFlow} from './flow.mjs?v=20261106-vs';
 import {chooseCity} from './team-roster.mjs?v=20261105-team-panel';
 import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-basin';
-import {createBladeAudio} from './audio.mjs?v=20261106-sides';
+import {createBladeAudio} from './audio.mjs?v=20261106-vs';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-basin';
 import {createMatch,createTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261106-sides';
 const $=id=>document.getElementById(id);
@@ -222,7 +222,7 @@ async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const re
   if(side==='cpu'){opponent=index===selected?randomOpponent(regions,selected):index;}
   else{selected=index;if(opponent===index)opponent=randomOpponent(regions,selected);}
   gameAudio.play('select');
- },startBattle:reset,leave:()=>{gameAudio.stop();match=null;finishEffect=null;teamEffects=createTeamEffects();resultShown=false;criticalFlashes=[];lastImpactId=0;aim=null;paused=false;accumulator=0;last=0;controls(false);$('launch').hidden=false;$('result').hidden=true;$('pause-cover').hidden=true;}});
+ },onVersus:()=>gameAudio.play('vs'),startBattle:reset,leave:()=>{gameAudio.stop();match=null;finishEffect=null;teamEffects=createTeamEffects();resultShown=false;criticalFlashes=[];lastImpactId=0;aim=null;paused=false;accumulator=0;last=0;controls(false);$('launch').hidden=false;$('result').hidden=true;$('pause-cover').hidden=true;}});
  $('start-exhibition').disabled=false;$('start-team').disabled=false;$('shuffle').disabled=false;resize();requestAnimationFrame(tick);
  }catch(error){$('load-error').hidden=false;$('load-error').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('status').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('region-hint').textContent='通信環境をご確認ください。';$('arena-caption').textContent='読み込みエラー';console.error('City Blade initialization failed:',error);}}
 init();

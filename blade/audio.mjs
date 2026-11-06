@@ -1,7 +1,7 @@
 // Web Audio is created only after the player's sound/launch gesture.
 export const CUES = Object.freeze(Object.fromEntries(
-  ['select','launch','hit','critical','ringout','break','win','lose','draw']
-    .map(name=>[name,new URL(`./audio/${name}.mp3${name==='critical'?'?v=20261105-critical-clear':''}`,import.meta.url).href])
+  ['select','vs','launch','hit','critical','ringout','break','win','lose','draw']
+    .map(name=>[name,new URL(`./audio/${name}.mp3${name==='critical'?'?v=20261105-critical-clear':name==='launch'?'?v=20261106-dash':''}`,import.meta.url).href])
 ));
 const MAX_VOICES=4,HIT_COOLDOWN_MS=180,MASTER_GAIN=.22;
 
