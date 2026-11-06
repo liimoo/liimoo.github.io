@@ -109,7 +109,7 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
     group.addEventListener('click',()=>activateMap(region.name,index));
     group.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();const wasPrefecture=Boolean(prefecture);activateMap(region.name,index);if(wasPrefecture){[...svg.querySelectorAll('[role=button]')].find(node=>node.dataset.name===region.name)?.focus();}else $('prefecture-back').focus();}});
    }
-   if(getSelectedIndices().some(i=>prefecture?regions[i].prefecture===prefecture&&regions[i].name===region.name:regions[i].prefecture===region.name))group.classList.add('map-selected');
+   if(getSelectedIndices().some(i=>prefecture?regions[i].prefecture===prefecture&&(regions[i].name===prefecture||regions[i].name===region.name):regions[i].prefecture===region.name))group.classList.add('map-selected');
    for(const polygon of region.polygons){const node=document.createElementNS(SVG,'polygon');node.setAttribute('points',polygon.map(p=>p.join(',')).join(' '));group.append(node);}
    const title=document.createElementNS(SVG,'title');title.textContent=region.name;group.append(title);svg.append(group);
   }
