@@ -1,4 +1,4 @@
-import {tokyoLayout} from './tokyo-layout.mjs';
+import {tokyoLayout} from './tokyo-layout.mjs?v=20261106-islands-final';
 const INSET_PREFECTURES=new Set(['島根県','長崎県','鹿児島県','沖縄県','32','42','46','47']);
 const area=polygon=>Math.abs(polygon.reduce((sum,p,i)=>{const q=polygon[(i+1)%polygon.length];return sum+p[0]*q[1]-q[0]*p[1];},0))/2;
 function bounds(items){

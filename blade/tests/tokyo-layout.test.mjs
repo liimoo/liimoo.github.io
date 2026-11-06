@@ -71,9 +71,9 @@ test('compact layout fills portrait space and keeps island labels below their sh
 
 test('Ogasawara satellite contours stay beside their principal islands',()=>{
  const box=(x,y,w)=>[[x,y],[x+w,y],[x+w,y+w],[x,y+w]];
- const source=[{name:'小笠原村',polygons:[box(0,0,10),box(100,0,9),box(200,0,8),box(300,0,7),box(12,0,1)]}];
+ const source=[{name:'小笠原村',polygons:[box(0,0,10),box(100,0,9),box(200,0,8),box(300,0,7),box(12,0,1),box(1000,0,.8),box(0,1000,.8),box(-1000,0,.8),box(0,-1000,.8)]}];
  const {regions}=tokyoLayout(source,{compact:true});
- assert.equal(regions[0].polygons.length,5);
+ assert.equal(regions[0].polygons.length,9);
  const xs=regions[0].polygons.map(p=>Math.min(...p.map(v=>v[0])));
  assert.ok(xs[4]>xs[0]&&xs[4]<xs[1]);
 });
@@ -87,5 +87,15 @@ test('distant small islands cannot shrink the main Ogasawara contour into invisi
   const visibleArea=Math.abs(p.reduce((sum,v,i)=>{const q=p[(i+1)%p.length];return sum+v[0]*q[1]-q[0]*v[1];},0))/2;
   assert.ok(visibleArea>500,`main contour area ${visibleArea}`);
   assert.deepEqual(regions[0].polygons.map(p=>p.length),polygons.map(p=>p.length));
+ }
+});
+
+test('actual largest Ogasawara contour remains readable after layout',()=>{
+ const area=p=>Math.abs(p.reduce((sum,v,i)=>{const q=p[(i+1)%p.length];return sum+v[0]*q[1]-q[0]*v[1];},0))/2;
+ const original=source.find(r=>r.name==='小笠原村');
+ const primary=original.polygons.reduce((best,p,i)=>area(p)>area(original.polygons[best])?i:best,0);
+ for(const compact of [false,true]){
+  const displayed=tokyoLayout(source,{compact}).regions.find(r=>r.name==='小笠原村');
+  assert.ok(area(displayed.polygons[primary])>=500,`largest Ogasawara contour ${area(displayed.polygons[primary])}`);
  }
 });

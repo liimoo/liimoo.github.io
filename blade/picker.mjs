@@ -1,5 +1,5 @@
-import {prefectureLayout} from './prefecture-layout.mjs?v=20261106-insets';
-import {drawFrames,drawSelectionLabels} from './map-annotations.mjs?v=20261106-insets';
+import {prefectureLayout} from './prefecture-layout.mjs?v=20261106-islands-final';
+import {drawFrames,drawSelectionLabels} from './map-annotations.mjs?v=20261106-islands-final';
 import {orderRegions} from './region-order.mjs?v=20261106-sort';
 const $=id=>document.getElementById(id),SVG='http://www.w3.org/2000/svg';
 const element=(tag,text)=>{const node=document.createElement(tag);if(text)node.textContent=text;return node;};

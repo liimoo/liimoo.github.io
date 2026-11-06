@@ -28,8 +28,8 @@ function contourAnchor(original,fitted){
 function islandGroups(polygons){
  const ranked=polygons.map((polygon,index)=>({polygon,index,area:area(polygon)})).sort((a,b)=>b.area-a.area);
  const pointDistance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
- let seeds=ranked.slice(0,1);
- while(seeds.length<Math.min(4,ranked.length)){
+ let seeds=ranked.slice(0,4);
+ while(seeds.length<Math.min(8,ranked.length)){
   const remaining=ranked.filter(item=>!seeds.includes(item));
   const nearest=item=>Math.min(...seeds.map(seed=>pointDistance(center([item.polygon]),center([seed.polygon]))));
   const next=remaining.reduce((best,item)=>nearest(item)>nearest(best)?item:best);
@@ -76,7 +76,7 @@ export function tokyoLayout(source,{compact=false}={}){
    // Satellites stay near a principal island instead of creating tiny individual cells.
    const groups=islandGroups(region.polygons);
    const packed=groups.flatMap((group,i)=>{
-    const fitted=fit(group.map(item=>item.polygon),polygonBox(cell(frames[2],i,groups.length,compact?4:2)));
+    const fitted=fit(group.map(item=>item.polygon),polygonBox(cell(frames[2],i,groups.length,4)));
     return group.map((item,j)=>({index:item.index,polygon:fitted[j]}));
    });
    const polygons=packed.sort((a,b)=>a.index-b.index).map(item=>item.polygon);
