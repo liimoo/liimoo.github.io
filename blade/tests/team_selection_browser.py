@@ -2,6 +2,7 @@
 import asyncio
 import sys
 from playwright.async_api import async_playwright
+from browser_flow_helpers import select_solo_match, select_team_match
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8766'
 
@@ -15,6 +16,7 @@ async def main():
             await page.route('**/googletagmanager.com/**', lambda route: route.abort())
             await page.goto(BASE + '/blade/')
             await page.locator('#start-team').click()
+            await select_team_match(page)
             assert await page.locator('#team-roster').is_visible()
             assert await page.locator('.team-slot').count() == 3
             assert await page.locator('#confirm-match').is_enabled()
@@ -45,6 +47,7 @@ async def main():
             await page.locator('#vs-back').click()
             await page.locator('#title-back').click()
             await page.locator('#start-exhibition').click()
+            await select_solo_match(page)
             assert await page.locator('#team-roster').is_hidden()
             assert await page.locator('#match-preview .preview-fighter').count() == 2
             assert not errors, errors

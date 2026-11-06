@@ -1,7 +1,7 @@
 """Decode real game assets and verify sound controls without publishing."""
 import asyncio
 from playwright.async_api import async_playwright
-from browser_flow_helpers import enter_selection, start_battle, replay_battle
+from browser_flow_helpers import enter_selection, start_battle, replay_battle, select_solo_match
 async def main():
     async with async_playwright() as p:
         browser=await p.chromium.launch()
@@ -15,6 +15,7 @@ async def main():
         await page.route('**/googletagmanager.com/**',lambda r:r.abort())
         await page.goto('http://127.0.0.1:8766/blade/')
         await enter_selection(page)
+        await select_solo_match(page)
         await start_battle(page)
         assert await page.evaluate('audioProbe.starts')==0
         await page.locator('#sound').click()

@@ -1,7 +1,8 @@
+import {newSelection,randomOpponent} from './selection-state.mjs?v=20261106-empty';
 import {criticalPresentations} from './critical-presentation.mjs?v=20261106-sides';
 import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-basin';
-import {mountFlow} from './flow.mjs?v=20261106-sort';
-import {chooseCity,defaultTeam} from './team-roster.mjs?v=20261105-team-panel';
+import {mountFlow} from './flow.mjs?v=20261106-empty';
+import {chooseCity} from './team-roster.mjs?v=20261105-team-panel';
 import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-basin';
 import {createBladeAudio} from './audio.mjs?v=20261106-sides';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-basin';
@@ -9,7 +10,7 @@ import {createMatch,createTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RAD
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let arenaLayer=null;
-let regions=[],selected=0,opponent=1,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null,mode='single',playerTeam=[],cpuTeam=[],teamEffects=createTeamEffects(),resultShown=false;
+let regions=[],selected=null,opponent=null,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,sound=false,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null,mode='single',playerTeam=[],cpuTeam=[],teamEffects=createTeamEffects(),resultShown=false;
 let launchSettings=[],launchCity=0;
 const launchHome=$('launch').parentElement;
 const stageControls=document.createElement('div');stageControls.id='stage-controls';stageControls.hidden=true;document.querySelector('.arena-wrap').append(stageControls);
@@ -66,7 +67,7 @@ function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=
 function fireFromControls(){const a=Number($('angle').value)*Math.PI/180;fire({x:Math.sin(a),y:-Math.cos(a)},Number($('power').value)/100);}
 $('launch').addEventListener('click',fireFromControls);
 for(const id of ['angle','power'])$(id).addEventListener('input',()=>{launchSettings=launchSettings.map((setting,i)=>i===launchCity?{...setting,[id]:Number($(id).value)}:setting);refreshLaunchControls();$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});
-$('shuffle').addEventListener('click',()=>{const candidates=regions.map((_,i)=>i).filter(i=>mode==='team'?regions[i].name===regions[i].prefecture&&regions[i].prefecture!==teamName('player'):i!==selected&&i!==opponent);opponent=candidates[Math.floor(Math.random()*candidates.length)]??(selected+1)%regions.length;if(mode==='team'){cpuTeam=defaultTeam(regions,opponent);opponent=cpuTeam[0];}flow?.refresh();gameAudio.play('select');});
+$('shuffle').addEventListener('click',()=>{if(mode==='team'){const next=newSelection(regions,'team');cpuTeam=next.cpuTeam;opponent=next.opponent;}else opponent=randomOpponent(regions,selected);flow?.refresh();gameAudio.play('select');});
 $('again').addEventListener('click',()=>flow?.show('vs'));
 $('sound').addEventListener('click',async()=>{sound=!sound;$('sound').setAttribute('aria-pressed',String(sound));$('sound').textContent=sound?'音 ON':'音 OFF';if(sound){const enabled=await gameAudio.enable();if(enabled&&sound)gameAudio.play('select');}else gameAudio.disable();});
 function setPause(value){aim=null;if(match?.phase!=='active')return;paused=value;if(value)gameAudio.stop();accumulator=0;last=0;$('pause-cover').hidden=!paused;$('pause').setAttribute('aria-label',paused?'対戦を再開':'一時停止');$('pause').textContent=paused?'▶':'Ⅱ';}
@@ -216,11 +217,10 @@ function resize(){const width=canvas.getBoundingClientRect().width;if(width>0)ca
 new ResizeObserver(resize).observe(canvas);
 async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const response=await fetch('./regions.json?v=20261106-sort');if(!response.ok)throw new Error('Map load failed');regions=await response.json();if(!Array.isArray(regions)||regions.length<2)throw new Error('Invalid maps');
  for(const r of regions){if(!Array.isArray(r.points)||r.points.length<3||!r.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))||typeof r.url!=='string'||!r.url.startsWith('/play/'))throw new Error('Invalid map');}
- selected=Math.max(0,regions.findIndex(r=>r.id==='city-osaka'));opponent=0;
- flow=mountFlow({regions,getSelection:()=>({selected,opponent,mode,playerTeam,cpuTeam}),setMode:next=>{mode=next;if(mode==='team'){playerTeam=defaultTeam(regions,selected);cpuTeam=defaultTeam(regions,opponent);selected=playerTeam[0];opponent=cpuTeam[0];}},select:(index,side)=>{
-  if(mode==='team'){if(side==='cpu'){cpuTeam=chooseCity(regions,cpuTeam,index);opponent=cpuTeam[0]??index;}else{playerTeam=chooseCity(regions,playerTeam,index);selected=playerTeam[0]??index;}gameAudio.play('select');return;}
-  if(side==='cpu'){opponent=index;if(selected===index)selected=(index+1)%regions.length;}
-  else{selected=index;if(opponent===index)opponent=(index+1)%regions.length;}
+ flow=mountFlow({regions,getSelection:()=>({selected,opponent,mode,playerTeam,cpuTeam}),setMode:next=>{mode=next;({selected,opponent,playerTeam,cpuTeam}=newSelection(regions,mode));},select:(index,side)=>{
+  if(mode==='team'){if(side==='cpu'){cpuTeam=chooseCity(regions,cpuTeam,index);opponent=cpuTeam[0]??null;}else{playerTeam=chooseCity(regions,playerTeam,index);selected=playerTeam[0]??null;}gameAudio.play('select');return;}
+  if(side==='cpu'){opponent=index===selected?randomOpponent(regions,selected):index;}
+  else{selected=index;if(opponent===index)opponent=randomOpponent(regions,selected);}
   gameAudio.play('select');
  },startBattle:reset,leave:()=>{gameAudio.stop();match=null;finishEffect=null;teamEffects=createTeamEffects();resultShown=false;criticalFlashes=[];lastImpactId=0;aim=null;paused=false;accumulator=0;last=0;controls(false);$('launch').hidden=false;$('result').hidden=true;$('pause-cover').hidden=true;}});
  $('start-exhibition').disabled=false;$('start-team').disabled=false;$('shuffle').disabled=false;resize();requestAnimationFrame(tick);

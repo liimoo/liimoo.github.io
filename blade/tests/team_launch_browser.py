@@ -2,6 +2,7 @@
 import asyncio,sys
 from pathlib import Path
 from playwright.async_api import async_playwright
+from browser_flow_helpers import select_solo_match, select_team_match
 BASE=sys.argv[1] if len(sys.argv)>1 else 'http://127.0.0.1:8766'
 async def main():
  async with async_playwright() as p:
@@ -11,7 +12,8 @@ async def main():
    errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
    await page.route('**/googletagmanager.com/**',lambda r:r.abort())
    await page.goto(BASE+'/blade/')
-   await page.locator('#start-team').click();await page.locator('#confirm-match').click();await page.locator('#skip-vs').click()
+   await page.locator('#start-team').click();await select_team_match(page)
+   await page.locator('#confirm-match').click();await page.locator('#skip-vs').click()
    assert await page.locator('.arena-wrap #launch').count()==1
    assert await page.locator('#player-energy').is_hidden()
    assert await page.locator('#cpu-energy').is_hidden()
@@ -63,6 +65,7 @@ async def main():
    assert await page.locator('#launch').is_visible()
    assert await page.locator('#angle').input_value()=='0'
    await page.locator('#battle-back').click();await page.locator('#title-back').click();await page.locator('#start-exhibition').click()
+   await select_solo_match(page)
    await page.locator('#confirm-match').click();await page.locator('#skip-vs').click()
    assert await page.locator('.launch-controls #launch').count()==1
    assert await page.locator('#launch-cities').is_hidden()

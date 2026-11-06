@@ -1,6 +1,7 @@
 """Sorting preserves selected regions and team roster on all viewport sizes."""
 import asyncio,sys
 from playwright.async_api import async_playwright
+from browser_flow_helpers import select_team_match
 BASE=sys.argv[1] if len(sys.argv)>1 else 'http://127.0.0.1:8766'
 async def main():
  async with async_playwright() as p:
@@ -29,6 +30,7 @@ async def main():
    await page.locator('#select-cpu').click()
    assert await page.locator('#region-order').input_value()=='north'
    await page.locator('#title-back').click();await page.locator('#start-team').click()
+   await select_team_match(page)
    roster=await page.locator('#team-roster').inner_text()
    await page.locator('.prefecture-card[data-prefecture="大阪府"]').click()
    await page.locator('#region-order').select_option('south')

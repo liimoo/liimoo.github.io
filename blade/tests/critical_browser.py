@@ -2,7 +2,7 @@
 import asyncio
 from pathlib import Path
 from playwright.async_api import async_playwright
-from browser_flow_helpers import enter_selection, start_battle, replay_battle
+from browser_flow_helpers import enter_selection, start_battle, replay_battle, select_solo_match
 ROOT=Path(__file__).parents[1]
 async def main():
     async with async_playwright() as p:
@@ -28,6 +28,7 @@ async def main():
             await page.add_init_script("window.criticalLabels=[];const original=CanvasRenderingContext2D.prototype.fillText;CanvasRenderingContext2D.prototype.fillText=function(text,...args){if(['会心の一撃！','痛恨の一撃！'].includes(text))window.criticalLabels.push({text,args,time:performance.now()});return original.call(this,text,...args);};")
             await page.goto('http://127.0.0.1:8766/blade/')
             await enter_selection(page)
+            await select_solo_match(page)
             await start_battle(page)
             await page.locator('#sound').click()
             await page.locator('#launch').click()

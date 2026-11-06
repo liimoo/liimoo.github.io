@@ -1,10 +1,11 @@
 import {validTeam as validRoster} from './team-roster.mjs?v=20261105-team';
-import {mountPicker} from './picker.mjs?v=20261106-sort';
+import {mountPicker} from './picker.mjs?v=20261106-empty';
 const $=id=>document.getElementById(id);
 const SVG='http://www.w3.org/2000/svg';
 function preview(region,side){
  const panel=document.createElement('article');panel.className=`preview-fighter ${side}`;
  const label=document.createElement('small');label.textContent=side==='player'?'YOU':'CPU';
+ if(!region){const title=document.createElement('h3');title.textContent='未選択';const help=document.createElement('p');help.textContent='地域を選んでください';panel.append(label,title,help);return panel;}
  const map=document.createElementNS(SVG,'svg');map.setAttribute('viewBox','-1.1 -1.1 2.2 2.2');map.setAttribute('aria-hidden','true');
  const polygon=document.createElementNS(SVG,'polygon');polygon.setAttribute('points',region.points.map(p=>p.join(',')).join(' '));map.append(polygon);
  const title=document.createElement('h3');title.textContent=region.name;
@@ -26,6 +27,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
  const teamMode=()=>getSelection().mode==='team';
  const roster=name=>getSelection()[name==='player'?'playerTeam':'cpuTeam']||[];
  const validTeam=items=>validRoster(regions,items);
+ const canStart=()=>teamMode()?validTeam(roster('player'))&&validTeam(roster('cpu')):Boolean(regions[getSelection().selected]&&regions[getSelection().opponent]);
  function teamPreview(name){
   const panel=document.createElement('article');panel.className=`preview-team ${name}`;
   const heading=document.createElement('h3');heading.textContent=`${name==='player'?'YOU':'CPU'} / ${regions[roster(name)[0]]?.prefecture||'県を選択'}`;panel.append(heading);
@@ -41,8 +43,8 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   for(let slot=0;slot<3;slot++){const index=indices[slot],button=document.createElement('button');button.type='button';button.className='team-slot';button.disabled=index===undefined;button.textContent=index===undefined?`${slot+1}. 都市を選択`:`${slot+1}. ${regions[index].name} ×`;if(index!==undefined){button.setAttribute('aria-label',`${regions[index].name}をチームから外す`);button.addEventListener('click',()=>{(removeTeam||select)(index,side);refresh();});}fragment.append(button);}
   $('team-roster').replaceChildren(fragment);
   $('team-selection-status').textContent=`${side==='player'?'あなた':'CPU'}：${indices.length}/3都市${indices.length===3?'。変更するときは先に1都市を外してください。':''}`;
-  $('confirm-match').textContent='この編成で対戦 →';
-  $('confirm-match').disabled=team&&(!validTeam(roster('player'))||!validTeam(roster('cpu')));
+  $('confirm-match').textContent=canStart()?'この編成で対戦 →':teamMode()?'同じ県の3都市を選ぼう':'あなたの地域を選ぼう';
+  $('confirm-match').disabled=!canStart();
  }
  const screens={title:$('title-screen'),select:$('choose-region'),vs:$('vs-screen'),battle:$('battle')};
  function refresh(){
@@ -55,16 +57,16 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   }
   $('select-player').setAttribute('aria-pressed',String(side==='player'));
   $('select-cpu').setAttribute('aria-pressed',String(side==='cpu'));
-  $('opponent-name').textContent=teamMode()?`${regions[roster('cpu')[0]]?.prefecture||'未選択'} / ${roster('cpu').length}都市`:regions[opponent].name;
+  $('opponent-name').textContent=teamMode()?`${regions[roster('cpu')[0]]?.prefecture||'未選択'} / ${roster('cpu').length}都市`:regions[opponent]?.name||'未選択';
   refreshRoster();
   const region=regions[side==='player'?selected:opponent];
-  $('region-kind').textContent=region.name!==region.prefecture?`${region.prefecture} / 市区町村のかたち`:'都道府県のかたち';
-  $('region-hint').textContent=region.hint;$('region-link').href=region.url;
+  $('region-kind').textContent=!region?'未選択':region.name!==region.prefecture?`${region.prefecture} / 市区町村のかたち`:'都道府県のかたち';
+  $('region-hint').textContent=region?.hint||'一覧または地図から地域を選んでください。';$('region-link').hidden=!region;if(region)$('region-link').href=region.url;
   picker?.refresh();
  }
  function show(next){
   if(!Object.hasOwn(screens,next))return;
-  if((next==='vs'||next==='battle')&&teamMode()&&(!validTeam(roster('player'))||!validTeam(roster('cpu'))))return;
+  if((next==='vs'||next==='battle')&&!canStart())return;
   clearTimeout(timer);timer=null;
   if(next!=='battle')leave();
   screen=next;
@@ -77,7 +79,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   $(focus).focus({preventScroll:true});screens[next].scrollIntoView({block:'start',behavior:'instant'});
   if(next==='vs')timer=setTimeout(()=>{if(screen==='vs')show('battle');},matchMedia('(prefers-reduced-motion: reduce)').matches?200:1400);
  }
- picker=mountPicker({regions,getSelected:()=>{const {selected,opponent}=getSelection();return side==='player'?selected:opponent;},getSelectedIndices:()=>teamMode()?roster(side):[side==='player'?getSelection().selected:getSelection().opponent],isTeam:teamMode,onSelect:index=>{select(index,side);refresh();}});
+ picker=mountPicker({regions,getSelected:()=>{const {selected,opponent}=getSelection();return side==='player'?selected:opponent;},getSelectedIndices:()=>teamMode()?roster(side):[side==='player'?getSelection().selected:getSelection().opponent].filter(i=>Number.isInteger(i)&&Boolean(regions[i])),isTeam:teamMode,onSelect:index=>{select(index,side);refresh();}});
  for(const name of ['player','cpu'])$(`select-${name}`).addEventListener('click',()=>{side=name;picker.reset();refresh();});
  for(const [id,target] of Object.entries({'title-back':'title','confirm-match':'vs','skip-vs':'battle','vs-back':'select','reselect':'select','result-title-home':'title','battle-back':'select'}))$(id).addEventListener('click',()=>show(target));
  for(const [id,mode] of [['start-exhibition','single'],['start-team','team']]){$(id).addEventListener('click',()=>{setMode(mode);side='player';picker.reset();show('select');});$(id).disabled=false;}

@@ -3,6 +3,7 @@ import asyncio
 import sys
 from pathlib import Path
 from playwright.async_api import async_playwright
+from browser_flow_helpers import select_team_match
 BASE=sys.argv[1] if len(sys.argv)>1 else 'http://127.0.0.1:8766'
 async def main():
  async with async_playwright() as p:
@@ -16,6 +17,7 @@ async def main():
    await page.route('**/googletagmanager.com/**',lambda route:route.abort())
    await page.goto(BASE+'/blade/')
    await page.locator('#start-team').click()
+   await select_team_match(page)
    await page.locator('#confirm-match').click()
    if not reduced: await page.locator('#skip-vs').click()
    await page.locator('#battle').wait_for()

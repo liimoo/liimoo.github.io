@@ -1,6 +1,7 @@
 """All selection actions stay inside viewport; only the region list scrolls."""
 import asyncio,sys
 from playwright.async_api import async_playwright
+from browser_flow_helpers import select_team_match
 BASE=sys.argv[1] if len(sys.argv)>1 else 'http://127.0.0.1:8766'
 async def visible_inside(page,selector):
  box=await page.locator(selector).bounding_box();size=page.viewport_size
@@ -13,6 +14,7 @@ async def main():
    errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
    await page.route('**/googletagmanager.com/**',lambda r:r.abort())
    await page.goto(BASE+'/blade/');await page.locator('#start-team').click()
+   await select_team_match(page)
    for selector in ['#title-back','#select-player','#select-cpu','#team-roster','#shuffle','#confirm-match','.map-picker']:
     await visible_inside(page,selector)
    scroll=await page.evaluate('scrollY')

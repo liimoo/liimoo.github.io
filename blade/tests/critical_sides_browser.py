@@ -2,6 +2,7 @@
 import asyncio,json
 from pathlib import Path
 from playwright.async_api import async_playwright
+from browser_flow_helpers import select_solo_match, select_team_match
 ROOT=Path(__file__).parents[1]
 async def main():
  async with async_playwright() as p:
@@ -19,6 +20,7 @@ async def main():
    await page.add_init_script("window.labels=[];const fill=CanvasRenderingContext2D.prototype.fillText;CanvasRenderingContext2D.prototype.fillText=function(t,...a){window.labels.push({text:t,color:this.fillStyle,y:this.getTransform().f});return fill.call(this,t,...a);};")
    await page.goto('http://127.0.0.1:8766/blade/')
    await page.locator('#start-team' if team else '#start-exhibition').click()
+   await (select_team_match(page) if team else select_solo_match(page))
    await page.locator('#confirm-match').click();await page.locator('#skip-vs').click()
    await page.locator('#launch').click()
    await page.wait_for_function("labels.some(l=>l.text==='痛恨の一撃！')")

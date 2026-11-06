@@ -2,7 +2,7 @@
 import asyncio
 import sys
 from playwright.async_api import async_playwright
-from browser_flow_helpers import enter_selection, start_battle, replay_battle
+from browser_flow_helpers import enter_selection, start_battle, replay_battle, select_solo_match
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8766'
 
@@ -17,6 +17,7 @@ async def main():
             await page.goto(BASE + '/blade/')
             await enter_selection(page)
             assert await page.locator('.prefecture-card').count() == 47
+            await select_solo_match(page)
             assert '大阪市' in await page.locator('#match-preview .player').text_content()
             assert await page.locator('.region-card meter').count() == 0
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -89,6 +90,7 @@ async def main():
         await page.route('**/googletagmanager.com/**', lambda route: route.abort())
         await page.goto(BASE + '/blade/')
         await enter_selection(page)
+        await select_solo_match(page)
         await start_battle(page)
         await page.locator('#launch').click()
         await page.wait_for_function('document.getElementById("status").textContent.startsWith("決着！")', timeout=48000)

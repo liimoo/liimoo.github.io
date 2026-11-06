@@ -3,7 +3,7 @@ import asyncio
 import sys
 from pathlib import Path
 from playwright.async_api import async_playwright
-from browser_flow_helpers import enter_selection, start_battle, replay_battle
+from browser_flow_helpers import enter_selection, start_battle, replay_battle, select_solo_match
 BASE = sys.argv[1] if len(sys.argv)>1 else 'http://127.0.0.1:8766'
 async def main():
     source=(Path(__file__).parents[1]/'engine.mjs').read_text().replace('export function step(match,dt)', 'function actualStep(match,dt)')
@@ -27,6 +27,7 @@ export function step(match,dt) {{
             await page.route('**/googletagmanager.com/**',lambda route:route.abort())
             await page.goto(BASE+'/blade/')
             await enter_selection(page)
+            await select_solo_match(page)
             await start_battle(page)
             await page.locator('#launch').click()
             await page.wait_for_function('document.getElementById("status").textContent.startsWith("決着！")')

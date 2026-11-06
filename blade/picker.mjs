@@ -95,6 +95,7 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
   const source=prefecture?cityMaps.get(prefecture):maps?.prefectures;
   if(!source?.length){
    const fallback=regions.find(r=>r.name===prefecture)||selected;
+   if(!fallback){svg.setAttribute('viewBox','0 0 1 1');return;}
    const polygon=document.createElementNS(SVG,'polygon');polygon.setAttribute('points',fallback.points.map(p=>p.join(',')).join(' '));polygon.classList.add('map-selected');svg.append(polygon);svg.setAttribute('viewBox','-1.2 -1.2 2.4 2.4');return;
   }
   svg.setAttribute('viewBox',mapBounds(source).join(' '));
@@ -132,7 +133,7 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
   $('prefecture-list').hidden=Boolean(prefecture);$('prefecture-back').hidden=!prefecture;$('regions').hidden=!prefecture;$('region-search-label').hidden=!prefecture;
   $('picker-title').textContent=prefecture||'全国';$('picker-step').textContent=prefecture?'② 使う地域を選ぶ':'① 都道府県を選ぶ';
   $('map-caption').textContent=mapFailed||failed.has(prefecture)?'地図を読み込めませんでした。左の一覧から選べます。':pending.has(prefecture)?'県の地図を読み込み中… 左の一覧からも選べます。':prefecture?(isTeam()?'同じ県から3都市を選択。選択済みを押すと外せます':'左の一覧から県全体や都市を選べます'):'都道府県を選ぶと都市の地図が開きます';
-  const selected=regions[getSelected()];$('selected-region-detail').replaceChildren(element('small','選択中'),element('h3',selected.name),element('p','能力は全地域共通。地図の形で勝負！'));
+  const selected=regions[getSelected()];$('selected-region-detail').replaceChildren(element('small',selected?'選択中':'選択状態'),element('h3',selected?.name||'未選択'),element('p',selected?'能力は全地域共通。地図の形で勝負！':'都道府県を選んで、使う地域を決めよう。'));
   drawMap();
  }
  refresh();return {refresh,reset:()=>{cancelCamera();prefecture='';$('region-search').value='';refresh();document.querySelector('.picker-sidebar').scrollTop=0;}};
