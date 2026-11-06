@@ -160,3 +160,9 @@ body[data-screen=select] #choose-region{position:fixed;inset:8px;z-index:10;widt
  #choose-region #selected-region-detail{padding:2px 12px}
 }
 #choose-region #prefecture-back{position:sticky;top:0;z-index:3;min-height:40px;margin-bottom:6px;box-shadow:0 2px 5px #38536b40}
+
+.region-order-label{display:block;background:#e1eaf7;color:#345675;font-size:10px;padding:4px 0 8px}
+#region-order{display:block;width:100%;min-height:40px;border:1px solid #bf903c;border-radius:10px;background:#f6cd7d;color:#352a18;font:inherit;font-size:12px;padding:5px 3px}
+
+#picker-list-tools{position:sticky;top:0;z-index:3;background:#e1eaf7}
+#picker-list-tools #prefecture-back{position:static}

@@ -1,6 +1,6 @@
 import {criticalPresentations} from './critical-presentation.mjs?v=20261106-sides';
 import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-basin';
-import {mountFlow} from './flow.mjs?v=20261105-zoom';
+import {mountFlow} from './flow.mjs?v=20261106-sort';
 import {chooseCity,defaultTeam} from './team-roster.mjs?v=20261105-team-panel';
 import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-basin';
 import {createBladeAudio} from './audio.mjs?v=20261106-sides';
@@ -214,7 +214,7 @@ function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
 }
 function resize(){const width=canvas.getBoundingClientRect().width;if(width>0)canvas.width=canvas.height=Math.round(width*Math.min(devicePixelRatio||1,2));}
 new ResizeObserver(resize).observe(canvas);
-async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const response=await fetch('./regions.json?v=20261105-national');if(!response.ok)throw new Error('Map load failed');regions=await response.json();if(!Array.isArray(regions)||regions.length<2)throw new Error('Invalid maps');
+async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const response=await fetch('./regions.json?v=20261106-sort');if(!response.ok)throw new Error('Map load failed');regions=await response.json();if(!Array.isArray(regions)||regions.length<2)throw new Error('Invalid maps');
  for(const r of regions){if(!Array.isArray(r.points)||r.points.length<3||!r.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))||typeof r.url!=='string'||!r.url.startsWith('/play/'))throw new Error('Invalid map');}
  selected=Math.max(0,regions.findIndex(r=>r.id==='city-osaka'));opponent=0;
  flow=mountFlow({regions,getSelection:()=>({selected,opponent,mode,playerTeam,cpuTeam}),setMode:next=>{mode=next;if(mode==='team'){playerTeam=defaultTeam(regions,selected);cpuTeam=defaultTeam(regions,opponent);selected=playerTeam[0];opponent=cpuTeam[0];}},select:(index,side)=>{

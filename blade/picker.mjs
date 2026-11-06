@@ -1,3 +1,4 @@
+import {orderRegions} from './region-order.mjs?v=20261106-sort';
 const $=id=>document.getElementById(id),SVG='http://www.w3.org/2000/svg';
 const element=(tag,text)=>{const node=document.createElement(tag);if(text)node.textContent=text;return node;};
 const normalize=value=>String(value||'').normalize('NFKC').toLowerCase();
@@ -17,6 +18,7 @@ function mapBounds(source){
  return [minX-pad,minY-pad,w+pad*2,h+pad*2];
 }
 export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=>[getSelected()],isTeam=()=>false}){
+ let order='north';
  let prefecture='',maps=null,mapRequested=false,mapFailed=false,renderedPrefecture=null;
  const cityMaps=new Map(),pending=new Set(),failed=new Set();
  let cameraFrame=0,cameraActive=false,cameraReveal=null;
@@ -55,13 +57,22 @@ export function mountPicker({regions,getSelected,onSelect,getSelectedIndices=()=
   button.append(element('small',regions.find(r=>r.name===name)?.reading||'都道府県'),element('strong',`${name} ›`));
   button.addEventListener('click',()=>choosePrefecture(name));$('prefecture-list').append(button);
  }
+ function sortPrefectures(){
+  const items=names.map(name=>({region:regions.find(r=>r.name===name&&r.kind==='県')}));
+  const cards=new Map([...$('prefecture-list').children].map(card=>[card.dataset.prefecture,card]));
+  for(const {region} of orderRegions(items,order))$('prefecture-list').append(cards.get(region.name));
+ }
+ $('region-order').addEventListener('change',()=>{
+  order=$('region-order').value;sortPrefectures();refresh();document.querySelector('.picker-sidebar').scrollTop=0;
+ });
+ sortPrefectures();
  $('prefecture-back').addEventListener('click',()=>choosePrefecture(''));
  function renderCards(){
-  const renderKey=`${prefecture}:${isTeam()}`;
+  const renderKey=`${prefecture}:${isTeam()}:${order}`;
   if(renderedPrefecture===renderKey)return;
   renderedPrefecture=renderKey;
   const fragment=document.createDocumentFragment();
-  for(const {region,index} of byPrefecture.get(prefecture)||[]){
+  for(const {region,index} of orderRegions(byPrefecture.get(prefecture)||[],order)){
    if(isTeam()&&region.name===region.prefecture)continue;
    const button=element('button');button.type='button';button.className='region-card';button.dataset.index=String(index);
    button.setAttribute('aria-label',`${region.name}を選ぶ`);
