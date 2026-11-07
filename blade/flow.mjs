@@ -81,11 +81,15 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   if(next==='battle')startBattle();
   const focus={title:'mode-heading',select:'selection-heading',vs:'vs-heading',battle:'battle'}[next];
   $(focus).focus({preventScroll:true});screens[next].scrollIntoView({block:'start',behavior:'instant'});
-  if(next==='vs')timer=setTimeout(()=>{if(screen==='vs')show('battle');},matchMedia('(prefers-reduced-motion: reduce)').matches?200:1400);
+  if(next==='vs')timer=setTimeout(()=>{if(screen==='vs')show('battle');},4000);
  }
  picker=mountPicker({regions,getSelected:()=>{const {selected,opponent}=getSelection();return side==='player'?selected:opponent;},getSelectedIndices:()=>teamMode()?roster(side):[side==='player'?getSelection().selected:getSelection().opponent].filter(i=>Number.isInteger(i)&&Boolean(regions[i])),isTeam:teamMode,isPrefectureTeam:prefectureTeam,onSelect:index=>{select(index,side);refresh();}});
  for(const name of ['player','cpu'])$(`select-${name}`).addEventListener('click',()=>{side=name;picker.reset();refresh();});
  for(const [id,target] of Object.entries({'title-back':'title','confirm-match':'vs','skip-vs':'battle','vs-back':'select','reselect':'select','result-title-home':'title','battle-back':'select'}))$(id).addEventListener('click',()=>show(target));
+ screens.vs.addEventListener('click',event=>{
+  if(screen!=='vs'||event.target.closest('button,a,input,select,textarea'))return;
+  show('battle');
+ });
  for(const [id,mode] of [['start-exhibition','single'],['start-team','team'],['start-pref-team','pref-team']]){$(id).addEventListener('click',()=>{setMode(mode);side='player';picker.reset();show('select');});$(id).disabled=false;}
  show('title');
  return {show,refresh,get screen(){return screen;},get side(){return side;}};

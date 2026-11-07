@@ -65,7 +65,7 @@ async def main():
         await page.goto('http://127.0.0.1:8766/blade/')
         await enter_selection(page);await select_solo_match(page)
         await page.locator('#confirm-match').click()
-        await page.locator('#battle').wait_for(timeout=4000)
+        await page.locator('#battle').wait_for(timeout=5500)
         assert await page.locator('#launch').is_enabled()
         await page.close()
         print('Natural VS transition to launch preparation: PASS',flush=True)
