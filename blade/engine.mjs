@@ -290,7 +290,7 @@ function teamResult(bodies,elapsed,events) {
    .reduce((sum,e)=>sum+(e.body.rawEnergy??e.body.energy),0));
   const difference=energies[0]-energies[1];
   return {winner:spinOnly&&Math.abs(difference)>EPSILON?(difference>0?'player':'cpu'):'draw',
-   reason:spinOnly?'spin':'ringout',...(spinOnly&&Math.abs(difference)>EPSILON?{tiebreak:'remaining-energy'}:{})};
+   reason:spinOnly?'spin':'ringout',...(spinOnly&&Math.abs(difference)>EPSILON?{tiebreak:'remaining-energy',survivorIndices:last.filter(e=>e.body.side===(difference>0?'player':'cpu')).map(e=>e.index)}:{})};
  }
  if(alive.some(team=>team.length===0)) return {winner:alive[0].length?'player':'cpu',reason:events.some(e=>e.reason==='ringout')?'ringout':'spin'};
  if(elapsed<MATCH_SECONDS) return null;

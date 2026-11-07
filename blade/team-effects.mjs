@@ -10,10 +10,13 @@ function eliminationEffect(event,bodies,reduced) {
  return {...(!reduced&&event.reason==='ringout'&&!canExplode(fx,event.index)?{...fx,duration:.55}:fx),id:event.id};
 }
 export function collectTeamEffects(state,match,reduced=false) {
- const fresh=(match.eliminations??[]).filter(event=>!state.effects.some(fx=>fx.id===event.id));
+ // Keep only the final blow's winning pieces visible; earlier teammates stay defeated.
+ const protectedIndices=match.result?.tiebreak==='remaining-energy'?match.result.survivorIndices??[]:[];
+ const fresh=(match.eliminations??[]).filter(event=>!protectedIndices.includes(event.index)&&!state.effects.some(fx=>fx.id===event.id));
  const effects=[...state.effects,...fresh.map(event=>eliminationEffect(event,match.bodies,reduced))];
- const final=state.final??(match.result?{age:0,reduced,origins:match.bodies.map(body=>({...body})),
-  survivors:match.bodies.flatMap((body,index)=>body.eliminated?[]:[index])}:null);
+ const final=state.final??(match.result?{age:0,reduced,origins:match.bodies.map((body,index)=>({...body,spin:protectedIndices.includes(index)
+   ?match.eliminations.find(event=>event.index===index)?.previousBody?.spin??body.cruiseSpin??0:body.spin})),
+  survivors:match.bodies.flatMap((body,index)=>!body.eliminated||protectedIndices.includes(index)?[index]:[])}:null);
  return {...state,effects,final,pendingCues:[...state.pendingCues,...fresh.filter(event=>event.reason==='ringout').map(()=> 'ringout')]};
 }
 export function advanceTeamEffects(state,dt) {

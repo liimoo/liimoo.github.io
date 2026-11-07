@@ -5,10 +5,10 @@ import {criticalPresentations} from './critical-presentation.mjs?v=20261106-side
 import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-basin';
 import {mountFlow} from './flow.mjs?v=20261106-pref-team';
 import {chooseCity,choosePrefecture} from './team-roster.mjs?v=20261106-pref-team';
-import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261105-basin';
+import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261107-winner-survival';
 import {createBladeAudio} from './audio.mjs?v=20261106-friendly-bump';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-basin';
-import {createMatch,createTeamMatch,createPrefectureTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261106-pref-team';
+import {createMatch,createTeamMatch,createPrefectureTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261107-winner-survival';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let arenaLayer=null;
@@ -104,7 +104,7 @@ canvas.addEventListener('pointerup',e=>{if(aim?.pointerId!==e.pointerId)return;a
 for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{aim=null;});
 function updateHud(){if(!match)return;$('time').textContent=String(Math.max(0,Math.ceil(MATCH_SECONDS-match.elapsed))).padStart(2,'0');
  for(const side of ['player','cpu']){const members=match.bodies.filter(b=>b.side===side);$(`${side}-energy`).style.transform=`scaleX(${members.reduce((sum,b)=>sum+(b.eliminated?0:b.energy),0)/members.length})`;}
- if(isTeamMode())for(const row of document.querySelectorAll('.battle-member')){const b=match.bodies[Number(row.dataset.body)];row.classList.toggle('eliminated',b.eliminated);row.querySelector('i').style.transform=`scaleX(${b.eliminated?0:b.energy})`;row.setAttribute('aria-label',`${b.region.name} ${b.eliminated?'脱落':`残り${Math.ceil(b.energy*100)}％`}`);}
+ if(isTeamMode())for(const row of document.querySelectorAll('.battle-member')){const b=match.bodies[Number(row.dataset.body)];const eliminated=b.eliminated&&!teamEffects.final?.survivors.includes(Number(row.dataset.body));row.classList.toggle('eliminated',eliminated);row.querySelector('i').style.transform=`scaleX(${b.eliminated?0:b.energy})`;row.setAttribute('aria-label',`${b.region.name} ${eliminated?'脱落':`残り${Math.ceil(b.energy*100)}％`}`);}
 }
 function beginFinish(previousBodies){
  if(isTeamMode()){teamEffects=collectTeamEffects(teamEffects,match,reduced);$('pause').disabled=true;aim=null;$('status').textContent='決着！ 最後の駒を見届けよう';return;}
@@ -116,7 +116,7 @@ function beginFinish(previousBodies){
 function finished(){if(resultShown)return;resultShown=true;telemetryMatch?.finish({...match.result,duration:Math.round(match.elapsed)});const {winner,reason}=match.result;const name=isTeamMode()?teamName('player'):regions[selected].name,other=isTeamMode()?teamName('cpu'):regions[opponent].name;
  $('result-title').textContent=winner==='player'?'あなたの勝ち！':winner==='cpu'?'CPUの勝ち！':'引き分け！';
  $('result-kicker').textContent=winner==='player'?'VICTORY / NICE LAUNCH':winner==='cpu'?'NEXT TIME / TRY AGAIN':'DRAW / GOOD BATTLE';
- const why=isTeamMode()?(reason==='time'?'時間切れ：残った駒の数、合計スタミナの順で判定':winner==='draw'?'両チームが全滅':match.result.tiebreak==='remaining-energy'?'同時に全滅・超過ダメージの少ない側の勝利':`相手の3${pieceUnit()}をすべて撃破`):match.result.tiebreak==='remaining-energy'?'同時にゲージ切れ・超過ダメージの少ない側の勝利':reason==='ringout'?'場外で決着':reason==='spin'?'回転スタミナがなくなって決着':'45秒、どちらもゆずらず';
+ const why=isTeamMode()?(reason==='time'?'時間切れ：残った駒の数、合計スタミナの順で判定':winner==='draw'?'両チームが全滅':match.result.tiebreak==='remaining-energy'?'同時にスタミナ切れ・超過ダメージの少ない側の勝利':`相手の3${pieceUnit()}をすべて撃破`):match.result.tiebreak==='remaining-energy'?'同時にゲージ切れ・超過ダメージの少ない側の勝利':reason==='ringout'?'場外で決着':reason==='spin'?'回転スタミナがなくなって決着':'45秒、どちらもゆずらず';
  $('result-detail').textContent=`${name} vs ${other} · ${why}`;$('status').textContent=`${$('result-title').textContent} ${why}`;$('arena-caption').textContent='地域や発射の向きを変えて、もう一戦。';$('result').hidden=false;$('pause').disabled=true;
  // Selection is enabled after a match, but launch remains disabled until reset.
  controls(false);$('launch').disabled=true;gameAudio.play(winner==='player'?'win':winner==='cpu'?'lose':'draw');track('blade_finish',{mode,region:regions[selected].id,winner,reason,duration:Math.round(match.elapsed)});

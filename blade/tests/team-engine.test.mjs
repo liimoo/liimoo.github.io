@@ -38,7 +38,7 @@ test('all three eliminated ends battle, including simultaneous raw energy tiebre
  let m=active();m={...m,bodies:m.bodies.map((b,i)=>i<3?{...b,energy:0}:b)};
  assert.equal(step(m,1/120).result.winner,'cpu');
  m=active();m={...m,bodies:m.bodies.map((b,i)=>({...b,energy:0,rawEnergy:i<3?-.1:-.2}))};
- const final=step(m,1/120);assert.equal(final.result.winner,'player');assert.equal(final.result.tiebreak,'remaining-energy');
+ const final=step(m,1/120);assert.equal(final.result.winner,'player');assert.equal(final.result.tiebreak,'remaining-energy');assert.deepEqual(final.result.survivorIndices,[0,1,2]);
 });
 test('timeout compares survivors then total energy and supports exact draw',()=>{
  let m=active();m={...m,elapsed:MATCH_SECONDS,bodies:m.bodies.map((b,i)=>({...b,eliminated:i===0}))};
@@ -67,7 +67,7 @@ test('simultaneous ringouts draw regardless of overkill and prior losses cannot 
  let m=active();m={...m,bodies:m.bodies.map((b,i)=>({...b,x:205,y:0,rawEnergy:i<3?-.1:-.4}))};
  assert.deepEqual(step(m,1/120).result,{winner:'draw',reason:'ringout'});
  m=active();m={...m,bodies:m.bodies.map((b,i)=>({...b,eliminated:i!==2&&i!==5,energy:0,rawEnergy:i===2?-.2:i===5?-.1:-100}))};
- assert.equal(step(m,1/120).result.winner,'cpu');
+ assert.equal(step(m,1/120).result.winner,'cpu');assert.deepEqual(step(m,1/120).result.survivorIndices,[5]);
  m={...m,bodies:m.bodies.map(b=>({...b,rawEnergy:-.1}))};assert.equal(step(m,1/120).result.winner,'draw');
 });
 test('team readiness is inert and malformed direction/power is rejected',()=>{
