@@ -29,7 +29,7 @@ test('stop clears voices but preserves enabled state',async()=>{
 test('hit cooldown and four-voice bound suppress audio pileup',async()=>{
  const f=fixture();await f.audio.enable();assert.equal(await f.audio.play('hit'),true);
  assert.equal(await f.audio.play('hit'),false);f.tick(180);assert.equal(await f.audio.play('hit'),true);
- for(let i=0;i<4;i++)await f.audio.play('launch');
+ for(let i=0;i<4;i++)await f.audio.play('critical');
  assert.equal(f.sources.filter(s=>!s.stopped).length,4);assert.ok(f.sources[0].stopped);
 });
 test('missing cues and failed loads do not throw or warn repeatedly',async()=>{
@@ -120,3 +120,23 @@ test('friendly bump obeys mute and cooldown resets on stop and re-enable',async(
  f.audio.disable();assert.equal(await f.audio.play('bump',{decisive:true}),false);
  await f.audio.enable();assert.equal(await f.audio.play('bump'),true);
 });
+
+ test('launch owns a reserved voice while four effects can be replaced',async()=>{
+ const f=fixture();await f.audio.enable();await f.audio.play('launch');
+ const launch=f.sources[0];
+ for(let i=0;i<12;i++)await f.audio.play(i%2?'critical':'hit',{decisive:true});
+ assert.equal(launch.stopped,undefined);
+ assert.equal(f.sources.filter(s=>!s.stopped).length,5);
+ f.audio.stop();assert.ok(f.sources.every(s=>s.stopped));
+ });
+ test('repeated launch replaces only launch and mute stops both channels',async()=>{
+ const f=fixture();await f.audio.enable();await f.audio.play('hit');await f.audio.play('launch');
+ await f.audio.play('launch');
+ assert.equal(f.sources[0].stopped,undefined);assert.ok(f.sources[1].stopped);
+ assert.equal(f.sources[2].stopped,undefined);
+ f.audio.disable();assert.ok(f.sources.every(s=>s.stopped));
+ });
+ test('late ended event from old launch does not release the new launch',async()=>{
+ const f=fixture();await f.audio.enable();await f.audio.play('launch');await f.audio.play('launch');
+ f.sources[0].onended();f.audio.stop();assert.ok(f.sources[1].stopped);
+ });

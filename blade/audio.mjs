@@ -10,7 +10,7 @@ export function createBladeAudio(options={}) {
   const fetchAudio=options.fetch??globalThis.fetch.bind(globalThis);
   const now=options.now??(()=>performance.now());
   const warn=options.warn??((...args)=>console.warn(...args));
-  let context,master,loads,enabled=false,generation=0,voices=[],lastHit=-Infinity,lastBump=-Infinity;
+  let context,master,loads,enabled=false,generation=0,voices=[],launchVoice=null,lastHit=-Infinity,lastBump=-Infinity;
   const warned=new Set();
   const report=(key,error)=>{
     if(!warned.has(key)){warned.add(key);warn(`都市ブレードの効果音を再生できません (${key})`,error);}
@@ -24,6 +24,7 @@ export function createBladeAudio(options={}) {
   };
   const release=source=>{
     voices=voices.filter(item=>item!==source);
+    if(launchVoice===source)launchVoice=null;
     source.disconnect();
   };
   const stopSource=source=>{
@@ -32,7 +33,7 @@ export function createBladeAudio(options={}) {
   };
   function stop(){
     generation++;lastHit=-Infinity;lastBump=-Infinity;
-    for(const source of [...voices])stopSource(source);
+    for(const source of [...voices,...(launchVoice?[launchVoice]:[])])stopSource(source);
   }
   function disable(){enabled=false;stop();}
   async function enable(){
@@ -61,11 +62,13 @@ export function createBladeAudio(options={}) {
       const timestamp=now();
       if(cue==='hit'&&!decisive&&timestamp-lastHit<HIT_COOLDOWN_MS)return false;
       if(cue==='bump'&&timestamp-lastBump<BUMP_COOLDOWN_MS)return false;
-      if(voices.length>=MAX_VOICES)stopSource(voices[0]);
+      // Reserve one launch voice so collision bursts cannot steal its playback.
+      if(cue==='launch'){if(launchVoice)stopSource(launchVoice);}
+      else if(voices.length>=MAX_VOICES)stopSource(voices[0]);
       const source=context.createBufferSource();source.buffer=buffer;
       if(cue==='critical')source.playbackRate.value=enemy?.65:1.12;
       source.connect(master);source.onended=()=>release(source);
-      voices=[...voices,source];
+      if(cue==='launch')launchVoice=source;else voices=[...voices,source];
       try{source.start();}catch(error){release(source);throw error;}
       if(cue==='hit')lastHit=timestamp;
       if(cue==='bump')lastBump=timestamp;
