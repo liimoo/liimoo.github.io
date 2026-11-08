@@ -60,6 +60,11 @@ function reset(){
  match=isTeamMode()?(mode==='pref-team'?createPrefectureTeamMatch:createTeamMatch)(playerTeam.map(i=>regions[i]),cpuTeam.map(i=>regions[i]),seed++):createMatch(regions[selected],regions[opponent],seed++);teamEffects=createTeamEffects();resultShown=false;buildTeamHud();prepareLaunchControls();finishEffect=null;aim=null;paused=false;accumulator=0;lastImpactId=0;criticalFlashes=[];
  $('launch').hidden=false;$('result').hidden=true;$('pause-cover').hidden=true;$('pause').disabled=true;$('pause').textContent='Ⅱ';
  $('player-name').textContent=mode==='pref-team'?'県チーム':isTeamMode()?teamName('player'):regions[selected].name;$('cpu-name').textContent=mode==='pref-team'?'県チーム':isTeamMode()?teamName('cpu'):regions[opponent].name;$('opponent-name').textContent=regions[opponent].name;
+ for(const [side,index] of [['player',selected],['cpu',opponent]]){
+  const region=regions[index],label=$(`${side}-prefecture`);
+  label.textContent=region.prefecture??'';
+  label.hidden=isTeamMode()||!region.prefecture||region.name===region.prefecture;
+ }
  $('region-kind').textContent=regions[selected].name!==regions[selected].prefecture?`${regions[selected].prefecture} / 市区町村のかたち`:'都道府県のかたち';
  for(const [i,side] of ['player','cpu'].entries()){
   $(`${side}-grit`).textContent=`底力 ${match.bodies.find(b=>b.side===side).grit} / 100`;
@@ -154,7 +159,7 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
   drawTop(ctx,b,{color,cpu,bounce:bounce/5,reduced,alpha});
   ctx.save();ctx.translate(b.x,b.y+floorOffset(b));
   if(match.phase==='active'&&!original.eliminated){ctx.save();ctx.translate(0,-10-bounce);ctx.rotate(b.angle);ctx.strokeStyle=color+'22';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,36,0,Math.PI*.8);ctx.stroke();ctx.restore();}
-  ctx.save();ctx.translate(0,44);ctx.scale(1,1/VIEW_TILT);ctx.font='8px sans-serif';ctx.textAlign='center';ctx.lineWidth=2.5;ctx.strokeStyle='#0a2031';ctx.strokeText(b.region.name,0,0);ctx.fillStyle=color;ctx.fillText(b.region.name,0,0);ctx.restore();
+  ctx.save();ctx.translate(0,44);ctx.scale(1,1/VIEW_TILT);ctx.font='8px sans-serif';ctx.textAlign='center';ctx.lineWidth=2.5;ctx.strokeStyle='#0a2031';ctx.strokeText(b.region.name,0,0);ctx.fillStyle=color;ctx.fillText(b.region.name,0,0);if(b.region.prefecture&&b.region.prefecture!==b.region.name){ctx.font='6px sans-serif';ctx.strokeText(b.region.prefecture,0,-10);ctx.fillText(b.region.prefecture,0,-10);}ctx.restore();
   if(match.phase==='ready'&&i===(isTeamMode()?launchCity:0)){const pulse=reduced?1:1+Math.sin(t*.003)*.04;circle(0,0,43*pulse);ctx.setLineDash([3,5]);ctx.strokeStyle='#71e6df90';ctx.stroke();ctx.setLineDash([]);}ctx.restore();
  }
  drawCriticalFlashes();
