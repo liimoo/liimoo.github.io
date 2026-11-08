@@ -1,3 +1,4 @@
+import {resultShare} from './result-share.mjs';
 import {createBladeTelemetry} from './telemetry.mjs?v=20261106-stats';
 import {createSoundPreference} from './sound-preference.mjs?v=20261106-default-on';
 import {newSelection,randomOpponent} from './selection-state.mjs?v=20261106-pref-team';
@@ -71,7 +72,7 @@ function reset(){
   $(`${side}-spin-power`).textContent=`回転力 ${match.bodies.find(b=>b.side===side).spinPower} / 100`;
  }
  $('region-hint').textContent=regions[selected].hint;$('region-link').href=regions[selected].url;
- $('status').textContent=isTeamMode()?`${pieceUnit()}ごとに角度と強さを調整し、舞台のボタンで一斉発射。`:'角度と強さを調整し、舞台のボタンで発射。';$('arena-caption').textContent=isTeamMode()?`青の3${pieceUnit()}があなたのチーム`:'引っ張って調整し、ボタンで発射';$('share-status').textContent='';
+ $('status').textContent=isTeamMode()?`${pieceUnit()}ごとに角度と強さを調整し、舞台のボタンで一斉発射。`:'角度と強さを調整し、舞台のボタンで発射。';$('arena-caption').textContent=isTeamMode()?`青の3${pieceUnit()}があなたのチーム`:'引っ張って調整し、ボタンで発射';$('share-status').textContent='';$('share-fallback').hidden=true;
  document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(Number(b.dataset.index)===selected)));controls(false);updateHud();resize();draw(0);flow?.refresh();
 }
 function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power,#launch-cities button,#battle-back'))el.disabled=active;}
@@ -122,12 +123,25 @@ function finished(){if(resultShown)return;resultShown=true;telemetryMatch?.finis
  $('result-title').textContent=winner==='player'?'あなたの勝ち！':winner==='cpu'?'CPUの勝ち！':'引き分け！';
  $('result-kicker').textContent=winner==='player'?'VICTORY / NICE LAUNCH':winner==='cpu'?'NEXT TIME / TRY AGAIN':'DRAW / GOOD BATTLE';
  const why=isTeamMode()?(reason==='time'?'時間切れ：残った駒の数、合計スタミナの順で判定':winner==='draw'?'両チームが全滅':match.result.tiebreak==='remaining-energy'?'同時にスタミナ切れ・超過ダメージの少ない側の勝利':`相手の3${pieceUnit()}をすべて撃破`):match.result.tiebreak==='remaining-energy'?'同時にゲージ切れ・超過ダメージの少ない側の勝利':reason==='ringout'?'場外で決着':reason==='spin'?'回転スタミナがなくなって決着':'45秒、どちらもゆずらず';
- $('result-detail').textContent=`${name} vs ${other} · ${why}`;$('status').textContent=`${$('result-title').textContent} ${why}`;$('arena-caption').textContent='地域や発射の向きを変えて、もう一戦。';$('result').hidden=false;$('pause').disabled=true;
+ $('result-detail').textContent=`${name} vs ${other} · ${why}`;$('status').textContent=`${$('result-title').textContent} ${why}`;$('arena-caption').textContent='地域や発射の向きを変えて、もう一戦。';$('share-x').href=shareData().xUrl;$('result').hidden=false;$('pause').disabled=true;
  // Selection is enabled after a match, but launch remains disabled until reset.
  controls(false);$('launch').disabled=true;gameAudio.play(winner==='player'?'win':winner==='cpu'?'lose':'draw');track('blade_finish',{mode,region:regions[selected].id,winner,reason,duration:Math.round(match.elapsed)});
 }
-$('share').addEventListener('click',async()=>{if(!match?.result)return;const text=`都市ブレード〈試作版〉 ${isTeamMode()?teamName('player'):regions[selected].name} vs ${isTeamMode()?teamName('cpu'):regions[opponent].name}：${$('result-title').textContent}`;
- try{if(navigator.share)await navigator.share({title:'都市ブレード',text,url:'https://japan-map.app/blade/'});else if(navigator.clipboard){await navigator.clipboard.writeText(`${text}\nhttps://japan-map.app/blade/`);$('share-status').textContent='結果とリンクをコピーしました。';}else $('share-status').textContent='このページのURLをコピーして共有できます。';}catch(e){if(e.name!=='AbortError')$('share-status').textContent='このページのURLをコピーして共有できます。';}});
+function shareData(){return resultShare({mode,winner:match.result.winner,player:match.bodies.filter(b=>b.side==='player').map(b=>b.region),cpu:match.bodies.filter(b=>b.side==='cpu').map(b=>b.region)});}
+async function copyResult(){
+ if(!match?.result)return;
+ const {copyText}=shareData();
+ try{await navigator.clipboard.writeText(copyText);$('share-status').textContent='結果とリンクをコピーしました。';$('share-fallback').hidden=true;}
+ catch{const field=$('share-fallback');field.value=copyText;field.hidden=false;field.focus();field.select();$('share-status').textContent='下の文章を選択してコピーしてください。';}
+}
+$('share-copy').addEventListener('click',copyResult);
+$('share').addEventListener('click',async()=>{
+ if(!match?.result)return;
+ if(!navigator.share){await copyResult();return;}
+ const {title,text,url}=shareData();
+ try{await navigator.share({title,text,url});}
+ catch(error){if(error.name!=='AbortError'){$('share-status').textContent='共有を開けませんでした。「Xで共有」または「コピー」をお使いください。';}}
+});
 function circle(x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);}
 function path(points,scale=1){ctx.beginPath();for(let i=0;i<points.length;i++){const p=points[i],x=(p.x??p[0])*scale,y=(p.y??p[1])*scale;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();}
 function bodyBounce(body){
