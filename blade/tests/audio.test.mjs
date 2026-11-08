@@ -11,16 +11,16 @@ function fixture(overrides={}) {
   return {audio,context,sources,requests,warnings,tick:ms=>{clock+=ms;}};
 }
 
-test('audio is lazy, preloads eleven module-relative cues once, and resumes on enable',async()=>{
+test('audio is lazy, preloads twelve module-relative cues once, and resumes on enable',async()=>{
  const f=fixture();assert.equal(await f.audio.play('launch'),false);assert.equal(f.requests.length,0);
- await f.audio.enable();await f.audio.enable();assert.equal(f.requests.length,11);
- assert.equal(Object.keys(CUES).length,11);assert.ok(f.requests.every(x=>new URL(x).pathname.includes('/blade/audio/')&&new URL(x).pathname.endsWith('.mp3')));
+ await f.audio.enable();await f.audio.enable();assert.equal(f.requests.length,12);
+ assert.equal(Object.keys(CUES).length,12);assert.ok(f.requests.every(x=>new URL(x).pathname.includes('/blade/audio/')&&new URL(x).pathname.endsWith('.mp3')));
  assert.equal(await f.audio.play('select'),true);assert.equal(f.sources.length,1);
 });
 test('disable stops voices and prevents sound until enabled again',async()=>{
  const f=fixture();await f.audio.enable();await f.audio.play('launch');f.audio.disable();
  assert.ok(f.sources[0].stopped);assert.equal(await f.audio.play('win'),false);
- await f.audio.enable();assert.equal(await f.audio.play('win'),true);assert.equal(f.requests.length,11);
+ await f.audio.enable();assert.equal(await f.audio.play('win'),true);assert.equal(f.requests.length,12);
 });
 test('stop clears voices but preserves enabled state',async()=>{
  const f=fixture();await f.audio.enable();await f.audio.play('launch');f.audio.stop();assert.ok(f.sources[0].stopped);
@@ -34,8 +34,8 @@ test('hit cooldown and four-voice bound suppress audio pileup',async()=>{
 });
 test('missing cues and failed loads do not throw or warn repeatedly',async()=>{
  const f=fixture({fetch:async()=>({ok:false,status:404})});await f.audio.enable();
- assert.equal(f.warnings.length,11);assert.equal(await f.audio.play('launch'),false);
- assert.equal(await f.audio.play('unknown'),false);await f.audio.enable();assert.equal(f.warnings.length,11);
+ assert.equal(f.warnings.length,12);assert.equal(await f.audio.play('launch'),false);
+ assert.equal(await f.audio.play('unknown'),false);await f.audio.enable();assert.equal(f.warnings.length,12);
 });
 test('pending sounds never play after stop or disable, even after re-enable',async()=>{
  for(const method of ['stop','disable']){
@@ -55,7 +55,7 @@ test('unsupported audio and resume failures are safe',async()=>{
 });
 test('decode and source start failures stay isolated from gameplay',async()=>{
  const f=fixture();f.context.decodeAudioData=async()=>{throw new Error('invalid audio');};
- await f.audio.enable();assert.equal(await f.audio.play('launch'),false);assert.equal(f.warnings.length,11);
+ await f.audio.enable();assert.equal(await f.audio.play('launch'),false);assert.equal(f.warnings.length,12);
  const g=fixture();await g.audio.enable();
  g.context.createBufferSource=()=>({connect(){},disconnect(){},start(){throw new Error('device lost');}});
  assert.equal(await g.audio.play('launch'),false);assert.equal(g.warnings.length,1);
@@ -84,10 +84,13 @@ test('critical asset has an independent cache version',()=>{
  assert.equal(new URL(CUES.hit).search,'');
 });
 
-test('friendly critical is bright and enemy critical is low pitched without changing hit audio',async()=>{
+test('friendly critical keeps its pitch and enemy critical uses a separate unpitched asset',async()=>{
  const f=fixture();await f.audio.enable();
  await f.audio.play('critical');await f.audio.play('critical',{enemy:true});await f.audio.play('hit');
- assert.deepEqual(f.sources.map(s=>s.playbackRate.value),[1.12,.65,1]);
+ assert.deepEqual(f.sources.map(s=>s.playbackRate.value),[1.12,1,1]);
+ assert.notEqual(f.sources[0].buffer,f.sources[1].buffer);
+ assert.ok(new URL(CUES.pain).pathname.endsWith('/pain.mp3'));
+ f.audio.disable();assert.equal(await f.audio.play('critical',{enemy:true}),false);
 });
 
 test('VS and launch use distinct assets and VS obeys mute',async()=>{

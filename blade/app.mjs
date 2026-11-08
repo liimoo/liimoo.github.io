@@ -6,7 +6,7 @@ import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop
 import {mountFlow} from './flow.mjs?v=20261107-vs-tap';
 import {chooseCity,choosePrefecture} from './team-roster.mjs?v=20261106-pref-team';
 import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261107-winner-survival';
-import {createBladeAudio} from './audio.mjs?v=20261108-launch-channel';
+import {createBladeAudio} from './audio.mjs?v=20261108-pain';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-basin';
 import {createMatch,createTeamMatch,createPrefectureTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261107-winner-survival';
 const $=id=>document.getElementById(id);

@@ -1,6 +1,6 @@
 // Web Audio is created only after the player's sound/launch gesture.
 export const CUES = Object.freeze(Object.fromEntries(
-  ['select','vs','launch','hit','bump','critical','ringout','break','win','lose','draw']
+  ['select','vs','launch','hit','bump','critical','pain','ringout','break','win','lose','draw']
     .map(name=>[name,new URL(`./audio/${name}.mp3${name==='critical'?'?v=20261105-critical-clear':name==='launch'?'?v=20261106-dash':''}`,import.meta.url).href])
 ));
 const MAX_VOICES=4,HIT_COOLDOWN_MS=180,BUMP_COOLDOWN_MS=300,MASTER_GAIN=.22;
@@ -57,7 +57,7 @@ export function createBladeAudio(options={}) {
     if(!enabled||!Object.hasOwn(CUES,cue)||!loads)return false;
     const token=generation;
     try{
-      const buffer=await loads[cue];
+      const buffer=await loads[cue==='critical'&&enemy?'pain':cue];
       if(!buffer||!enabled||token!==generation||context.state!=='running')return false;
       const timestamp=now();
       if(cue==='hit'&&!decisive&&timestamp-lastHit<HIT_COOLDOWN_MS)return false;
@@ -66,7 +66,7 @@ export function createBladeAudio(options={}) {
       if(cue==='launch'){if(launchVoice)stopSource(launchVoice);}
       else if(voices.length>=MAX_VOICES)stopSource(voices[0]);
       const source=context.createBufferSource();source.buffer=buffer;
-      if(cue==='critical')source.playbackRate.value=enemy?.65:1.12;
+      if(cue==='critical'&&!enemy)source.playbackRate.value=1.12;
       source.connect(master);source.onended=()=>release(source);
       if(cue==='launch')launchVoice=source;else voices=[...voices,source];
       try{source.start();}catch(error){release(source);throw error;}
