@@ -49,7 +49,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   $('confirm-match').textContent=canStart()?'この編成で対戦 →':teamMode()?(prefectureTeam()?'異なる3県を選ぼう':'同じ県の3都市を選ぼう'):'あなたの地域を選ぼう';
   $('confirm-match').disabled=!canStart();
  }
- const screens={title:$('title-screen'),select:$('choose-region'),vs:$('vs-screen'),battle:$('battle')};
+ const screens={title:$('title-screen'),select:$('choose-region'),vs:$('vs-screen'),battle:$('battle'),quest:$('quest-screen')};
  function refresh(){
   const {selected,opponent}=getSelection();
   for(const id of ['match-preview','vs-preview']){
@@ -69,7 +69,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
  }
  function show(next){
   if(!Object.hasOwn(screens,next))return;
-  if((next==='vs'||next==='battle')&&!canStart())return;
+  if((next==='vs'||next==='battle')&&getSelection().mode!=='quest'&&!canStart())return;
   clearTimeout(timer);timer=null;
   if(next!=='battle')leave();
   screen=next;
@@ -79,7 +79,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   if(next==='select'||next==='vs')refresh();
   if(next==='vs')onVersus();
   if(next==='battle')startBattle();
-  const focus={title:'mode-heading',select:'selection-heading',vs:'vs-heading',battle:'battle'}[next];
+  const focus={title:'mode-heading',select:'selection-heading',vs:'vs-heading',battle:'battle',quest:'quest-screen'}[next];
   $(focus).focus({preventScroll:true});screens[next].scrollIntoView({block:'start',behavior:'instant'});
   if(next==='vs')timer=setTimeout(()=>{if(screen==='vs')show('battle');},4000);
  }
@@ -90,6 +90,7 @@ export function mountFlow({regions,getSelection,select,startBattle,leave,setMode
   if(screen!=='vs'||event.target.closest('button,a,input,select,textarea'))return;
   show('battle');
  });
+ $('start-quest').addEventListener('click',()=>show('quest'));
  for(const [id,mode] of [['start-exhibition','single'],['start-team','team'],['start-pref-team','pref-team']]){$(id).addEventListener('click',()=>{setMode(mode);side='player';picker.reset();show('select');});$(id).disabled=false;}
  show('title');
  return {show,refresh,get screen(){return screen;},get side(){return side;}};

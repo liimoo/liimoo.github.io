@@ -4,6 +4,10 @@ export const BODY_RADIUS = 32;
 export const MATCH_SECONDS = 45;
 const EPSILON = 1e-8;
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+const statTuningFactor=(power,value10,value50,value100)=>{
+ const stat=clamp(power,0,100);
+ return Math.max(0,stat<=50?value10+(value50-value10)*(stat-10)/40:value50+(value100-value50)*(stat-50)/50);
+};
 const cross = (a, b) => a.x * b.y - a.y * b.x;
 const dot = (a, b) => a.x * b.x + a.y * b.y;
 const subtract = (a, b) => ({ x: a.x - b.x, y: a.y - b.y });
@@ -47,12 +51,17 @@ export function regionStats(region) {
 }
 
 export function combatBonuses(body) {
- const bonus=1+body.grit/100*(1-clamp(body.energy,0,1))**2;
- return {attack:bonus,resistance:bonus};
+ const grit=clamp(body.grit??50,0,100),lowEnergy=(1-clamp(body.energy,0,1))**2;
+ const gritDamage=body.quest?statTuningFactor(grit,.1,1,2):grit/100;
+ const bonus=1+gritDamage*lowEnergy;
+ const stat=clamp(body.attack??50,10,100);
+ const attackScale=statTuningFactor(stat,.8,1.1,1.3);
+ return {attack:bonus*(body.quest?attackScale:1),resistance:bonus};
 }
 
 export function criticalChance(body) {
- return .08+.08*clamp(body.grit,0,100)/100*(1-clamp(body.energy,0,1))**2;
+ const grit=clamp(body.grit??50,0,100),bonus=body.quest?statTuningFactor(grit,.008,.4,.8):.08*grit/100;
+ return .08+bonus*(1-clamp(body.energy,0,1))**2;
 }
 const nextCriticalRandom = seed => (Math.imul(seed,1664525)+1013904223)>>>0;
 
@@ -93,7 +102,7 @@ export function launch(match, direction, power) {
 // Plans follow player roster order; CPU launch remains seed-driven.
 export function launchTeam(match,settings) {
  if(match.phase!=='ready') return match;
- if(match.mode!=='team'||!Array.isArray(settings)||settings.length!==3) throw new Error('Invalid team launch settings');
+ if((match.mode!=='team'&&!match.quest)||!Array.isArray(settings)||settings.length!==match.bodies.filter(b=>b.side==='player').length||settings.length<1||settings.length>3) throw new Error('Invalid team launch settings');
  const plans=Array.from(settings,setting=>launchSettings(setting?.direction,setting?.power));
  const launched=launch(match,{x:0,y:-1},.75);
  return {...launched,bodies:launched.bodies.map((b,i)=>{
@@ -155,13 +164,17 @@ function resolve(a,b,hit,criticalAttackers=[]) {
 
  return [a,b].map((v,i)=>{
   const sign=i?1:-1,offset=i?rb:ra;
-  const vx=v.vx+sign*force.x,vy=v.vy+sign*force.y;
+  const source=i?a:b,knockbackStat=clamp(source.knockback??50,10,100);
+  const knockbackScale=v.quest?statTuningFactor(knockbackStat,.8,1,1.25):1;
+  const vx=v.vx+sign*force.x*knockbackScale,vy=v.vy+sign*force.y*knockbackScale;
   const speed=Math.hypot(vx,vy),scale=speed>340?340/speed:1;
   const {resistance}=combatBonuses(v),{attack}=combatBonuses(i?a:b);
   const angularChange=sign*cross(offset,force)/v.inertia/resistance;
   // Grit resists torque and boosts stamina damage, never the linear collision impulse.
   const multiplier=criticalAttackers.includes(i?0:1)?1.5:1;
-  const drain=Math.min(.18,(impulse*.00012+Math.abs(angularChange)*.012)*attack)*multiplier;
+  const hpDurability=v.quest?100/Math.max(1,v.maxHpPoints??100):1;
+  const damageCap=v.quest ? .29*hpDurability : .18;
+  const drain=Math.min(damageCap,(impulse*.00012+Math.abs(angularChange)*.012)*attack)*multiplier*hpDurability;
   const rawEnergy=(v.rawEnergy??v.energy)-drain;
   const energy=Math.max(0,rawEnergy);
   return {...v,x:v.x+sign*n.x*correction,y:v.y+sign*n.y*correction,
@@ -171,10 +184,14 @@ function resolve(a,b,hit,criticalAttackers=[]) {
 }
 
 function move(b,dt,openingAssist=0) {
- // Arcade bowl: stamina is endurance, not a multiplier on visible rotation.
- const rawEnergy=b.energy-dt*.035*(1-.30*b.spinPower/100);
+ // Quest combat follows Godot's spin stamina tuning and max-HP scaling.
+ const spinPower=clamp(b.spinPower??50,0,100);
+ const endurance=b.quest?statTuningFactor(spinPower,1.05,.75,.5):1-.30*spinPower/100;
+ const hpDrainScale=b.quest?100/Math.max(1,b.maxHpPoints??100):1;
+ const rawEnergy=b.energy-dt*.035*endurance*hpDrainScale;
  const energy=Math.max(0,rawEnergy);
- const recovery=1-Math.exp(-4*dt);
+ const recoveryRate=b.quest?statTuningFactor(spinPower,2.4,6,10):4;
+ const recovery=1-Math.exp(-recoveryRate*dt);
  const spin=sustainedSpin(b,b.spin+(b.cruiseSpin-b.spin)*recovery,energy);
  const bowl=2.8,damping=Math.exp(-(.13+openingAssist)*dt);
  const vx=(b.vx-b.x*bowl*dt)*damping,vy=(b.vy-b.y*bowl*dt)*damping;
@@ -346,4 +363,16 @@ function stepTeam(match,dt) {
   if(result) break;
  }
  return current;
+}
+
+// Quest battles use the same collision simulation with one to three members per side.
+export function createQuestMatch(playerMembers,cpuMembers,seed=1){
+ if(!Array.isArray(playerMembers)||!playerMembers.length||playerMembers.length>3||!Array.isArray(cpuMembers)||!cpuMembers.length||cpuMembers.length>3)throw new Error('Quest teams must contain one to three members');
+ const base=createMatch(playerMembers[0].region,cpuMembers[0].region,seed);
+ const bodies=[...playerMembers.map(m=>({...body(m.region,'player'),...questBodyStats(m),energy:m.hp/m.maxHp,rawEnergy:m.hp/m.maxHp,maxHpPoints:m.maxHp,eliminated:m.hp<=0})),...cpuMembers.map(m=>({...body(m.region,'cpu'),...questBodyStats(m),energy:m.hp/m.maxHp,rawEnergy:m.hp/m.maxHp,maxHpPoints:m.maxHp,eliminated:false}))].map((b,i)=>({...b,x:(i%3-1)*72,y:i<playerMembers.length?95:-95}));
+ return {...base,mode:'team',quest:true,bodies,criticalContacts:{},eliminations:[],eliminationSerial:0};
+}
+function questBodyStats(member){
+ const stats=member.stats||{};
+ return {quest:true,attack:stats.attack??10,knockback:stats.knockback??10,spinPower:stats.spin??10,grit:stats.grit??10,maxHpPoints:member.maxHp,startHpPoints:member.hp};
 }

@@ -4,17 +4,18 @@ import {createSoundPreference} from './sound-preference.mjs?v=20261106-default-o
 import {newSelection,randomOpponent} from './selection-state.mjs?v=20261106-pref-team';
 import {criticalPresentations} from './critical-presentation.mjs?v=20261106-sides';
 import {VIEW_TILT,screenToWorld,floorOffset,drawArenaDepth,drawBowlFloor,drawTop} from './depth-view.mjs?v=20261105-basin';
-import {mountFlow} from './flow.mjs?v=20261107-vs-tap';
+import {mountFlow} from './flow.mjs?v=20261122-quest';
 import {chooseCity,choosePrefecture} from './team-roster.mjs?v=20261106-pref-team';
 import {createTeamEffects,collectTeamEffects,advanceTeamEffects,teamBody,teamHidden,drawTeamEffects,teamFinishDone} from './team-effects.mjs?v=20261107-winner-survival';
 import {createBladeAudio} from './audio.mjs?v=20261108-pain';
 import {createFinishEffect,advanceFinishEffect,hiddenByFinish,finishBody,canExplode,finishShake,drawFinishEffect} from './finish-effects.mjs?v=20261105-basin';
-import {createMatch,createTeamMatch,createPrefectureTeamMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261107-winner-survival';
+import {createMatch,createTeamMatch,createPrefectureTeamMatch,createQuestMatch,launch,launchTeam,step,ARENA_RADIUS,BODY_RADIUS,MATCH_SECONDS} from './engine.mjs?v=20261122-quest';
+import {mountQuest} from './quest-ui.mjs?v=20261122-quest';
 const $=id=>document.getElementById(id);
 const canvas=$('arena'),ctx=canvas.getContext('2d');
 let arenaLayer=null;
 let regions=[],selected=null,opponent=null,match=null,aim=null,seed=1,paused=false,last=0,accumulator=0,flow=null,lastImpactId=0,criticalFlashes=[],finishEffect=null,mode='single',playerTeam=[],cpuTeam=[],teamEffects=createTeamEffects(),resultShown=false;
-let launchSettings=[],launchCity=0;
+let launchSettings=[],launchCity=0,questUI=null,lastQuestSave=0;
 const launchHome=$('launch').parentElement;
 const stageControls=document.createElement('div');stageControls.id='stage-controls';stageControls.hidden=true;document.querySelector('.arena-wrap').append(stageControls);
 const launchTabs=document.createElement('div');launchTabs.id='launch-cities';launchTabs.setAttribute('aria-label','発射を調整する駒');launchHome.before(launchTabs);
@@ -25,7 +26,7 @@ const gameAudio=createBladeAudio();
 const telemetry=createBladeTelemetry();
 let telemetryMatch=null;
 function track(name,params={}){if(typeof window.gtag==='function')window.gtag('event',name,{...params,page_path:location.pathname});}
-function isTeamMode(){return mode==='team'||mode==='pref-team';}
+function isTeamMode(){return mode==='team'||mode==='pref-team'||mode==='quest';}
 function pieceUnit(){return mode==='pref-team'?'県':'都市';}
 function teamName(side){return mode==='pref-team'?(side==='player'?'あなたの県チーム':'CPUの県チーム'):regions[(side==='player'?playerTeam:cpuTeam)[0]]?.prefecture??'';}
 function buildTeamHud(){
@@ -41,7 +42,7 @@ function refreshLaunchControls(){
 }
 canvas.addEventListener('keydown',event=>{
  if(!isTeamMode()||match?.phase!=='ready'||!['ArrowLeft','ArrowRight'].includes(event.key))return;
- event.preventDefault();launchCity=(launchCity+(event.key==='ArrowRight'?1:2))%3;syncLaunchSliders();refreshLaunchControls();
+ event.preventDefault();const count=match.bodies.filter(b=>b.side==='player').length;launchCity=(launchCity+(event.key==='ArrowRight'?1:count-1))%count;syncLaunchSliders();refreshLaunchControls();
 });
 function syncLaunchSliders(){
  const setting=launchSettings[launchCity];
@@ -49,7 +50,7 @@ function syncLaunchSliders(){
 }
 function prepareLaunchControls(){
  launchCity=0;launchSettings=Array.from({length:3},()=>({angle:0,power:75}));
- const team=isTeamMode();$('battle').classList.toggle('team-battle',team);$('launch').classList.add('stage-launch');
+ const team=isTeamMode();$('battle-back').hidden=mode==='quest';$('battle').classList.toggle('team-battle',team);$('launch').classList.add('stage-launch');
  stageControls.hidden=false;
  stageControls.append(launchTabs,launchHome);launchHome.append($('launch'));
  syncLaunchSliders();refreshLaunchControls();
@@ -58,25 +59,25 @@ function prepareLaunchControls(){
 function reset(){
  telemetryMatch=null;
  gameAudio.stop();
- match=isTeamMode()?(mode==='pref-team'?createPrefectureTeamMatch:createTeamMatch)(playerTeam.map(i=>regions[i]),cpuTeam.map(i=>regions[i]),seed++):createMatch(regions[selected],regions[opponent],seed++);teamEffects=createTeamEffects();resultShown=false;buildTeamHud();prepareLaunchControls();finishEffect=null;aim=null;paused=false;accumulator=0;lastImpactId=0;criticalFlashes=[];
- $('launch').hidden=false;$('result').hidden=true;$('pause-cover').hidden=true;$('pause').disabled=true;$('pause').textContent='Ⅱ';
- $('player-name').textContent=mode==='pref-team'?'県チーム':isTeamMode()?teamName('player'):regions[selected].name;$('cpu-name').textContent=mode==='pref-team'?'県チーム':isTeamMode()?teamName('cpu'):regions[opponent].name;$('opponent-name').textContent=regions[opponent].name;
+ match=mode==='quest'&&questUI.state.battle?.battleState?questUI.state.battle.battleState:mode==='quest'?createQuestMatch(questUI.state.battle.playerIndices.map(i=>({...questUI.state.roster[i],region:regions[questUI.state.roster[i].regionId]})),questUI.state.battle.enemies.map(e=>({...e,region:regions[e.regionId]})),questUI.state.battle.seed):isTeamMode()?(mode==='pref-team'?createPrefectureTeamMatch:createTeamMatch)(playerTeam.map(i=>regions[i]),cpuTeam.map(i=>regions[i]),seed++):createMatch(regions[selected],regions[opponent],seed++);teamEffects=createTeamEffects();resultShown=false;buildTeamHud();prepareLaunchControls();finishEffect=null;aim=null;paused=false;accumulator=0;lastImpactId=0;criticalFlashes=[];
+ $('launch').hidden=match.phase!=='ready';$('result').hidden=true;$('pause-cover').hidden=true;$('pause').disabled=match.phase!=='active';$('pause').textContent='Ⅱ';
+ $('player-name').textContent=mode==='quest'?'あなたの仲間':mode==='pref-team'?'県チーム':isTeamMode()?teamName('player'):regions[selected].name;$('cpu-name').textContent=mode==='quest'?'対戦相手':mode==='pref-team'?'県チーム':isTeamMode()?teamName('cpu'):regions[opponent].name;$('opponent-name').textContent=mode==='quest'?'クエスト':regions[opponent]?.name||'—';
  for(const [side,index] of [['player',selected],['cpu',opponent]]){
-  const region=regions[index],label=$(`${side}-prefecture`);
+  const region=regions[index],label=$(`${side}-prefecture`);if(!region){label.hidden=true;continue;}
   label.textContent=region.prefecture??'';
   label.hidden=isTeamMode()||!region.prefecture||region.name===region.prefecture;
  }
- $('region-kind').textContent=regions[selected].name!==regions[selected].prefecture?`${regions[selected].prefecture} / 市区町村のかたち`:'都道府県のかたち';
+ $('region-kind').textContent=mode==='quest'?'クエスト':regions[selected]?.name!==regions[selected]?.prefecture?`${regions[selected]?.prefecture} / 市区町村のかたち`:'都道府県のかたち';
  for(const [i,side] of ['player','cpu'].entries()){
   $(`${side}-grit`).textContent=`底力 ${match.bodies.find(b=>b.side===side).grit} / 100`;
   $(`${side}-spin-power`).textContent=`回転力 ${match.bodies.find(b=>b.side===side).spinPower} / 100`;
  }
- $('region-hint').textContent=regions[selected].hint;$('region-link').href=regions[selected].url;
- $('status').textContent=isTeamMode()?`${pieceUnit()}ごとに角度と強さを調整し、舞台のボタンで一斉発射。`:'角度と強さを調整し、舞台のボタンで発射。';$('arena-caption').textContent=isTeamMode()?`青の3${pieceUnit()}があなたのチーム`:'引っ張って調整し、ボタンで発射';$('share-status').textContent='';$('share-fallback').hidden=true;
- document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(Number(b.dataset.index)===selected)));controls(false);updateHud();resize();draw(0);flow?.refresh();
+ $('region-hint').textContent=mode==='quest'?'クエストの対戦準備中です。':regions[selected]?.hint||'';if(regions[selected])$('region-link').href=regions[selected].url;
+ $('status').textContent=match.phase==='active'?'対戦を続けています。':isTeamMode()?`${pieceUnit()}ごとに角度と強さを調整し、舞台のボタンで一斉発射。`:'角度と強さを調整し、舞台のボタンで発射。';$('arena-caption').textContent=isTeamMode()?`青の${match.bodies.filter(b=>b.side==='player').length}${pieceUnit()}があなたのチーム`:'引っ張って調整し、ボタンで発射';$('share-status').textContent='';$('share-fallback').hidden=true;
+ document.querySelectorAll('.region-card').forEach((b,i)=>b.setAttribute('aria-pressed',String(Number(b.dataset.index)===selected)));controls(match.phase==='active');stageControls.hidden=match.phase!=='ready';if(match.phase==='active')$('launch').hidden=true;updateHud();resize();draw(0);flow?.refresh();
 }
 function controls(active){for(const el of document.querySelectorAll('.region-card,#shuffle,#launch,#angle,#power,#launch-cities button,#battle-back'))el.disabled=active;}
-function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=isTeamMode()?launchTeam(match,launchSettings.map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):launch(match,direction,power);telemetryMatch=telemetry.start({mode,player_regions:match.bodies.filter(b=>b.side==='player').map(b=>b.region.id),cpu_regions:match.bodies.filter(b=>b.side==='cpu').map(b=>b.region.id)});$('launch').hidden=true;stageControls.hidden=true;aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');track('blade_start',{mode,region:regions[selected].id,opponent:regions[opponent].id});}
+function fire(direction,power){if(flow?.screen!=='battle'||!match||match.phase!=='ready')return;match=mode==='quest'?launchTeam(match,launchSettings.slice(0,match.bodies.filter(b=>b.side==='player').length).map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):isTeamMode()?launchTeam(match,launchSettings.map(setting=>{const a=setting.angle*Math.PI/180;return {direction:{x:Math.sin(a),y:-Math.cos(a)},power:setting.power/100};})):launch(match,direction,power);telemetryMatch=mode==='quest'?null:telemetry.start({mode,player_regions:match.bodies.filter(b=>b.side==='player').map(b=>b.region.id),cpu_regions:match.bodies.filter(b=>b.side==='cpu').map(b=>b.region.id)});$('launch').hidden=true;stageControls.hidden=true;aim=null;controls(true);$('pause').disabled=false;$('status').textContent='相手を場外へ！ 発射後は自動で進みます。';$('arena-caption').textContent='青があなた ／ 金がCPU';gameAudio.play('launch');if(mode!=='quest')track('blade_start',{mode,region:regions[selected].id,opponent:regions[opponent].id});}
 function fireFromControls(){const a=Number($('angle').value)*Math.PI/180;fire({x:Math.sin(a),y:-Math.cos(a)},Number($('power').value)/100);}
 $('launch').addEventListener('click',fireFromControls);
 for(const id of ['angle','power'])$(id).addEventListener('input',()=>{launchSettings=launchSettings.map((setting,i)=>i===launchCity?{...setting,[id]:Number($(id).value)}:setting);refreshLaunchControls();$(`${id}-value`).textContent=$(id).value+(id==='angle'?'°':'%');});
@@ -89,10 +90,10 @@ let soundStorage;try{soundStorage=globalThis.localStorage;}catch{/* Storage may 
 const soundPreference=createSoundPreference({audio:gameAudio,storage:soundStorage,onChange:renderSound});
 renderSound(soundPreference.enabled);
 for(const id of ['sound','title-sound'])$(id).addEventListener('click',()=>soundPreference.toggle());
-function setPause(value){aim=null;if(match?.phase!=='active')return;paused=value;if(value)gameAudio.stop();accumulator=0;last=0;$('pause-cover').hidden=!paused;$('pause').setAttribute('aria-label',paused?'対戦を再開':'一時停止');$('pause').textContent=paused?'▶':'Ⅱ';}
+function setPause(value){if(mode==='quest'&&match?.phase==='active')questUI?.saveBattleState(match);aim=null;if(match?.phase!=='active')return;paused=value;if(value)gameAudio.stop();accumulator=0;last=0;$('pause-cover').hidden=!paused;$('pause').setAttribute('aria-label',paused?'対戦を再開':'一時停止');$('pause').textContent=paused?'▶':'Ⅱ';}
 $('pause').addEventListener('click',()=>setPause(!paused));$('resume').addEventListener('click',()=>setPause(false));
-document.addEventListener('visibilitychange',()=>{if(document.hidden){gameAudio.stop();setPause(true);}});
-window.addEventListener('blur',()=>{gameAudio.stop();setPause(true);});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(mode==='quest'&&match?.phase==='active')questUI?.saveBattleState(match);gameAudio.stop();setPause(true);}});
+window.addEventListener('blur',()=>{if(mode==='quest'&&match?.phase==='active')questUI?.saveBattleState(match);gameAudio.stop();setPause(true);});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&match?.phase==='active'){e.preventDefault();setPause(!paused);}});
 function pointer(e){const r=canvas.getBoundingClientRect();return screenToWorld({x:(e.clientX-r.left)/r.width*440-220,y:(e.clientY-r.top)/r.height*440-220});}
 canvas.addEventListener('pointerdown',e=>{if(flow?.screen!=='battle'||!match||match.phase!=='ready'||!e.isPrimary)return;const p=pointer(e),b=match.bodies.find(b=>b.side==='player'&&Math.hypot(p.x-b.x,p.y-b.y)<=BODY_RADIUS+18);if(!b)return;if(isTeamMode()){launchCity=match.bodies.indexOf(b);syncLaunchSliders();refreshLaunchControls();}aim={pointerId:e.pointerId,start:p,end:p,bodyIndex:match.bodies.indexOf(b)};canvas.setPointerCapture(e.pointerId);});
@@ -119,7 +120,7 @@ function beginFinish(previousBodies){
  $('arena-caption').textContent=match.result.reason==='time'?'時間切れ':match.result.reason==='ringout'?'場外！':'ゲージ切れ → 回転停止';
  if(finishEffect.reason==='ringout')gameAudio.play('ringout');
 }
-function finished(){if(resultShown)return;resultShown=true;telemetryMatch?.finish({...match.result,duration:Math.round(match.elapsed)});const {winner,reason}=match.result;const name=isTeamMode()?teamName('player'):regions[selected].name,other=isTeamMode()?teamName('cpu'):regions[opponent].name;
+function finished(){if(resultShown)return;resultShown=true;if(mode==='quest'){questUI.finishBattle(match);flow?.show('quest');return;}telemetryMatch?.finish({...match.result,duration:Math.round(match.elapsed)});const {winner,reason}=match.result;const name=isTeamMode()?teamName('player'):regions[selected].name,other=isTeamMode()?teamName('cpu'):regions[opponent].name;
  $('result-title').textContent=winner==='player'?'あなたの勝ち！':winner==='cpu'?'CPUの勝ち！':'引き分け！';
  $('result-kicker').textContent=winner==='player'?'VICTORY / NICE LAUNCH':winner==='cpu'?'NEXT TIME / TRY AGAIN':'DRAW / GOOD BATTLE';
  const why=isTeamMode()?(reason==='time'?'時間切れ：残った駒の数、合計スタミナの順で判定':winner==='draw'?'両チームが全滅':match.result.tiebreak==='remaining-energy'?'同時にスタミナ切れ・超過ダメージの少ない側の勝利':`相手の3${pieceUnit()}をすべて撃破`):match.result.tiebreak==='remaining-energy'?'同時にゲージ切れ・超過ダメージの少ない側の勝利':reason==='ringout'?'場外で決着':reason==='spin'?'回転スタミナがなくなって決着':'45秒、どちらもゆずらず';
@@ -178,7 +179,7 @@ function draw(t){if(!ctx)return;const w=canvas.width;ctx.setTransform(w/440,0,0,
  }
  drawCriticalFlashes();
  ctx.save();ctx.translate(0,-10);if(isTeamMode())drawTeamEffects(ctx,teamEffects,match.bodies);else drawFinishEffect(ctx,finishEffect,match.bodies);ctx.restore();
- if(match.phase==='ready')for(const index of isTeamMode()?[0,1,2]:[aim?.bodyIndex??0]){const b=match.bodies[index];let dx,dy,power;{const setting=launchSettings[index];const a=setting.angle*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=setting.power/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();for(let n=0;n<=12;n++){const d=38+(7+power*55)*n/12,p={x:b.x+ux*d,y:b.y+uy*d};n?ctx.lineTo(p.x,p.y+floorOffset(p)):ctx.moveTo(p.x,p.y+floorOffset(p));}ctx.stroke();ctx.setLineDash([]);ctx.beginPath();const tipA={x:end.x-ux*8-uy*5,y:end.y-uy*8+ux*5},tipB={x:end.x-ux*8+uy*5,y:end.y-uy*8-ux*5};ctx.moveTo(tipA.x,tipA.y+floorOffset(tipA));ctx.lineTo(end.x,end.y+floorOffset(end));ctx.lineTo(tipB.x,tipB.y+floorOffset(tipB));ctx.stroke();}
+ if(match.phase==='ready')for(const index of mode==='quest'?match.bodies.map((b,i)=>b.side==='player'?i:-1).filter(i=>i>=0):isTeamMode()?[0,1,2]:[aim?.bodyIndex??0]){const b=match.bodies[index];let dx,dy,power;{const setting=launchSettings[index];const a=setting.angle*Math.PI/180;dx=Math.sin(a);dy=-Math.cos(a);power=setting.power/100;}const length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,end={x:b.x+ux*(45+power*55),y:b.y+uy*(45+power*55)};ctx.strokeStyle='#71e6df';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();for(let n=0;n<=12;n++){const d=38+(7+power*55)*n/12,p={x:b.x+ux*d,y:b.y+uy*d};n?ctx.lineTo(p.x,p.y+floorOffset(p)):ctx.moveTo(p.x,p.y+floorOffset(p));}ctx.stroke();ctx.setLineDash([]);ctx.beginPath();const tipA={x:end.x-ux*8-uy*5,y:end.y-uy*8+ux*5},tipB={x:end.x-ux*8+uy*5,y:end.y-uy*8-ux*5};ctx.moveTo(tipA.x,tipA.y+floorOffset(tipA));ctx.lineTo(end.x,end.y+floorOffset(end));ctx.lineTo(tipB.x,tipB.y+floorOffset(tipB));ctx.stroke();}
 }
 function collectImpacts(){
  for(const hit of match.impacts){
@@ -234,7 +235,7 @@ function updateCriticalHud(){
   }
  }
 }
-function tick(t){const dt=last?Math.min((t-last)/1000,.1):0;last=t;
+function tick(t){if(mode==='quest'&&match?.phase==='active'&&t-lastQuestSave>=2000){questUI?.saveBattleState(match);lastQuestSave=t;}const dt=last?Math.min((t-last)/1000,.1):0;last=t;
  if(!paused&&!document.hidden)criticalFlashes=criticalFlashes.map(f=>({...f,age:f.age+dt})).filter(f=>f.age<CRITICAL_LABEL_SECONDS);
  if(match?.phase==='active'&&!paused){accumulator+=dt;let loops=0;while(accumulator>=1/120&&loops++<12){const previousBodies=match.bodies;match=step(match,1/120);collectImpacts();if(isTeamMode())teamEffects=collectTeamEffects(teamEffects,match,reduced);accumulator-=1/120;if(match.phase==='finished'){beginFinish(previousBodies);accumulator=0;break;}}updateHud();}
  if(isTeamMode()&&match&&!paused&&!document.hidden){const next=advanceTeamEffects(teamEffects,dt);teamEffects=next.state;for(const cue of next.cues)gameAudio.play(cue);if(!resultShown&&teamFinishDone(teamEffects,match))finished();}
@@ -257,7 +258,8 @@ async function init(){try{if(!ctx)throw new Error('Canvas unsupported');const re
   else{selected=index;if(opponent===index)opponent=randomOpponent(regions,selected);}
   gameAudio.play('select');
  },onVersus:()=>gameAudio.play('vs'),startBattle:reset,leave:()=>{gameAudio.stop();match=null;finishEffect=null;teamEffects=createTeamEffects();resultShown=false;criticalFlashes=[];lastImpactId=0;aim=null;paused=false;accumulator=0;last=0;controls(false);$('launch').hidden=false;$('result').hidden=true;$('pause-cover').hidden=true;}});
+ questUI=mountQuest({container:$('quest-screen'),regions,onBattle:()=>{mode='quest';flow?.show('battle');},onExit:()=>{mode='single';flow?.show('title');}});$('start-quest').addEventListener('click',()=>{soundPreference.activate();questUI.show();});
  for(const id of ['start-exhibition','start-team','start-pref-team'])$(id).addEventListener('click',()=>soundPreference.activate());
- $('start-exhibition').disabled=false;$('start-team').disabled=false;$('start-pref-team').disabled=false;$('shuffle').disabled=false;resize();requestAnimationFrame(tick);
+ $('start-exhibition').disabled=false;$('start-team').disabled=false;$('start-pref-team').disabled=false;$('start-quest').disabled=false;$('shuffle').disabled=false;resize();requestAnimationFrame(tick);
  }catch(error){$('load-error').hidden=false;$('load-error').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('status').textContent='地図を読み込めませんでした。ページを再読み込みしてください。';$('region-hint').textContent='通信環境をご確認ください。';$('arena-caption').textContent='読み込みエラー';console.error('City Blade initialization failed:',error);}}
 init();
