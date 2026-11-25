@@ -1,7 +1,47 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-02T05:24:24+00:00",
+  "updated_at": "2026-11-25T21:19:19+00:00",
   "records": [
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "07",
+      "name": "福島県",
+      "rank": 1
+    },
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "22",
+      "name": "静岡県",
+      "rank": 2
+    },
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "23",
+      "name": "愛知県",
+      "rank": 3
+    },
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "01",
+      "name": "北海道",
+      "rank": 4
+    },
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "14",
+      "name": "神奈川県",
+      "rank": 5
+    },
     {
       "season_id": 13,
       "season_title": "第3回",

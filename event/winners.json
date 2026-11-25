@@ -1,7 +1,111 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-02T06:05:23+00:00",
+  "updated_at": "2026-11-25T21:19:19+00:00",
   "seasons": [
+    {
+      "id": 14,
+      "title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "winners": [
+        {
+          "kind": "pref",
+          "code": "07",
+          "pref_code": "07",
+          "name": "福島県",
+          "guide": {
+            "key": "07",
+            "name": "福島県",
+            "pref": "福島県",
+            "pref_code": "07",
+            "lead": "全国3位の広さで、浜通り・中通り・会津の3つの顔を持ちます。桃と日本酒の県。",
+            "hook": "ひとつの県の中に、気候も歴史もまるで違う3つの地方があります。",
+            "history": "福島県は奥羽山脈と阿武隈高地に区切られ、太平洋側の浜通り、中央の中通り、山あいの会津という気候も歴史も違う3地域からなります。会津は1590年に蒲生氏郷が入って城下町を整え、江戸時代は会津松平家23万石の要地となりました。幕末には藩校日新館で人材を育てましたが、戊辰戦争で新政府軍と激しく戦い、白虎隊の悲劇が生まれます。明治9年に3県が合併して現在の福島県となりました。2011年3月の東日本大震災と原子力発電所の事故は浜通りを中心に深い影響を残し、避難と除染、そして農水産物の全量検査という長い取り組みが続いています。",
+            "spots": [
+              {
+                "name": "鶴ヶ城",
+                "reading": "つるがじょう",
+                "desc": "会津若松の城。日本で唯一の赤瓦の天守で、戊辰戦争で1か月の籠城に耐えました。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/%E9%B6%B4%E3%83%B6%E5%9F%8E_-_panoramio_%284%29.jpg/960px-%E9%B6%B4%E3%83%B6%E5%9F%8E_-_panoramio_%284%29.jpg",
+                  "author": "くろふね",
+                  "license": "CC BY 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:%E9%B6%B4%E3%83%B6%E5%9F%8E_-_panoramio_(4).jpg"
+                }
+              },
+              {
+                "name": "大内宿",
+                "reading": "おおうちじゅく",
+                "desc": "かやぶき屋根の家が街道沿いに並ぶ宿場町。ねぎ1本で食べる「ねぎそば」が名物。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/%E5%A4%A7%E5%86%85%E5%AE%BF_-_panoramio_%2810%29.jpg/960px-%E5%A4%A7%E5%86%85%E5%AE%BF_-_panoramio_%2810%29.jpg",
+                  "author": "くろふね",
+                  "license": "CC BY 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:%E5%A4%A7%E5%86%85%E5%AE%BF_-_panoramio_(10).jpg"
+                }
+              },
+              {
+                "name": "五色沼",
+                "reading": "ごしきぬま",
+                "desc": "磐梯山の噴火でできた湖沼群。沼ごとに青・緑・赤と色が違います。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Goshikinuma.JPEG/960px-Goshikinuma.JPEG",
+                  "author": "不明",
+                  "license": "CC BY-SA 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:Goshikinuma.JPEG"
+                }
+              },
+              {
+                "name": "あぶくま洞",
+                "reading": "あぶくまどう",
+                "desc": "8000万年かけてできた鍾乳洞。種類の多さは東洋一とされます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Abukuma_Cave_06.jpg/960px-Abukuma_Cave_06.jpg",
+                  "author": "Σ64",
+                  "license": "CC BY 4.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:Abukuma_Cave_06.jpg"
+                }
+              },
+              {
+                "name": "塔のへつり",
+                "reading": "とうのへつり",
+                "desc": "川が100万年かけて削った塔状の岩壁。吊り橋から間近に見られます。",
+                "photo": {
+                  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/%E5%A1%94%E3%81%AE%E3%81%B8%E3%81%A4%E3%82%8A.JPG/960px-%E5%A1%94%E3%81%AE%E3%81%B8%E3%81%A4%E3%82%8A.JPG",
+                  "author": "Qwert1234",
+                  "license": "CC BY-SA 4.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:%E5%A1%94%E3%81%AE%E3%81%B8%E3%81%A4%E3%82%8A.JPG"
+                }
+              }
+            ],
+            "souvenirs": [
+              {
+                "name": "日本酒",
+                "desc": "全国新酒鑑評会の金賞受賞数で何度も日本一。会津の蔵が有名です。"
+              },
+              {
+                "name": "桃",
+                "desc": "あかつきなど。全国有数の生産量で、夏のおくりものの定番。"
+              },
+              {
+                "name": "会津塗",
+                "desc": "400年以上の歴史をもつ漆器。華やかな蒔絵が特徴です。"
+              },
+              {
+                "name": "赤べこ",
+                "desc": "首を振る赤い牛の張り子。疫病よけの縁起物です。"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "city",
+          "code": "07364",
+          "pref_code": "07",
+          "name": "檜枝岐村",
+          "guide": null
+        }
+      ]
+    },
     {
       "id": 13,
       "title": "第3回",

@@ -1,7 +1,57 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-02T07:52:29+00:00",
+  "updated_at": "2026-11-25T21:19:19+00:00",
   "records": [
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "07",
+      "pref_name": "福島県",
+      "name": "檜枝岐村",
+      "city_code": "07364",
+      "rank": 1
+    },
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "07",
+      "pref_name": "福島県",
+      "name": "本宮市",
+      "city_code": "07214",
+      "rank": 2
+    },
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "22",
+      "pref_name": "静岡県",
+      "name": "静岡市",
+      "city_code": "22100",
+      "rank": 3
+    },
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "12",
+      "pref_name": "千葉県",
+      "name": "鎌ケ谷市",
+      "city_code": "12224",
+      "rank": 4
+    },
+    {
+      "season_id": 14,
+      "season_title": "第4回",
+      "ended_at": "2026-11-25T15:00:00+00:00",
+      "pref_code": "23",
+      "pref_name": "愛知県",
+      "name": "安城市",
+      "city_code": "23212",
+      "rank": 5
+    },
     {
       "season_id": 13,
       "season_title": "第3回",
