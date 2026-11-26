@@ -88,6 +88,7 @@ function boardName(b){
   if (!b) return b;
   if (b === "00") return "全国（パズル）";
   if (b === "quiz:00") return "全国（クイズ）";
+  if (b === "blade:survival") return "都市ブレード（クエスト）";
   if (/^\d{2}$/.test(b)) return ((CITY&&CITY.prefs[b])||b) + "（県・パズル）";
   if (/^quiz:\d{2}$/.test(b)){ const p=b.slice(5); return ((CITY&&CITY.prefs[p])||p) + "（県・クイズ）"; }
   if (/^\d{5}$/.test(b)) return cityName(b) + "（市町村）";
@@ -144,7 +145,7 @@ async function api(action, params){
   return d;
 }
 
-const RLABEL = { bad_score_pass: "スコア署名が不一致", bad_clear_pass: "対抗戦クリア署名が不一致" };
+const RLABEL = { bad_score_pass: "スコア署名が不一致", bad_clear_pass: "対抗戦クリア署名が不一致", bad_blade_run_pass: "都市ブレード戦績署名が不一致" };
 function rlabel(r){ return RLABEL[r] || r; }
 function rpill(r){ return `<span class="pill ${r==='bad_clear_pass'?'p-clear':'p-score'}">${esc(rlabel(r))}</span>`; }
 
