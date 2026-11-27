@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-26T21:17:44+00:00",
+  "updated_at": "2026-11-27T07:28:33+00:00",
   "seasons": [
     {
       "id": 14,
@@ -115,31 +115,56 @@
                 "name": "尾瀬ヶ原",
                 "reading": "おぜがはら",
                 "desc": "湿原の広がる尾瀬の景観を歩いて楽しめます。",
-                "photo": null
+                "photo": {
+                  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Ozegahara_96.jpg/960px-Ozegahara_96.jpg",
+                  "author": "Σ64",
+                  "license": "CC BY 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:Ozegahara_96.jpg"
+                }
               },
               {
                 "name": "尾瀬沼",
                 "reading": "おぜぬま",
                 "desc": "燧ヶ岳の噴火で川がせき止められてできた沼です。",
-                "photo": null
+                "photo": {
+                  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Ozenuma_09.jpg/960px-Ozenuma_09.jpg",
+                  "author": "Σ64",
+                  "license": "CC BY 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:Ozenuma_09.jpg"
+                }
               },
               {
                 "name": "会津駒ヶ岳",
                 "reading": "あいづこまがだけ",
                 "desc": "檜枝岐村周辺の山並みを代表する山の一つです。",
-                "photo": null
+                "photo": {
+                  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/Mt._Aizukoma_080713.JPG/960px-Mt._Aizukoma_080713.JPG",
+                  "author": "Qwert1234",
+                  "license": "CC BY-SA 3.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:Mt._Aizukoma_080713.JPG"
+                }
               },
               {
                 "name": "燧ヶ岳",
                 "reading": "ひうちがたけ",
                 "desc": "尾瀬国立公園の山の自然に親しめる名峰です。",
-                "photo": null
+                "photo": {
+                  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Hiuchigatake_160801.JPG/960px-Hiuchigatake_160801.JPG",
+                  "author": "Qwert1234",
+                  "license": "CC BY-SA 4.0",
+                  "page": "https://commons.wikimedia.org/wiki/File:Hiuchigatake_160801.JPG"
+                }
               },
               {
                 "name": "檜枝岐歌舞伎",
                 "reading": "ひのえまたかぶき",
                 "desc": "村人が伝承する歌舞伎。歌舞伎伝承館では歴史資料などを見られます。",
-                "photo": null
+                "photo": {
+                  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Farm_village_Kabuki_stage_Hinoemata-no_Butai.JPG/960px-Farm_village_Kabuki_stage_Hinoemata-no_Butai.JPG",
+                  "author": "Qwert1234",
+                  "license": "Public domain",
+                  "page": "https://commons.wikimedia.org/wiki/File:Farm_village_Kabuki_stage_Hinoemata-no_Butai.JPG"
+                }
               }
             ],
             "souvenirs": [
